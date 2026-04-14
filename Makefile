@@ -1,4 +1,4 @@
-.PHONY: help dev dev-all dev-down dev-all-down dev-all-reset dev-logs dev-status build test check clean web-deps web-install web-install-ci dev-server dev-server-restart dev-web build-backend test-backend build-frontend test-frontend test-e2e-frontend test-e2e-smoke-frontend build-web test-web typecheck-web lint-web generate-api db-reset namespace-smoke validate-release-config staging staging-down staging-logs pr parallel-init parallel-sync parallel-up parallel-down docs-dev docs-build docs-preview
+.PHONY: help dev dev-all dev-down dev-all-down dev-all-reset dev-logs dev-status build test check clean web-deps web-install web-install-ci dev-server dev-server-restart dev-web build-backend build-backend-docker test-backend build-frontend test-frontend test-e2e-frontend test-e2e-smoke-frontend build-web test-web typecheck-web lint-web generate-api db-reset namespace-smoke validate-release-config staging staging-down staging-logs pr parallel-init parallel-sync parallel-up parallel-down docs-dev docs-build docs-preview
 
 DEV_DIR := .dev
 DEV_SERVER_PID := $(DEV_DIR)/server.pid
@@ -191,6 +191,11 @@ dev-logs: ## 实时查看开发服务日志（backend/frontend，默认 backend�
 
 build-backend: ## 构建后端
 	cd server && ./mvnw clean package -DskipTests
+
+BACKEND_DOCKER_IMAGE ?= skillhub-server:build-verify
+
+build-backend-docker: ## 在 Docker 内构建后端（与 server/Dockerfile 生产多阶段一致，跳过测试）
+	docker build -t $(BACKEND_DOCKER_IMAGE) -f server/Dockerfile server
 
 test-backend: ## 运行后端单元测试
 	cd server && JDK_JAVA_OPTIONS="$(BACKEND_TEST_JAVA_OPTIONS)" ./mvnw test

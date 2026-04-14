@@ -6,7 +6,7 @@ Deliver **user-owned skill collections** with **owner/contributor** collaboratio
 
 ## Phases
 
-- [ ] **Phase 1: Domain & persistence** — Collections aggregate, collaborators, membership ordering; Flyway; repositories; domain services with authorization matrix groundwork.
+- [x] **Phase 1: Domain & persistence** — Collections aggregate, collaborators, membership ordering; Flyway; repositories; domain services with authorization matrix groundwork.
 - [ ] **Phase 2: Application & API** — App services, REST controllers (`/api/web/...` primary), `RouteSecurityPolicyRegistry` updates, admin parity, integrity rules **INT-***, audit alignment **ADM-01**.
 - [ ] **Phase 3: Web UI** — Dashboard surfaces **WEB-*** flows; public collection page respects **VIS-***.
 - [ ] **Phase 4: Verification & docs** — Automated + E2E tests **QA-***; short developer/user documentation.
@@ -31,8 +31,8 @@ Deliver **user-owned skill collections** with **owner/contributor** collaboratio
 
 Plans:
 
-- [ ] 01-01-PLAN.md — Flyway V40+ three-table schema, JPA entities, repository ports + infra JPA adapters; blocking `make test-backend`
-- [ ] 01-02-PLAN.md — Domain services (CRUD, membership, contributors), policy matrix, caps, slug collisions, mocked `SkillReadableForActorPort` tests
+- [x] 01-01-PLAN.md — Flyway V40+ three-table schema, JPA entities, repository ports + infra JPA adapters; blocking `make test-backend`
+- [x] 01-02-PLAN.md — Domain services (CRUD, membership, contributors), policy matrix, caps, slug collisions, mocked `SkillReadableForActorPort` tests
 
 ### Phase 2: Application & API
 
