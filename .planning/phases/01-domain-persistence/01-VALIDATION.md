@@ -39,7 +39,7 @@ created: 2026-04-15
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | TBD | 01 | 1 | COL/ROL/INT (schema) | T-01 / — | CASCADE + uniqueness at DB | unit/integration | `make test-backend` | ⬜ Wave 0 | ⬜ pending |
-| TBD | 02 | 1 | COL-01..07, ROL-01..08 | T-04 / V4 | Service-level auth matrix; port for skill readability | unit | `./mvnw -pl skillhub-domain test` | ⬜ Wave 0 | ⬜ pending |
+| TBD | 02 | 2 | COL-01..07, ROL-01..08 | T-04 / V4 | Service-level auth matrix; port for skill readability | unit | `./mvnw -pl skillhub-domain test` | ⬜ Wave 0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

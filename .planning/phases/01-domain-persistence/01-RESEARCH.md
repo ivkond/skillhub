@@ -288,22 +288,16 @@ UNIQUE (collection_id, skill_id)
 | A1 | `mvnw test` runs Flyway against the same embedded/test DB configuration used for other modules, so new migrations are exercised in CI without extra setup. | Validation Architecture | Miss migration errors until integration env. |
 | A2 | Contributor table should use `UNIQUE(collection_id, user_id)` to enforce idempotent grants (not explicit in CONTEXT — inferred from ROL-02/ROL-03 patterns). | Architecture | Double rows if not enforced. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Exact Flyway artifact alignment (`flyway-core` 9.22.3 vs `flyway-database-postgresql` 10.10.0)**
-   - What we know: Managed `flyway.version`=**9.22.3**; explicit postgres module **10.10.0** in POM [VERIFIED: Maven + `skillhub-app/pom.xml`].
-   - What's unclear: Whether Maven resolves a compatible set in practice.
-   - Recommendation: Confirm with `dependency:tree` before Phase 1 merge; bump BOM or explicit artifact to a single Flyway release line if needed.
+1. **RESOLVED — Flyway artifact alignment (`flyway-core` 9.22.3 vs `flyway-database-postgresql` 10.10.0)**  
+   **Decision:** Treat as **acceptable for Phase 1** as long as `cd server && ./mvnw -pl skillhub-app dependency:tree -Dincludes=org.flywaydb` shows a resolved tree with no conflicts and `make test-backend` passes after V40 lands. If `dependency:tree` shows incompatible Flyway artifacts, align versions in `skillhub-app/pom.xml` in the same PR as V40 (executor follow-up, not blocking planning).
 
-2. **Optimistic locking (@Version) placement**
-   - What we know: CONTEXT defers to planner.
-   - What's unclear: Whether reorder-heavy membership updates need `@Version` on membership rows.
-   - Recommendation: Start without `@Version` unless concurrent reorder is modeled; document concurrency expectations.
+2. **RESOLVED — Optimistic locking (`@Version`) placement**  
+   **Decision:** **No `@Version` on membership for v1** unless concurrent reorder becomes a stated requirement; document “last write wins” for `sort_order` batch updates. Optional `@Version` on `skill_collection` root only if planner adds it for metadata edits—default **omit** per **01-CONTEXT.md** discretion.
 
-3. **Configurable caps (100 skills, 50 collections, 20 contributors)**
-   - What we know: REQUIREMENTS.md states tunable constants.
-   - What's unclear: Whether they live in `application.yml`, hard-coded domain constants, or existing config pattern.
-   - Recommendation: Mirror existing governance/limit patterns in codebase during planning (search for similar caps) — not verified in this research session [LOW — needs grep during plan].
+3. **RESOLVED — Configurable caps (100 / 50 / 20)**  
+   **Decision:** Implement as **`SkillCollectionLimits` (or equivalent) constants in `skillhub-domain`** in Phase 1 (see **01-02-PLAN.md**); moving to `application.yml` is a **Phase 2+ hardening** item unless an existing repo-wide limit-config pattern is found during execution.
 
 ## Environment Availability
 
@@ -410,7 +404,7 @@ UNIQUE (collection_id, skill_id)
 
 - Standard stack: **HIGH** — POMs + Maven property evaluated + CI workflow read.
 - Architecture: **HIGH** — multiple exemplar types in repo for entities, repos, services, tests.
-- Pitfalls: **MEDIUM** — includes one unresolved dependency alignment check.
+- Pitfalls: **LOW** — Flyway alignment explicitly closed under **Open Questions (RESOLVED)**; runtime still verify with `dependency:tree` + `make test-backend` during execution.
 
 **Research date:** 2026-04-15  
 **Valid until:** 2026-05-15 (stable stack); re-check Flyway line if upgrading Spring Boot before then.

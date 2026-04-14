@@ -27,12 +27,12 @@ Deliver **user-owned skill collections** with **owner/contributor** collaboratio
 2. Domain layer can create/update/delete collection with owner and enforce single-owner invariant.
 3. Domain layer can add/remove/reorder skills with duplicate prevention and contributor rule enforcement at service level (unit tests).
 
-**Plans:** TBD in `/gsd-plan-phase 1`
+**Plans:** 2 plans in `/gsd-plan-phase 1`
 
 Plans:
 
-- [ ] 01-01: Flyway schema + JPA entities + repositories
-- [ ] 01-02: Domain services — ownership, contributor limits, add-skill validation hooks to visibility layer
+- [ ] 01-01-PLAN.md — Flyway V40+ three-table schema, JPA entities, repository ports + infra JPA adapters; blocking `make test-backend`
+- [ ] 01-02-PLAN.md — Domain services (CRUD, membership, contributors), policy matrix, caps, slug collisions, mocked `SkillReadableForActorPort` tests
 
 ### Phase 2: Application & API
 
