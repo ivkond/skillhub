@@ -26,13 +26,13 @@ Teams can **govern, publish, and reuse** agent skills in one place—with visibi
 
 ### Validated
 
-(None tracked here yet — populate when features ship.)
+- **Phase 3 (Web UI):** Dashboard collection detail (reorder, D-09 hint), contributor add/remove, share copy link, public `/u/.../c/...` with session refetch — validated in code review / verification pass 2026-04-16 (`WEB-03`..`WEB-05`, `VIS-02`/`VIS-03` UX).
 
 ### Active
 
-- [ ] Collections domain model, persistence, and visibility rules (`COL-*`, `VIS-*`, `ROL-*`)
-- [ ] Backend APIs + web security alignment for collection CRUD and membership
-- [ ] Web UI: list, create/edit, detail, sharing entry points, contributor management (owner)
+- [x] Collections domain model, persistence, and visibility rules (`COL-*`, `VIS-*`, `ROL-*`)
+- [x] Backend APIs + web security alignment for collection CRUD and membership
+- [x] Web UI: list, create/edit, detail, sharing entry points, contributor management (owner)
 - [ ] Lifecycle handling for collection items when skills become unavailable (`INT-*`)
 - [ ] Verification: automated tests + critical path manual / E2E notes (`QA-*`)
 
