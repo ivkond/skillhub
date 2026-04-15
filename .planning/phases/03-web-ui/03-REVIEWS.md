@@ -1,8 +1,9 @@
 ---
 phase: 3
 reviewers:
+  - qwen
   - agent-peer
-reviewed_at: 2026-04-15T18:45:00+00:00
+reviewed_at: 2026-04-15T21:50:00+00:00
 plans_reviewed:
   - .planning/phases/03-web-ui/03-01-PLAN.md
   - .planning/phases/03-web-ui/03-02-PLAN.md
@@ -38,6 +39,56 @@ Not invoked (same model family as the orchestrating session; skipped for indepen
 **Could not be completed.**
 
 `opencode run` with attached plan files was started with review-only instructions; after several minutes the process had not written stdout content to the terminal capture (possible hang, auth, or provider stall). Re-run locally if an OpenCode review is required for parity with Phase 2.
+
+---
+
+## Qwen Review
+
+Invoked via **`qwen` CLI** (`--channel CI`, stdin = full 03-01/02/03 plans + instructions; system prompt: no tools, markdown-only).
+
+### Summary
+
+Plans 01–03 deliver Phase 3 Web UI in a logical three-wave split: (01) authenticated routing + list/create/edit scaffolding, (02) backend D-09 aggregate + D-11 contributor reorder merge, (03) detail page, contributor management, share, and public route. The split is coherent, dependencies are correctly ordered (02 before 03), and the threat models are well-reasoned. However, there are notable gaps around route registration mechanics, the D-11 backend merge complexity, public-page dual-fetch race conditions, and missing verification steps for critical UI behaviors.
+
+### Strengths
+
+- **Good plan decomposition**: 01 → 02 → 03 ordering is correct; 02 (backend) gates 03's detail UX properly, preventing UI from coding against missing contracts.
+- **Pattern mirroring is explicit**: Heavy reliance on `use-namespace-queries.ts` and `AddNamespaceMemberDialog` as templates reduces surface area for novel bugs. Plans correctly cite exact file paths and existing patterns.
+- **Threat models are solid**: CSRF, information disclosure, and access control risks are identified with concrete mitigations (e.g., D-08 generic not-found, D-09 non-leaking count).
+- **OpenAPI regeneration contingency**: Task 1 in 01 correctly handles the case where Spring Boot isn't running by documenting manual typings and flagging regeneration in SUMMARY.
+- **Verification commands are explicit**: Each task has `rg`-based acceptance criteria and automated `vitest`/`typecheck`/`mvnw test` gates.
+- **D-11 resolved decision correctly placed in 02**: The research open question about partial reorder is resolved and assigned to the backend plan where it belongs.
+
+### Concerns
+
+- **HIGH:** **D-11 merge logic complexity under-specified**: "Merge ordering (stable relative order for hidden ids)" is a non-trivial algorithm. Plan 02 does not specify the merge strategy (e.g., preserve hidden positions, interleave visible order, or append). Without a concrete algorithm, implementation risk is high and could produce inconsistent reorder results.
+- **HIGH:** **Public page dual-fetch has no race/cancellation strategy**: Plan 03 Task 2 describes sequential `GET /api/web/public/...` then `GET /api/web/collections/{id}` when session exists. If the authenticated fetch is slower, the page may flash the public payload then switch, or if the user navigates away mid-flight, state could update on unmounted components. No abort signal, cancel token, or React Query `refetchOnMount`/`staleTime` tuning is mentioned.
+- **HIGH:** **Router registration pattern mismatch**: Plan 01 Task 3 says to register `dashboard/collections`, `dashboard/collections/new`, `dashboard/collections/$collectionId/edit` as siblings. The existing `router.tsx` uses a **flat structure** — every `dashboard/*` route is a direct child of `rootRoute`, not nested children of `dashboardRoute`. Plans must follow this flat pattern (e.g., `path: 'dashboard/collections'`, not a child route) to avoid TanStack Router nesting bugs.
+- **MEDIUM:** **No `beforeLoad` caching / data prefetch for list page**: `CollectionsListPage` will call `useMyCollections`, but plan 01 does not specify whether `beforeLoad` should prefetch data (existing TanStack patterns in this repo may or may not use `loader`). If `loader` isn't used, pages will flash loading state — acceptable but should be explicit.
+- **MEDIUM:** **`useCollectionDetail` invalidation scope missing**: Plan 01 Task 2 lists invalidation of `['collections','mine']` and `['collections', id]` on mutations, but does not mention invalidating `['collections']` (generic prefix) which may be used elsewhere (e.g., dashboard preview card). Missing invalidation could cause stale cards after create.
+- **MEDIUM:** Plan 03 Task 1 acceptance criteria uses regex `dashboard/collections/\$collectionId` — tighten patterns to avoid false positives.
+- **MEDIUM:** **No explicit handling of `ApiError` field-level validation messages**: Plan 01 Task 3 says "handle `ApiError` field messages in-place" but does not specify how (inline form field errors, toast, banner).
+- **MEDIUM:** **D-09 aggregate field name not finalized**: Plan 02 uses `additionalMembersHiddenFromActorCount` as a candidate name but says "name TBD". This delays frontend typing and requires coordination between 02 and 03. Should be locked before 03 starts.
+- **MEDIUM:** Plan 03 Task 2 references `getCurrentUser|useSession|auth` without committing to actual auth hook — should use the exact hook name from the repo (e.g. `useAuth`) to avoid drift.
+- **LOW:** **No Playwright/E2E scenario mentioned** for Phase 3 success criteria; deferral to Phase 4 is noted but a single smoke scenario would de-risk 03-03.
+- **LOW:** **`collectionApi` public GET not in 01**: Public endpoint could be scaffolded in 01 alongside other methods for cohesion.
+- **LOW:** **i18n namespace not specified** — clarify flat vs nested keys in `en.json`/`zh.json`.
+
+### Suggestions
+
+1. **Specify the D-11 merge algorithm explicitly** in 02-PLAN Task 1 (pseudo-code or decision table).
+2. **Lock the D-09 field name** before 03 starts; document JSON camelCase in 02-PLAN.
+3. **Add abort/cancellation to public page dual-fetch** in 03-PLAN Task 2 (React Query `signal`, `setQueryData`, unmount safety).
+4. **Clarify router registration style** in 01-PLAN Task 3 (flat sibling routes under `rootRoute` per existing `dashboard/*` pattern).
+5. **Add `collectionApi.getPublicBySlug`** (or equivalent) in 01 Task 1.
+6. **Specify form validation error pattern** in 01-PLAN Task 3 (map `ApiError.details` like existing flows).
+7. **Use exact auth hook name** in 03 acceptance criteria.
+8. **Add a single E2E smoke scenario** to 03-03 (anonymous public → sign-in → owner reorder).
+9. **Tighten `rg` patterns** or assert route `id` properties instead of path-only strings.
+
+### Risk Assessment
+
+**MEDIUM** — The plan split is well-structured and most risks are mitigated by explicit pattern mirroring and threat models. D-11 merge complexity and public dual-fetch races are genuine implementation risks. Router registration style mismatch could cause debugging churn if missed. D-09 field name ambiguity is a coordination risk between 02 and 03. With suggested clarifications, risk drops toward **LOW**.
 
 ---
 
@@ -85,25 +136,28 @@ The three waves move from **client foundation** (OpenAPI, hooks, routes, CRUD UI
 
 ## Consensus Summary
 
-External CLIs did not yield additional independent markdown reviews in this environment. The **agent peer review** aligns with **03-RESEARCH.md**: dual-fetch correctness, D-09/D-11 server contracts, and OpenAPI staleness remain the highest-leverage risks.
+**Qwen** and **agent peer** both flag **D-11 merge under-specification**, **dual-fetch / public-page correctness**, and **contract coordination** (OpenAPI, DTO field names) as the main execution risks. **Agent peer** emphasizes **D-08** ownership and **information disclosure** more strongly (**overall HIGH** until tests lock semantics); **Qwen** rates **overall MEDIUM** with concrete engineering gaps (router flatness, cancellation, invalidation, form errors).
 
 ### Agreed strengths (with research / plans)
 
 - Wave **03-02** correctly front-loads **D-09** and **D-11** before **03-03** consumes those contracts in the UI.
 - Plans reference **namespace-members** patterns and **RouteSecurityPolicyRegistry**, matching repo conventions.
 - Threat-model sections in each plan surface ASVS-style thinking.
+- Explicit **rg/vitest/mvn** verification hooks in each plan.
 
 ### Agreed concerns (prioritize for `/gsd-plan-phase 3 --reviews`)
 
-1. **D-08 and error parity** — Explicitly assign generic Not Found behavior and tests across public + authenticated flows (**HIGH**).
-2. **Partial reorder merge semantics** — Lock idempotency, conflict behavior, and proof that responses cannot leak hidden membership (**HIGH**).
-3. **Dual-fetch UX and consistency** — Specify loading states, deduplication, and snapshot rules for public-then-authenticated refetch (**MEDIUM**).
-4. **Skill enrichment performance** — Avoid unbounded per-skill calls; document batching or server-side expansion (**MEDIUM**).
-5. **OpenAPI / contract drift** — CI or workflow guard so 03-01 does not ship against a stale spec (**MEDIUM**).
+1. **D-08 and error parity** — Assign generic Not Found behavior and tests across public + authenticated flows (**HIGH**, agent-peer; aligns with product **D-08**).
+2. **Partial reorder merge semantics** — Specify merge algorithm, idempotency, and non-leak guarantees; add tests (**HIGH**, both reviewers).
+3. **Dual-fetch UX and consistency** — Loading, flicker, cancellation, React Query policy (**MEDIUM/HIGH**, both).
+4. **Skill enrichment performance** — N+1 / batching / server expansion (**MEDIUM**, agent-peer).
+5. **OpenAPI / contract drift** — Regen discipline and field-name lock for D-09 before 03 (**MEDIUM**, both).
+6. **Router + invalidation + form-error patterns** — Flat `dashboard/*` registration, query key invalidation scope, `ApiError` mapping (**MEDIUM**, Qwen).
 
 ### Divergent views
 
-- **Codex vs plan intent:** The automated Codex session diverged into code exploration; this does **not** contradict the plans but shows **tooling risk** when using general-purpose coding agents for doc-only review.
+- **Overall risk level:** **Agent peer: HIGH** (security surface of public URL + partial reorder + D-08) vs **Qwen: MEDIUM** (implementation detail and coordination). Treat **HIGH** for security-sensitive items (**D-08**, merge leak surface) and **MEDIUM** for engineering polish.
+- **Codex vs plan intent:** The automated Codex session diverged into code exploration; shows **tooling risk** for doc-only review, not a product disagreement.
 
 ---
 
