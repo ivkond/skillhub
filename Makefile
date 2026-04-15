@@ -24,6 +24,15 @@ DEV_COMPOSE := docker compose -p $(DEV_COMPOSE_PROJECT_NAME)
 STAGING_BASE_COMPOSE := docker compose -p $(STAGING_COMPOSE_PROJECT_NAME)
 STAGING_COMPOSE := $(STAGING_BASE_COMPOSE) -f docker-compose.yml -f docker-compose.staging.yml
 
+# GNU Make on Windows often runs recipes with cmd.exe, where ./mvnw is not valid.
+ifeq ($(OS),Windows_NT)
+MVNW := mvnw.cmd
+WEB_INSTALL_CI_CMD = cd web && set "CI=true" && pnpm install --frozen-lockfile
+else
+MVNW := ./mvnw
+WEB_INSTALL_CI_CMD = cd web && CI=true pnpm install --frozen-lockfile
+endif
+
 help: ## 显示帮助
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -190,7 +199,7 @@ dev-logs: ## 实时查看开发服务日志（backend/frontend，默认 backend�
 	fi
 
 build-backend: ## 构建后端
-	cd server && ./mvnw clean package -DskipTests
+	cd server && $(MVNW) clean package -DskipTests
 
 BACKEND_DOCKER_IMAGE ?= skillhub-server:build-verify
 
@@ -198,13 +207,13 @@ build-backend-docker: ## 在 Docker 内构建后端（与 server/Dockerfile 生�
 	docker build -t $(BACKEND_DOCKER_IMAGE) -f server/Dockerfile server
 
 test-backend: ## 运行后端单元测试
-	cd server && JDK_JAVA_OPTIONS="$(BACKEND_TEST_JAVA_OPTIONS)" ./mvnw test
+	cd server && JDK_JAVA_OPTIONS="$(BACKEND_TEST_JAVA_OPTIONS)" $(MVNW) test
 
 build-backend-app: ## 构建 skillhub-app 及其依赖模块
-	cd server && ./mvnw -pl skillhub-app -am clean package -DskipTests
+	cd server && $(MVNW) -pl skillhub-app -am clean package -DskipTests
 
 test-backend-app: ## 运行 skillhub-app 及其依赖模块测试
-	cd server && JDK_JAVA_OPTIONS="$(BACKEND_TEST_JAVA_OPTIONS)" ./mvnw -pl skillhub-app -am test
+	cd server && JDK_JAVA_OPTIONS="$(BACKEND_TEST_JAVA_OPTIONS)" $(MVNW) -pl skillhub-app -am test
 
 build: build-backend build-frontend ## 完整构建前后端
 
@@ -213,7 +222,7 @@ test: test-backend test-frontend ## 运行前后端完整单元测试
 check: build test ## 执行前后端完整构建和完整单元测试
 
 clean: ## 清理构建产物
-	cd server && ./mvnw clean
+	cd server && $(MVNW) clean
 	$(DEV_COMPOSE) down -v
 	rm -rf $(DEV_DIR)
 
@@ -239,7 +248,7 @@ web-deps: ## 确保前端依赖可用（本地开发优先复用现有 node_modu
 	fi
 
 web-install-ci: ## 以 CI 方式安装前端依赖
-	cd web && CI=true pnpm install --frozen-lockfile
+	$(WEB_INSTALL_CI_CMD)
 
 dev-web: ## 启动前端开发服务器
 	cd web && pnpm run dev
@@ -269,38 +278,31 @@ lint-web: ## 前端代码检查
 db-reset: ## 重置数据库
 	$(DEV_COMPOSE) down -v --remove-orphans
 	$(DEV_COMPOSE) up -d --wait --remove-orphans postgres
-	cd server && ./mvnw flyway:migrate -pl skillhub-app
+	cd server && $(MVNW) flyway:migrate -pl skillhub-app
 
 validate-release-config: ## 校验发布环境变量文件（默认 .env.release）
 	./scripts/validate-release-config.sh .env.release
 
+# Exported for scripts/staging-smoke-and-report.sh (POSIX env assignment must not run under Windows cmd).
+staging: export STAGING_COMPOSE := $(STAGING_COMPOSE)
+staging: export STAGING_API_URL := $(STAGING_API_URL)
+staging: export STAGING_WEB_URL := $(STAGING_WEB_URL)
+staging: export BOOTSTRAP_ADMIN_USERNAME := admin
+staging: export BOOTSTRAP_ADMIN_PASSWORD := Admin@staging2026
+
 staging: ## 构建并启动 staging 环境，运行 smoke test（混合模式：后端镜像 + 前端静态文件）
 	@echo "=== [1/5] Building backend JAR and Docker image ==="
-	cd server && ./mvnw package -DskipTests -B -q
+	cd server && $(MVNW) package -DskipTests -B -q
 	docker build -t $(STAGING_SERVER_IMAGE) -f server/Dockerfile.dev server
 	@echo "=== [2/5] Building frontend static files ==="
+	@$(MAKE) web-install-ci
 	cd web && pnpm run build
 	@echo "=== [3/5] Starting dependency services ==="
 	$(STAGING_BASE_COMPOSE) up -d --wait
 	@echo "=== [4/5] Starting staging services ==="
 	$(STAGING_COMPOSE) up -d --wait server web
 	@echo "=== [5/5] Running smoke tests ==="
-	@if BOOTSTRAP_ADMIN_USERNAME=admin BOOTSTRAP_ADMIN_PASSWORD='Admin@staging2026' \
-		bash scripts/smoke-test.sh $(STAGING_API_URL); then \
-		echo ""; \
-		echo "Staging passed. Environment is running:"; \
-		echo "  Web UI:  $(STAGING_WEB_URL)"; \
-		echo "  Backend: $(STAGING_API_URL)"; \
-		echo ""; \
-		echo "Run 'make staging-down' to stop."; \
-		echo "Run 'make pr' to create a pull request."; \
-	else \
-		echo ""; \
-		echo "Smoke tests FAILED. Printing logs..."; \
-		$(STAGING_COMPOSE) logs server; \
-		$(MAKE) staging-down; \
-		exit 1; \
-	fi
+	@bash scripts/staging-smoke-and-report.sh
 
 staging-down: ## 停止 staging 环境
 	$(STAGING_COMPOSE) down --remove-orphans
