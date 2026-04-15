@@ -48,13 +48,13 @@ Plans:
 2. Public collection API never returns forbidden skill payloads to anonymous users.
 3. `RouteSecurityPolicyRegistry` documents new routes; session auth works for private collections.
 
-**Plans:** TBD in `/gsd-plan-phase 2`
+**Plans:** 3 plans in `.planning/phases/02-application-api/`
 
 Plans:
 
-- [ ] 02-01: DTOs + `*AppService` + controllers
-- [ ] 02-02: Security registry + negative tests for forbidden contributor actions
-- [ ] 02-03: Membership reconciliation strategy for **INT-03**
+- [ ] `02-01-PLAN.md` — DTOs + portal app services + `SkillCollectionController` / `PublicSkillCollectionController`
+- [ ] `02-02-PLAN.md` — `RouteSecurityPolicyRegistry` + `RouteSecurityPolicyRegistryTest` + `SkillCollectionSecurityIT`
+- [ ] `02-03-PLAN.md` — `reconcileInvisibleSkillsForCollection` + scheduler + **ADM-01** admin audit on commands
 
 ### Phase 3: Web UI
 
