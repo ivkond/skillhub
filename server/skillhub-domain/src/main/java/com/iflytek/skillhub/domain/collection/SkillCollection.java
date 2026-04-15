@@ -38,6 +38,9 @@ public class SkillCollection {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "last_reconciled_at", nullable = false)
+    private Instant lastReconciledAt;
+
     protected SkillCollection() {
     }
 
@@ -53,6 +56,9 @@ public class SkillCollection {
         Instant now = Instant.now(Clock.systemUTC());
         this.createdAt = now;
         this.updatedAt = now;
+        if (this.lastReconciledAt == null) {
+            this.lastReconciledAt = Instant.EPOCH;
+        }
     }
 
     @PreUpdate
@@ -92,6 +98,10 @@ public class SkillCollection {
         return updatedAt;
     }
 
+    public Instant getLastReconciledAt() {
+        return lastReconciledAt;
+    }
+
     public void setSlug(String slug) {
         this.slug = slug;
     }
@@ -106,5 +116,9 @@ public class SkillCollection {
 
     public void setVisibility(SkillVisibility visibility) {
         this.visibility = visibility;
+    }
+
+    public void markReconciled(Instant reconciledAt) {
+        this.lastReconciledAt = reconciledAt;
     }
 }

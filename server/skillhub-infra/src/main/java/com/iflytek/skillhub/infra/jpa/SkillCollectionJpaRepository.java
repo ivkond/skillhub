@@ -2,6 +2,7 @@ package com.iflytek.skillhub.infra.jpa;
 
 import com.iflytek.skillhub.domain.collection.SkillCollection;
 import com.iflytek.skillhub.domain.collection.SkillCollectionRepository;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -23,4 +24,11 @@ public interface SkillCollectionJpaRepository extends JpaRepository<SkillCollect
 
     @Override
     Page<SkillCollection> findByOwnerIdOrIdIn(String ownerId, Collection<Long> ids, Pageable pageable);
+
+    @Override
+    List<SkillCollection> findByIdGreaterThanAndLastReconciledAtBeforeOrderByIdAsc(
+            Long afterId,
+            Instant staleBefore,
+            Pageable pageable
+    );
 }

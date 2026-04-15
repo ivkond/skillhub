@@ -76,6 +76,7 @@ spring:
 skillhub:
   collections:
     reconcile-cron: ${SKILLHUB_COLLECTIONS_RECONCILE_CRON:0 0 * * * *}
+    reconcile-stale-after: ${SKILLHUB_COLLECTIONS_RECONCILE_STALE_AFTER:PT24H}
   auth:
     mock:
       enabled: ${SKILLHUB_AUTH_MOCK_ENABLED:false}

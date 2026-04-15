@@ -188,6 +188,24 @@ class SkillCollectionSecurityIT {
     }
 
     @Test
+    void ownerCanUpdateCollectionMetadataViaV1Route() throws Exception {
+        TestFixture fixture = createFixture();
+
+        mockMvc.perform(patch("/api/v1/collections/{id}", fixture.collection().getId())
+                        .with(authentication(portalAuth(fixture.ownerUserId(), "USER")))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "title", "Owner update v1",
+                                "description", "allowed",
+                                "slug", fixture.collection().getSlug()
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.title").value("Owner update v1"));
+    }
+
+    @Test
     void strangerCannotReadPrivateCollection() throws Exception {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         String ownerUserId = "owner-" + suffix;
@@ -279,6 +297,31 @@ class SkillCollectionSecurityIT {
         );
 
         mockMvc.perform(get("/api/web/public/collections/{ownerId}/{slug}",
+                        fixture.ownerUserId(),
+                        fixture.collection().getSlug()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.members.length()").value(1))
+                .andExpect(jsonPath("$.data.members[0].skillId").value(fixture.publicSkill().getId()));
+    }
+
+    @Test
+    void anonymousV1PublicEndpointFiltersInvisibleMembersVis03() throws Exception {
+        TestFixture fixture = createFixture();
+        skillCollectionMembershipService.addSkill(
+                fixture.collection().getId(),
+                fixture.ownerUserId(),
+                fixture.publicSkill().getId(),
+                false
+        );
+        skillCollectionMembershipService.addSkill(
+                fixture.collection().getId(),
+                fixture.ownerUserId(),
+                fixture.ownerPrivateSkill().getId(),
+                false
+        );
+
+        mockMvc.perform(get("/api/v1/public/collections/{ownerId}/{slug}",
                         fixture.ownerUserId(),
                         fixture.collection().getSlug()))
                 .andExpect(status().isOk())

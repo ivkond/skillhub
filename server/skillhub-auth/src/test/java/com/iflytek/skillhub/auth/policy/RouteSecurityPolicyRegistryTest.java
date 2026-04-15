@@ -75,32 +75,53 @@ class RouteSecurityPolicyRegistryTest {
 
     @Test
     void authorizationPolicies_shouldExposePublicCollectionRouteToAnonymousUsers() {
-        boolean matched = registry.authorizationPolicies().stream()
+        boolean matchedV1 = registry.authorizationPolicies().stream()
+                .anyMatch(policy -> policy.method() == HttpMethod.GET
+                        && "/api/v1/public/collections/*/*".equals(policy.pattern())
+                        && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.PERMIT_ALL);
+        boolean matchedWeb = registry.authorizationPolicies().stream()
                 .anyMatch(policy -> policy.method() == HttpMethod.GET
                         && "/api/web/public/collections/*/*".equals(policy.pattern())
                         && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.PERMIT_ALL);
 
-        assertTrue(matched);
+        assertTrue(matchedV1);
+        assertTrue(matchedWeb);
     }
 
     @Test
     void authorizationPolicies_shouldRequireAuthenticationForMyCollectionsRoute() {
-        boolean matched = registry.authorizationPolicies().stream()
+        boolean matchedV1 = registry.authorizationPolicies().stream()
+                .anyMatch(policy -> policy.method() == HttpMethod.GET
+                        && "/api/v1/me/collections".equals(policy.pattern())
+                        && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.AUTHENTICATED);
+        boolean matchedWeb = registry.authorizationPolicies().stream()
                 .anyMatch(policy -> policy.method() == HttpMethod.GET
                         && "/api/web/me/collections".equals(policy.pattern())
                         && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.AUTHENTICATED);
 
-        assertTrue(matched);
+        assertTrue(matchedV1);
+        assertTrue(matchedWeb);
     }
 
     @Test
     void authorizationPolicies_shouldRequireAuthenticationForCollectionCreateRoute() {
-        boolean matched = registry.authorizationPolicies().stream()
+        boolean matchedV1 = registry.authorizationPolicies().stream()
+                .anyMatch(policy -> policy.method() == HttpMethod.POST
+                        && "/api/v1/collections".equals(policy.pattern())
+                        && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.AUTHENTICATED);
+        boolean matchedWeb = registry.authorizationPolicies().stream()
                 .anyMatch(policy -> policy.method() == HttpMethod.POST
                         && "/api/web/collections".equals(policy.pattern())
                         && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.AUTHENTICATED);
 
-        assertTrue(matched);
+        assertTrue(matchedV1);
+        assertTrue(matchedWeb);
+    }
+
+    @Test
+    void authorizeApiToken_shouldAllowV1PublicCollectionReadWithoutScope() {
+        var decision = registry.authorizeApiToken("GET", "/api/v1/public/collections/owner/slug", Set.of());
+        assertTrue(decision.allowed());
     }
 
     @Test

@@ -118,4 +118,15 @@ class ApiTokenScopeServiceTest {
 
         assertTrue(decision.allowed());
     }
+
+    @Test
+    void authorizeShouldAllowV1PublicCollectionReadWithoutScope() {
+        ApiTokenScopeService.AuthorizationDecision decision = scopeService.authorize(
+                "GET",
+                "/api/v1/public/collections/owner-a/collection-a",
+                Set.of()
+        );
+
+        assertTrue(decision.allowed());
+    }
 }

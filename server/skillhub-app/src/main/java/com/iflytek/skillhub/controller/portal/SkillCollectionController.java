@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/web")
+@RequestMapping({"/api/v1", "/api/web"})
 public class SkillCollectionController extends BaseApiController {
     private final SkillCollectionPortalQueryAppService queryService;
     private final SkillCollectionPortalCommandAppService commandService;

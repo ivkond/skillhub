@@ -1,5 +1,6 @@
 package com.iflytek.skillhub.domain.collection;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,12 @@ public interface SkillCollectionRepository {
     Page<SkillCollection> findByOwnerIdOrIdIn(String ownerId, Collection<Long> ids, Pageable pageable);
 
     Page<SkillCollection> findAll(Pageable pageable);
+
+    List<SkillCollection> findByIdGreaterThanAndLastReconciledAtBeforeOrderByIdAsc(
+            Long afterId,
+            Instant staleBefore,
+            Pageable pageable
+    );
 
     long countByOwnerId(String ownerId);
 
