@@ -84,6 +84,14 @@ const CollectionEditPage = createLazyRouteComponent(
   () => import('@/pages/dashboard/collection-edit'),
   'CollectionEditPage',
 )
+const CollectionDetailPage = createLazyRouteComponent(
+  () => import('@/pages/dashboard/collection-detail'),
+  'CollectionDetailPage',
+)
+const PublicCollectionPage = createLazyRouteComponent(
+  () => import('@/pages/public/public-collection-page'),
+  'PublicCollectionPage',
+)
 const MySkillsPage = createLazyRouteComponent(() => import('@/pages/dashboard/my-skills'), 'MySkillsPage')
 const PublishPage = createLazyRouteComponent(() => import('@/pages/dashboard/publish'), 'PublishPage')
 const MyNamespacesPage = createLazyRouteComponent(
@@ -362,11 +370,24 @@ const dashboardCollectionEditRoute = createRoute({
   component: CollectionEditPage,
 })
 
+const dashboardCollectionDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'dashboard/collections/$collectionId',
+  beforeLoad: requireAuth,
+  component: CollectionDetailPage,
+})
+
 const dashboardCollectionsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'dashboard/collections',
   beforeLoad: requireAuth,
   component: CollectionsListPage,
+})
+
+const publicCollectionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'u/$ownerKey/c/$collectionSlug',
+  component: PublicCollectionPage,
 })
 
 const cliAuthRoute = createRoute({
@@ -462,8 +483,10 @@ const routeTree = rootRoute.addChildren([
   dashboardNotificationsRoute,
   dashboardTokensRoute,
   dashboardCollectionNewRoute,
+  dashboardCollectionDetailRoute,
   dashboardCollectionEditRoute,
   dashboardCollectionsRoute,
+  publicCollectionRoute,
   cliAuthRoute,
   settingsSecurityRoute,
   settingsProfileRoute,

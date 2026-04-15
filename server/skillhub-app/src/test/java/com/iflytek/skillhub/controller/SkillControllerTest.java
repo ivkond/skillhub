@@ -205,6 +205,49 @@ class SkillControllerTest {
     }
 
     @Test
+    void getSkillDetailByIdShouldReturnSkillDetailEnvelope() throws Exception {
+        SkillQueryService.SkillDetailDTO detail = new SkillQueryService.SkillDetailDTO(
+                99L,
+                "demo",
+                "Demo",
+                "owner-1",
+                "Alice",
+                "Demo skill",
+                "PUBLIC",
+                "ACTIVE",
+                11L,
+                3,
+                null,
+                0,
+                false,
+                1L,
+                Instant.parse("2026-03-15T10:00:00Z"),
+                Instant.parse("2026-03-15T10:00:00Z"),
+                true,
+                false,
+                true,
+                true,
+                new com.iflytek.skillhub.domain.skill.service.SkillLifecycleProjectionService.VersionProjection(11L, "1.0.0", "PUBLISHED"),
+                new com.iflytek.skillhub.domain.skill.service.SkillLifecycleProjectionService.VersionProjection(11L, "1.0.0", "PUBLISHED"),
+                null,
+                null,
+                "PUBLISHED"
+        );
+        when(skillQueryService.getSkillDetailById(
+                eq(99L),
+                eq((String) null),
+                eq(Map.<Long, NamespaceRole>of())))
+                .thenReturn(new SkillQueryService.SkillDetailWithNamespaceDTO("team", detail));
+
+        mockMvc.perform(get("/api/web/skills/id/99"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.id").value(99))
+                .andExpect(jsonPath("$.data.namespace").value("team"))
+                .andExpect(jsonPath("$.data.slug").value("demo"));
+    }
+
+    @Test
     void listFilesByTagShouldReturnUnifiedEnvelope() throws Exception {
         when(skillQueryService.listFilesByTag(
                 eq("team"),

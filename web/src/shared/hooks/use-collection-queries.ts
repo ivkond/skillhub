@@ -4,11 +4,13 @@ import { collectionApi } from '@/api/client'
 
 type SkillCollectionCreateBody = components['schemas']['SkillCollectionCreateRequest']
 type SkillCollectionUpdateBody = components['schemas']['SkillCollectionUpdateRequest']
+type SkillCollectionVisibility = 'PUBLIC' | 'PRIVATE'
 
 function invalidateMineAndDetail(queryClient: ReturnType<typeof useQueryClient>, id?: string | number | null) {
   queryClient.invalidateQueries({ queryKey: ['collections', 'mine'] })
   if (id != null && id !== '') {
     queryClient.invalidateQueries({ queryKey: ['collections', String(id)] })
+    queryClient.invalidateQueries({ queryKey: ['collections', String(id), 'contributors'] })
   }
 }
 
@@ -21,11 +23,19 @@ export function useMyCollections(params: { page?: number; size?: number } = {}) 
   })
 }
 
-export function useCollectionDetail(id: string | undefined) {
+export function useCollectionDetail(id: string | undefined, enabled = true) {
   return useQuery({
     queryKey: ['collections', id],
     queryFn: () => collectionApi.getById(id!),
-    enabled: !!id,
+    enabled: !!id && enabled,
+  })
+}
+
+export function usePublicCollection(ownerKey: string | undefined, collectionSlug: string | undefined) {
+  return useQuery({
+    queryKey: ['collections', 'public', ownerKey, collectionSlug],
+    queryFn: () => collectionApi.getPublicByOwnerAndSlug(ownerKey!, collectionSlug!),
+    enabled: !!ownerKey && !!collectionSlug,
   })
 }
 
@@ -52,7 +62,7 @@ export function useUpdateCollection() {
 export function useSetCollectionVisibility() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (variables: { id: string; visibility: 'PUBLIC' | 'PRIVATE' }) =>
+    mutationFn: (variables: { id: string; visibility: SkillCollectionVisibility }) =>
       collectionApi.setVisibility(variables.id, variables.visibility),
     onSuccess: (_data, variables) => {
       invalidateMineAndDetail(queryClient, variables.id)
@@ -66,6 +76,69 @@ export function useDeleteCollection() {
     mutationFn: (id: string) => collectionApi.deleteCollection(id),
     onSuccess: (_data, id) => {
       invalidateMineAndDetail(queryClient, id)
+    },
+  })
+}
+
+export function useAddCollectionSkill() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (variables: { id: string; skillId: number }) =>
+      collectionApi.addSkill(variables.id, variables.skillId),
+    onSuccess: (_data, variables) => {
+      invalidateMineAndDetail(queryClient, variables.id)
+    },
+  })
+}
+
+export function useRemoveCollectionSkill() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (variables: { id: string; skillId: number }) =>
+      collectionApi.removeSkill(variables.id, variables.skillId),
+    onSuccess: (_data, variables) => {
+      invalidateMineAndDetail(queryClient, variables.id)
+    },
+  })
+}
+
+export function useReorderCollectionSkills() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (variables: { id: string; skillIdsInOrder: number[] }) =>
+      collectionApi.reorderSkills(variables.id, variables.skillIdsInOrder),
+    onSuccess: (_data, variables) => {
+      invalidateMineAndDetail(queryClient, variables.id)
+    },
+  })
+}
+
+export function useCollectionContributors(id: string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: ['collections', id, 'contributors'],
+    queryFn: () => collectionApi.listContributors(id!),
+    enabled: !!id && enabled,
+  })
+}
+
+export function useAddCollectionContributor() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (variables: { id: string; userId: string }) =>
+      collectionApi.addContributor(variables.id, variables.userId),
+    onSuccess: (_data, variables) => {
+      invalidateMineAndDetail(queryClient, variables.id)
+    },
+  })
+}
+
+export function useRemoveCollectionContributor() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (variables: { id: string; userId: string }) =>
+      collectionApi.removeContributor(variables.id, variables.userId),
+    onSuccess: (_data, variables) => {
+      invalidateMineAndDetail(queryClient, variables.id)
     },
   })
 }

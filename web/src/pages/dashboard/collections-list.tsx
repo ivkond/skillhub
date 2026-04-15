@@ -88,7 +88,7 @@ export function CollectionsListPage() {
                     <p className="text-xs text-muted-foreground">{t('collections.updatedAt', { date: updated })}</p>
                   ) : null}
                   <Link
-                    to="/dashboard/collections/$collectionId/edit"
+                    to="/dashboard/collections/$collectionId"
                     params={{ collectionId: String(id) }}
                     className="inline-flex text-sm font-semibold text-primary hover:underline"
                   >

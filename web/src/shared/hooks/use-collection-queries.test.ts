@@ -5,7 +5,12 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { collectionApi } from '@/api/client'
-import { useCreateCollection, useMyCollections } from './use-collection-queries'
+import {
+  useCollectionContributors,
+  useCreateCollection,
+  useMyCollections,
+  useReorderCollectionSkills,
+} from './use-collection-queries'
 
 function createTestQueryClient() {
   return new QueryClient({
@@ -25,10 +30,14 @@ function createWrapper(queryClient: QueryClient) {
 describe('use-collection-queries', () => {
   const createSpy = vi.spyOn(collectionApi, 'create')
   const listMineSpy = vi.spyOn(collectionApi, 'listMine')
+  const listContributorsSpy = vi.spyOn(collectionApi, 'listContributors')
+  const reorderSkillsSpy = vi.spyOn(collectionApi, 'reorderSkills')
 
   beforeEach(() => {
     createSpy.mockReset()
     listMineSpy.mockReset()
+    listContributorsSpy.mockReset()
+    reorderSkillsSpy.mockReset()
   })
 
   afterEach(() => {
@@ -81,6 +90,53 @@ describe('use-collection-queries', () => {
       visibility: 'PUBLIC',
       slug: 'my-col',
     })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', 'mine'] })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', '42'] })
+  })
+
+  it('useCollectionContributors fetches contributor list by collection id', async () => {
+    listContributorsSpy.mockResolvedValue([
+      {
+        userId: 'u-1',
+        createdAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+      },
+    ])
+    const queryClient = createTestQueryClient()
+
+    const { result } = renderHook(() => useCollectionContributors('42'), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(listContributorsSpy).toHaveBeenCalledWith('42')
+    expect(queryClient.getQueryData(['collections', '42', 'contributors'])).toEqual([
+      {
+        userId: 'u-1',
+        createdAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+      },
+    ])
+  })
+
+  it('useReorderCollectionSkills calls API and invalidates mine/detail queries', async () => {
+    reorderSkillsSpy.mockResolvedValue([
+      { membershipId: 10, skillId: 200, sortOrder: 0 },
+      { membershipId: 11, skillId: 100, sortOrder: 1 },
+    ])
+    const queryClient = createTestQueryClient()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+
+    const { result } = renderHook(() => useReorderCollectionSkills(), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    await result.current.mutateAsync({
+      id: '42',
+      skillIdsInOrder: [200, 100],
+    })
+
+    expect(reorderSkillsSpy).toHaveBeenCalledWith('42', [200, 100])
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', 'mine'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', '42'] })
   })

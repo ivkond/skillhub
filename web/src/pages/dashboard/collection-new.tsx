@@ -58,7 +58,7 @@ export function CollectionNewPage() {
         return
       }
       navigate({
-        to: '/dashboard/collections/$collectionId/edit',
+        to: '/dashboard/collections/$collectionId',
         params: { collectionId: String(created.id) },
       })
     } catch (error) {

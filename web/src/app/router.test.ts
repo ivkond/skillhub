@@ -66,7 +66,9 @@ describe('router', () => {
       expect.arrayContaining([
         'dashboard/collections',
         'dashboard/collections/new',
+        'dashboard/collections/$collectionId',
         'dashboard/collections/$collectionId/edit',
+        'u/$ownerKey/c/$collectionSlug',
       ]),
     )
   })

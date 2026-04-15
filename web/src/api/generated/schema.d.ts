@@ -3195,7 +3195,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["getSkillDetailById"];
         put?: never;
         post?: never;
         delete: operations["deleteSkillById"];
@@ -3355,7 +3355,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["getSkillDetailById_1"];
         put?: never;
         post?: never;
         delete: operations["deleteSkillById_1"];
@@ -3855,6 +3855,8 @@ export interface components {
             description?: string;
             visibility?: string;
             members?: components["schemas"]["SkillCollectionMemberResponse"][];
+            /** Format: int32 */
+            additionalMembersHiddenFromActorCount?: number;
             /** Format: date-time */
             createdAt?: string;
             /** Format: date-time */
@@ -9252,6 +9254,28 @@ export interface operations {
             };
         };
     };
+    getSkillDetailById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                skillId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseSkillDetailResponse"];
+                };
+            };
+        };
+    };
     deleteSkill_1: {
         parameters: {
             query?: {
@@ -9284,6 +9308,28 @@ export interface operations {
             path: {
                 namespace: string;
                 slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseSkillDetailResponse"];
+                };
+            };
+        };
+    };
+    getSkillDetailById_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                skillId: number;
             };
             cookie?: never;
         };

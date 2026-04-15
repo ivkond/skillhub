@@ -40,6 +40,7 @@ import type {
   AdminLabelInput,
   LabelDefinition,
   LabelItem,
+  SkillDetail,
 } from './types'
 import { ApiError } from '@/shared/lib/api-error'
 import i18n from '@/i18n/config'
@@ -727,6 +728,8 @@ type SkillCollectionResponse = components['schemas']['SkillCollectionResponse']
 type SkillCollectionCreateRequestBody = components['schemas']['SkillCollectionCreateRequest']
 type SkillCollectionUpdateRequestBody = components['schemas']['SkillCollectionUpdateRequest']
 type PageSkillCollectionResponse = components['schemas']['PageSkillCollectionResponse']
+type SkillCollectionMemberResponse = components['schemas']['SkillCollectionMemberResponse']
+type SkillCollectionContributorResponse = components['schemas']['SkillCollectionContributorResponse']
 
 export const collectionApi = {
   async listMine(params?: { page?: number; size?: number }): Promise<{
@@ -791,10 +794,68 @@ export const collectionApi = {
     })
   },
 
+  async addSkill(id: string | number, skillId: number): Promise<SkillCollectionMemberResponse> {
+    return fetchJson<SkillCollectionMemberResponse>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/skills`, {
+      method: 'POST',
+      headers: await ensureCsrfHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({ skillId }),
+    })
+  },
+
+  async removeSkill(id: string | number, skillId: number): Promise<void> {
+    await fetchJson<components['schemas']['MessageResponse']>(
+      `${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/skills/${encodeURIComponent(String(skillId))}`,
+      {
+        method: 'DELETE',
+        headers: await ensureCsrfHeaders(),
+      },
+    )
+  },
+
+  async reorderSkills(id: string | number, skillIdsInOrder: number[]): Promise<SkillCollectionMemberResponse[]> {
+    return fetchJson<SkillCollectionMemberResponse[]>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/skills/order`, {
+      method: 'PUT',
+      headers: await ensureCsrfHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({ skillIdsInOrder }),
+    })
+  },
+
+  async listContributors(id: string | number): Promise<SkillCollectionContributorResponse[]> {
+    return fetchJson<SkillCollectionContributorResponse[]>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/contributors`)
+  },
+
+  async addContributor(id: string | number, userId: string): Promise<SkillCollectionContributorResponse> {
+    return fetchJson<SkillCollectionContributorResponse>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/contributors`, {
+      method: 'POST',
+      headers: await ensureCsrfHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({ userId }),
+    })
+  },
+
+  async removeContributor(id: string | number, userId: string): Promise<void> {
+    await fetchJson<components['schemas']['MessageResponse']>(
+      `${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/contributors/${encodeURIComponent(userId)}`,
+      {
+        method: 'DELETE',
+        headers: await ensureCsrfHeaders(),
+      },
+    )
+  },
+
   async getPublicByOwnerAndSlug(ownerKey: string, slug: string): Promise<SkillCollectionResponse> {
     return fetchJson<SkillCollectionResponse>(
       `${WEB_API_PREFIX}/public/collections/${encodeURIComponent(ownerKey)}/${encodeURIComponent(slug)}`,
     )
+  },
+
+  async getSkillById(skillId: number): Promise<SkillDetail> {
+    return fetchJson<SkillDetail>(`${WEB_API_PREFIX}/skills/id/${encodeURIComponent(String(skillId))}`)
   },
 }
 
