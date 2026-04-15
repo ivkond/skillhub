@@ -104,6 +104,24 @@ public class SkillCollectionMembershipService {
         memberRepository.saveAll(toSave);
     }
 
+    @Transactional
+    public int reconcileInvisibleSkillsForCollection(long collectionId) {
+        var collectionOptional = skillCollectionRepository.findById(collectionId);
+        if (collectionOptional.isEmpty()) {
+            return 0;
+        }
+        SkillCollection collection = collectionOptional.get();
+        List<SkillCollectionMember> members = memberRepository.findByCollectionIdOrderBySortOrderAscIdAsc(collectionId);
+        int deleted = 0;
+        for (SkillCollectionMember member : members) {
+            if (!skillReadableForActorPort.canActingUserReadSkill(collection.getOwnerId(), member.getSkillId())) {
+                memberRepository.deleteByCollectionIdAndSkillId(collectionId, member.getSkillId());
+                deleted++;
+            }
+        }
+        return deleted;
+    }
+
     private SkillCollection requireCollection(Long collectionId) {
         return skillCollectionRepository.findById(collectionId)
                 .orElseThrow(() -> new DomainBadRequestException("error.skillCollection.notFound", collectionId));
