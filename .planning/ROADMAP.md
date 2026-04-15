@@ -74,9 +74,9 @@ Plans:
 
 Plans:
 
-- [ ] 03-01: Routes + list/create/edit screens
-- [ ] 03-02: Backend — D-09 aggregate + D-11 contributor reorder merge
-- [ ] 03-03: Detail + contributor management + share + public page
+- [x] 03-01: Routes + list/create/edit screens
+- [x] 03-02: Backend — D-09 aggregate + D-11 contributor reorder merge
+- [x] 03-03: Detail + contributor management + share + public page
 
 ### Phase 4: Verification & docs
 
