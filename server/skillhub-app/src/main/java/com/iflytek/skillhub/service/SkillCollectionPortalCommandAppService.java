@@ -7,6 +7,7 @@ import com.iflytek.skillhub.domain.collection.SkillCollectionDomainService;
 import com.iflytek.skillhub.domain.collection.SkillCollectionMember;
 import com.iflytek.skillhub.domain.collection.SkillCollectionMemberRepository;
 import com.iflytek.skillhub.domain.collection.SkillCollectionMembershipService;
+import com.iflytek.skillhub.domain.audit.AuditLogService;
 import com.iflytek.skillhub.domain.skill.SkillVisibility;
 import com.iflytek.skillhub.dto.collection.SkillCollectionContributorResponse;
 import com.iflytek.skillhub.dto.collection.SkillCollectionCreateRequest;
@@ -14,6 +15,7 @@ import com.iflytek.skillhub.dto.collection.SkillCollectionMemberResponse;
 import com.iflytek.skillhub.dto.collection.SkillCollectionResponse;
 import com.iflytek.skillhub.dto.collection.SkillCollectionUpdateRequest;
 import java.util.List;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,24 +25,28 @@ public class SkillCollectionPortalCommandAppService {
     private final SkillCollectionMembershipService skillCollectionMembershipService;
     private final SkillCollectionContributorService skillCollectionContributorService;
     private final SkillCollectionMemberRepository memberRepository;
+    private final AuditLogService auditLogService;
 
     public SkillCollectionPortalCommandAppService(
             SkillCollectionDomainService skillCollectionDomainService,
             SkillCollectionMembershipService skillCollectionMembershipService,
             SkillCollectionContributorService skillCollectionContributorService,
-            SkillCollectionMemberRepository memberRepository
+            SkillCollectionMemberRepository memberRepository,
+            AuditLogService auditLogService
     ) {
         this.skillCollectionDomainService = skillCollectionDomainService;
         this.skillCollectionMembershipService = skillCollectionMembershipService;
         this.skillCollectionContributorService = skillCollectionContributorService;
         this.memberRepository = memberRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
     public SkillCollectionResponse create(String actingUserId,
                                           boolean adminEquivalent,
                                           String targetOwnerIdOrNull,
-                                          SkillCollectionCreateRequest req) {
+                                          SkillCollectionCreateRequest req,
+                                          AuditRequestContext auditContext) {
         SkillCollection created = skillCollectionDomainService.createCollection(
                 actingUserId,
                 req.title(),
@@ -50,6 +56,15 @@ public class SkillCollectionPortalCommandAppService {
                 adminEquivalent,
                 adminEquivalent ? targetOwnerIdOrNull : actingUserId
         );
+        if (adminEquivalent) {
+            recordCollectionAudit(
+                    "SKILL_COLLECTION_ADMIN_CREATE",
+                    actingUserId,
+                    created.getId(),
+                    auditContext,
+                    "{\"ownerId\":\"" + created.getOwnerId() + "\"}"
+            );
+        }
         return SkillCollectionResponse.from(created);
     }
 
@@ -57,7 +72,8 @@ public class SkillCollectionPortalCommandAppService {
     public SkillCollectionResponse updateMetadata(Long id,
                                                   String actingUserId,
                                                   boolean adminEquivalent,
-                                                  SkillCollectionUpdateRequest req) {
+                                                  SkillCollectionUpdateRequest req,
+                                                  AuditRequestContext auditContext) {
         SkillCollection updated = skillCollectionDomainService.updateMetadata(
                 id,
                 actingUserId,
@@ -66,18 +82,46 @@ public class SkillCollectionPortalCommandAppService {
                 req.slug(),
                 adminEquivalent
         );
+        if (adminEquivalent) {
+            recordCollectionAudit(
+                    "SKILL_COLLECTION_ADMIN_UPDATE",
+                    actingUserId,
+                    id,
+                    auditContext,
+                    "{\"slug\":\"" + req.slug() + "\"}"
+            );
+        }
         return SkillCollectionResponse.from(updated, listMembers(id));
     }
 
     @Transactional
-    public SkillCollectionResponse setVisibility(Long id, String actingUserId, boolean adminEquivalent, SkillVisibility vis) {
+    public SkillCollectionResponse setVisibility(Long id, String actingUserId, boolean adminEquivalent, SkillVisibility vis,
+                                                 AuditRequestContext auditContext) {
         SkillCollection updated = skillCollectionDomainService.setVisibility(id, actingUserId, vis, adminEquivalent);
+        if (adminEquivalent) {
+            recordCollectionAudit(
+                    "SKILL_COLLECTION_ADMIN_VISIBILITY",
+                    actingUserId,
+                    id,
+                    auditContext,
+                    "{\"visibility\":\"" + vis.name() + "\"}"
+            );
+        }
         return SkillCollectionResponse.from(updated, listMembers(id));
     }
 
     @Transactional
-    public void delete(Long id, String actingUserId, boolean adminEquivalent) {
+    public void delete(Long id, String actingUserId, boolean adminEquivalent, AuditRequestContext auditContext) {
         skillCollectionDomainService.deleteCollection(id, actingUserId, adminEquivalent);
+        if (adminEquivalent) {
+            recordCollectionAudit(
+                    "SKILL_COLLECTION_ADMIN_DELETE",
+                    actingUserId,
+                    id,
+                    auditContext,
+                    "{}"
+            );
+        }
     }
 
     @Transactional
@@ -123,5 +167,22 @@ public class SkillCollectionPortalCommandAppService {
         return memberRepository.findByCollectionIdOrderBySortOrderAscIdAsc(collectionId).stream()
                 .map(SkillCollectionMemberResponse::from)
                 .toList();
+    }
+
+    void recordCollectionAudit(String actionCode,
+                               String actorUserId,
+                               Long collectionId,
+                               AuditRequestContext ctx,
+                               String jsonPayload) {
+        auditLogService.record(
+                actorUserId,
+                actionCode,
+                "SKILL_COLLECTION",
+                collectionId,
+                MDC.get("requestId"),
+                ctx != null ? ctx.clientIp() : null,
+                ctx != null ? ctx.userAgent() : null,
+                jsonPayload
+        );
     }
 }

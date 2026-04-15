@@ -14,8 +14,10 @@ import com.iflytek.skillhub.dto.collection.SkillCollectionCreateRequest;
 import com.iflytek.skillhub.dto.collection.SkillCollectionMemberResponse;
 import com.iflytek.skillhub.dto.collection.SkillCollectionResponse;
 import com.iflytek.skillhub.dto.collection.SkillCollectionUpdateRequest;
+import com.iflytek.skillhub.service.AuditRequestContext;
 import com.iflytek.skillhub.service.SkillCollectionPortalCommandAppService;
 import com.iflytek.skillhub.service.SkillCollectionPortalQueryAppService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -63,13 +65,15 @@ public class SkillCollectionController extends BaseApiController {
     public ApiResponse<SkillCollectionResponse> create(
             @Valid @RequestBody SkillCollectionCreateRequest request,
             @RequestAttribute("userId") String userId,
-            @AuthenticationPrincipal PlatformPrincipal principal
+            @AuthenticationPrincipal PlatformPrincipal principal,
+            HttpServletRequest httpRequest
     ) {
         return ok("response.success.created", commandService.create(
                 userId,
                 isAdminEquivalent(principal),
                 null,
-                request
+                request,
+                AuditRequestContext.from(httpRequest)
         ));
     }
 
@@ -87,9 +91,16 @@ public class SkillCollectionController extends BaseApiController {
             @PathVariable Long id,
             @Valid @RequestBody SkillCollectionUpdateRequest request,
             @RequestAttribute("userId") String userId,
-            @AuthenticationPrincipal PlatformPrincipal principal
+            @AuthenticationPrincipal PlatformPrincipal principal,
+            HttpServletRequest httpRequest
     ) {
-        return ok("response.success.updated", commandService.updateMetadata(id, userId, isAdminEquivalent(principal), request));
+        return ok("response.success.updated", commandService.updateMetadata(
+                id,
+                userId,
+                isAdminEquivalent(principal),
+                request,
+                AuditRequestContext.from(httpRequest)
+        ));
     }
 
     @PatchMapping("/collections/{id}/visibility")
@@ -97,19 +108,27 @@ public class SkillCollectionController extends BaseApiController {
             @PathVariable Long id,
             @Valid @RequestBody VisibilityBody request,
             @RequestAttribute("userId") String userId,
-            @AuthenticationPrincipal PlatformPrincipal principal
+            @AuthenticationPrincipal PlatformPrincipal principal,
+            HttpServletRequest httpRequest
     ) {
         SkillVisibility visibility = SkillVisibility.valueOf(request.visibility());
-        return ok("response.success.updated", commandService.setVisibility(id, userId, isAdminEquivalent(principal), visibility));
+        return ok("response.success.updated", commandService.setVisibility(
+                id,
+                userId,
+                isAdminEquivalent(principal),
+                visibility,
+                AuditRequestContext.from(httpRequest)
+        ));
     }
 
     @DeleteMapping("/collections/{id}")
     public ApiResponse<MessageResponse> delete(
             @PathVariable Long id,
             @RequestAttribute("userId") String userId,
-            @AuthenticationPrincipal PlatformPrincipal principal
+            @AuthenticationPrincipal PlatformPrincipal principal,
+            HttpServletRequest httpRequest
     ) {
-        commandService.delete(id, userId, isAdminEquivalent(principal));
+        commandService.delete(id, userId, isAdminEquivalent(principal), AuditRequestContext.from(httpRequest));
         return ok("response.success.deleted", new MessageResponse("Collection deleted successfully"));
     }
 
