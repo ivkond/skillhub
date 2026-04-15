@@ -152,7 +152,8 @@ class SkillStarControllerTest {
         );
 
         mockMvc.perform(put("/api/web/skills/10/star")
-                        .with(authentication(auth)))
+                        .with(authentication(auth))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0));
 

@@ -101,6 +101,7 @@ class UserProfileControllerTest {
     @Test
     void updateProfile_unauthenticated_shouldReturn401() throws Exception {
         mockMvc.perform(patch("/api/v1/user/profile")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"displayName\":\"NewName\"}"))
                 .andExpect(status().isUnauthorized());
