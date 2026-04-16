@@ -88,6 +88,39 @@ POST /api/v1/namespaces/{slug}/reviews/{id}/reject
 POST /api/v1/namespaces/{slug}/skills/{skillId}/promote
 ```
 
+## Collections APIs (Authenticated)
+
+Collections APIs cover creation, detail reads, collaborator management, skill membership changes, and public-share access. The permission model follows `owner / contributor / stranger / admin`:
+
+- `owner`: creator of the collection, full write privileges
+- `contributor`: can manage skill membership, but cannot change collection metadata/visibility
+- `stranger`: no write privileges
+- `admin`: governance role with elevated cross-collection operations
+
+Core web routes:
+
+```http
+GET    /api/web/collections
+POST   /api/web/collections
+GET    /api/web/collections/{id}
+PATCH  /api/web/collections/{id}
+DELETE /api/web/collections/{id}
+
+POST   /api/web/collections/{id}/contributors
+DELETE /api/web/collections/{id}/contributors/{userId}
+
+POST   /api/web/collections/{id}/skills
+DELETE /api/web/collections/{id}/skills/{skillId}
+
+GET    /api/web/users/{ownerId}/collections/{slug}   # public/share route
+```
+
+Visibility and safety expectations:
+
+- `PRIVATE` collections return not-found style responses to unauthorized viewers to avoid leaking collection or skill metadata
+- write routes are server-side role guarded (owner/admin baseline, contributor for selected membership actions)
+- public share links return full payload only when visibility allows it
+
 ## API Token
 
 ```http

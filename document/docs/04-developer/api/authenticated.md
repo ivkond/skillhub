@@ -88,6 +88,39 @@ POST /api/v1/namespaces/{slug}/reviews/{id}/reject
 POST /api/v1/namespaces/{slug}/skills/{skillId}/promote
 ```
 
+## 集合（Collections）API（需登录）
+
+集合 API 覆盖创建、详情读取、成员协作、技能成员维护与公开访问场景。默认采用 `owner / contributor / stranger / admin` 角色模型：
+
+- `owner`：集合创建者，拥有全部写权限
+- `contributor`：可维护集合内技能成员，但不能改集合元信息与可见性
+- `stranger`：无授权写权限
+- `admin`：治理角色，可跨集合执行管理操作
+
+核心路由（Web Portal）：
+
+```http
+GET    /api/web/collections
+POST   /api/web/collections
+GET    /api/web/collections/{id}
+PATCH  /api/web/collections/{id}
+DELETE /api/web/collections/{id}
+
+POST   /api/web/collections/{id}/contributors
+DELETE /api/web/collections/{id}/contributors/{userId}
+
+POST   /api/web/collections/{id}/skills
+DELETE /api/web/collections/{id}/skills/{skillId}
+
+GET    /api/web/users/{ownerId}/collections/{slug}   # 公开/外链访问
+```
+
+可见性与安全约束：
+
+- `PRIVATE` 集合对未授权访问者返回 not-found 样式响应，避免泄露集合与技能元信息
+- 集合写操作必须通过服务端角色校验（owner/admin 为主，部分成员操作开放 contributor）
+- 公开分享链接仅在集合可见性允许时返回完整内容
+
 ## API Token
 
 ```http

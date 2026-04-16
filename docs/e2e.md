@@ -76,6 +76,8 @@ web/
 - `protected-routes.spec.ts`：匿名访问 dashboard/admin 受保护路由跳转登录
 - `cli-auth.spec.ts`：CLI Auth 缺失参数错误路径
 - `role-access-control.spec.ts`：登录普通用户访问治理/管理台受限路由会被回退
+- `collections-flow.spec.ts`：集合创建、加技能、公开页访问、贡献者增删主流程
+- `collections-visibility-guard.spec.ts`：私有集合公开链接防泄露（未授权用户 not-found）
 
 ## 4. 执行命令
 
@@ -94,6 +96,18 @@ cd web && pnpm test:e2e:smoke
 cd web && pnpm exec playwright test e2e/<feature>.spec.ts
 cd web && pnpm test:e2e:ui
 ```
+
+Phase 4 集合验证专用命令：
+
+```bash
+cd web && pnpm exec playwright test e2e/collections-flow.spec.ts --config=playwright.config.ts
+cd web && pnpm exec playwright test e2e/collections-visibility-guard.spec.ts --config=playwright.config.ts
+cd web && pnpm exec playwright test e2e/collections-flow.spec.ts e2e/collections-visibility-guard.spec.ts --config=playwright.config.ts
+```
+
+CI 说明：
+
+- `.github/workflows/pr-e2e.yml` 通过既有 `make test-e2e-frontend` 执行全量 `web/e2e`，上述两个集合 spec 会自动纳入 PR 校验，无需新增独立 job。
 
 说明：
 
