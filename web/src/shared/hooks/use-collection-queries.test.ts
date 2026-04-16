@@ -203,7 +203,6 @@ describe('use-collection-queries', () => {
         items: [
           {
             id: 100,
-            slug: 'my-skill',
             displayName: 'My skill',
             namespace: 'team',
             summary: 'summary',

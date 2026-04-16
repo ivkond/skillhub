@@ -1,10 +1,85 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { components } from '@/api/generated/schema'
-import { collectionApi } from '@/api/client'
+import { ApiError, collectionApi, fetchJson } from '@/api/client'
+import type { PagedResponse, SearchParams, SkillSummary } from '@/api/types'
+import { buildSkillSearchUrl } from './skill-query-helpers'
 
 type SkillCollectionCreateBody = components['schemas']['SkillCollectionCreateRequest']
 type SkillCollectionUpdateBody = components['schemas']['SkillCollectionUpdateRequest']
 type SkillCollectionVisibility = 'PUBLIC' | 'PRIVATE'
+type CollectionAddCandidate = Pick<SkillSummary, 'id' | 'displayName' | 'namespace' | 'summary' | 'status'> & {
+  visibility?: string
+  alreadyInCollection: boolean
+}
+
+type CollectionAddCandidatesParams = {
+  collectionId: string
+  q?: string
+  label?: string
+  sort?: string
+  page?: number
+  size?: number
+}
+
+type CollectionAddCandidatesPage = PagedResponse<CollectionAddCandidate>
+
+type BulkAddCollectionSkillsInput = {
+  id: string
+  skillIds: number[]
+}
+
+type BulkAddCollectionSkillsResult = {
+  addedIds: number[]
+  alreadyInCollectionIds: number[]
+  failedIds: number[]
+}
+
+const DUPLICATE_COLLECTION_MEMBER_ERROR = 'error.skillCollection.member.duplicate'
+
+function isDuplicateCollectionMemberError(error: unknown): boolean {
+  if (!(error instanceof ApiError)) {
+    return false
+  }
+  return (
+    error.serverMessageKey === DUPLICATE_COLLECTION_MEMBER_ERROR
+    || error.serverMessage === DUPLICATE_COLLECTION_MEMBER_ERROR
+    || error.message === DUPLICATE_COLLECTION_MEMBER_ERROR
+  )
+}
+
+function normalizeCollectionAddCandidatesParams(params: CollectionAddCandidatesParams): Required<CollectionAddCandidatesParams> {
+  return {
+    collectionId: params.collectionId,
+    q: params.q ?? '',
+    label: params.label ?? '',
+    sort: params.sort ?? '',
+    page: params.page ?? 0,
+    size: params.size ?? 20,
+  }
+}
+
+function toSkillSearchParams(params: Required<CollectionAddCandidatesParams>): SearchParams {
+  return {
+    q: params.q,
+    label: params.label || undefined,
+    sort: params.sort || undefined,
+    page: params.page,
+    size: params.size,
+  }
+}
+
+function mapCollectionAddCandidate(skill: SkillSummary): CollectionAddCandidate {
+  const skillWithVisibility = skill as SkillSummary & { visibility?: string }
+  return {
+    id: skill.id,
+    displayName: skill.displayName,
+    namespace: skill.namespace,
+    summary: skill.summary,
+    status: skill.status,
+    visibility: skillWithVisibility.visibility,
+    alreadyInCollection: false,
+  }
+}
 
 function invalidateMineAndDetail(queryClient: ReturnType<typeof useQueryClient>, id?: string | number | null) {
   queryClient.invalidateQueries({ queryKey: ['collections', 'mine'] })
@@ -118,6 +193,66 @@ export function useCollectionContributors(id: string | undefined, enabled = true
     queryKey: ['collections', id, 'contributors'],
     queryFn: () => collectionApi.listContributors(id!),
     enabled: !!id && enabled,
+  })
+}
+
+export function useCollectionAddCandidates(params: CollectionAddCandidatesParams) {
+  const normalized = normalizeCollectionAddCandidatesParams(params)
+  return useQuery({
+    queryKey: [
+      'collections',
+      normalized.collectionId,
+      'add-candidates',
+      normalized.q,
+      normalized.label,
+      normalized.sort,
+      normalized.page,
+      normalized.size,
+    ],
+    queryFn: async (): Promise<CollectionAddCandidatesPage> => {
+      const searchParams = toSkillSearchParams(normalized)
+      const response = await fetchJson<PagedResponse<SkillSummary>>(buildSkillSearchUrl(searchParams))
+      return {
+        ...response,
+        items: response.items.map(mapCollectionAddCandidate),
+      }
+    },
+    enabled: !!normalized.collectionId,
+  })
+}
+
+export function useBulkAddCollectionSkills() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (variables: BulkAddCollectionSkillsInput): Promise<BulkAddCollectionSkillsResult> => {
+      const result: BulkAddCollectionSkillsResult = {
+        addedIds: [],
+        alreadyInCollectionIds: [],
+        failedIds: [],
+      }
+
+      for (const skillId of variables.skillIds) {
+        try {
+          await collectionApi.addSkill(variables.id, skillId)
+          result.addedIds.push(skillId)
+        } catch (error) {
+          if (isDuplicateCollectionMemberError(error)) {
+            result.alreadyInCollectionIds.push(skillId)
+            continue
+          }
+          result.failedIds.push(skillId)
+        }
+      }
+
+      return result
+    },
+    onSuccess: (result, variables) => {
+      if (result.addedIds.length === 0) {
+        return
+      }
+      queryClient.invalidateQueries({ queryKey: ['collections', 'mine'] })
+      queryClient.invalidateQueries({ queryKey: ['collections', String(variables.id)] })
+    },
   })
 }
 
