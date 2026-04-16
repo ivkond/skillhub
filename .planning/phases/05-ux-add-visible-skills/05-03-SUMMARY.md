@@ -12,6 +12,7 @@ summary: "Completed phase confidence for add-flow by adding duplicate/partial re
 commits:
   - 9e3a28c9
   - d96d4bd7
+  - f82e68e6
 files_created: []
 files_modified:
   - web/src/shared/hooks/use-collection-queries.test.ts
@@ -35,6 +36,7 @@ Closed regression and confidence work for the collection add-flow rollout.
 2. Converted `collections-flow.spec.ts` to execute add operations via Add Skill modal UI (`Add selected (1)`) instead of direct API add shortcuts.
 3. Stabilized E2E support utilities for cross-platform ZIP packaging in test-data builder.
 4. Kept public collection page assertions verifying post-add visibility on `/u/{ownerId}/c/{slug}`.
+5. Restored contributor add/remove coverage with a resilient secondary-session bootstrap in E2E.
 
 ## Verification results
 
