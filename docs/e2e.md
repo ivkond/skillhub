@@ -24,16 +24,12 @@
 
 ## 2. 目录结构
 
+所有业务流 spec 位于 `web/e2e/*.spec.ts`（当前 32 个文件）；共享辅助代码在 `web/e2e/helpers/`。
+
 ```text
 web/
 ├── e2e/
-│   ├── auth-entry.spec.ts
-│   ├── dashboard-shell.spec.ts
-│   ├── landing-navigation.spec.ts
-│   ├── public-pages.spec.ts
-│   ├── route-guard.spec.ts
-│   ├── settings-pages.spec.ts
-│   ├── tokens.spec.ts
+│   ├── *.spec.ts
 │   └── helpers/
 │       ├── auth-fixtures.ts
 │       ├── session.ts
@@ -51,7 +47,7 @@ web/
 
 ## 3. 当前覆盖范围
 
-当前真实请求 E2E 覆盖 23 个 spec：
+当前真实请求 E2E 覆盖 32 个 spec 文件。以下为部分代表 spec（完整列表见 `web/e2e/*.spec.ts`）：
 
 - `auth-entry.spec.ts`：登录入口、注册入口、`returnTo` 保留
 - `landing-navigation.spec.ts`：首页导航与匿名受限跳转
