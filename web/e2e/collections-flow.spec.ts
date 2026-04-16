@@ -1,4 +1,4 @@
-import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from '@playwright/test'
+import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type TestInfo } from '@playwright/test'
 import { setEnglishLocale } from './helpers/auth-fixtures'
 import { registerSession, createFreshSession } from './helpers/session'
 import { E2eTestDataBuilder } from './helpers/test-data-builder'
@@ -22,11 +22,11 @@ async function parseEnvelope<T>(response: Awaited<ReturnType<APIRequestContext['
   return body.data
 }
 
-async function newSecondarySession(browser: Browser, page: Page) {
+async function newSecondarySession(browser: Browser, page: Page, testInfo: TestInfo) {
   const context = await browser.newContext()
   const secondaryPage = await context.newPage()
   await setEnglishLocale(secondaryPage)
-  await createFreshSession(secondaryPage)
+  await createFreshSession(secondaryPage, testInfo)
   const me = await parseEnvelope<{ userId: string }>(
     await secondaryPage.context().request.get('/api/v1/auth/me'),
   )
@@ -59,14 +59,14 @@ test.describe('Collections happy-path flow (Real API)', () => {
       const collectionSlug = `flow-${Date.now().toString(36)}`
 
       await page.goto('/dashboard/collections/new')
-      await expect(page.getByRole('heading', { name: 'Create collection' })).toBeVisible()
-      await page.locator('#collection-title').fill(collectionTitle)
-      await page.locator('#collection-slug').fill(collectionSlug)
-      await page.locator('#collection-description').fill('Playwright happy-path collection flow')
+      await expect(page.getByTestId('collection-new-form')).toBeVisible()
+      await page.getByTestId('collection-new-title-input').fill(collectionTitle)
+      await page.getByTestId('collection-new-slug-input').fill(collectionSlug)
+      await page.getByTestId('collection-new-description-input').fill('Playwright happy-path collection flow')
 
-      await page.locator('[role="combobox"]').first().click()
-      await page.getByRole('option', { name: 'Public', exact: true }).click()
-      await page.getByRole('button', { name: 'Create', exact: true }).click()
+      await page.getByTestId('collection-new-visibility-trigger').click()
+      await page.getByTestId('collection-new-visibility-public').click()
+      await page.getByTestId('collection-new-submit').click()
 
       await expect(page.getByRole('heading', { name: collectionTitle, exact: true })).toBeVisible()
       expect(page.url()).toContain('/dashboard/collections/')
@@ -95,20 +95,20 @@ test.describe('Collections happy-path flow (Real API)', () => {
       await expect(page.getByRole('heading', { name: collectionTitle, exact: true })).toBeVisible()
       await expect(page.getByRole('link', { name: seededSkillName, exact: true }).first()).toBeVisible()
 
-      const secondary = await newSecondarySession(browser, page)
+      const secondary = await newSecondarySession(browser, page, testInfo)
       secondaryContext = secondary.context
 
       await page.goto(`/dashboard/collections/${collection.id}`)
-      await page.getByRole('button', { name: 'Add contributor', exact: true }).click()
+      await page.getByTestId('collection-detail-add-contributor').click()
       await page.locator('#collection-contributor-user-id').fill(secondary.candidateUserId)
-      await page.getByRole('button', { name: 'Add contributor', exact: true }).click()
+      await page.getByTestId('collection-detail-add-contributor-submit').click()
       await expect(page.getByText('Contributor added')).toBeVisible()
-      await expect(page.getByText(secondary.candidateUserId)).toBeVisible()
+      await expect(page.getByTestId(`collection-detail-contributor-${secondary.candidateUserId}`)).toBeVisible()
 
-      await page.getByRole('button', { name: 'Remove', exact: true }).first().click()
-      await page.getByRole('button', { name: 'Remove', exact: true }).nth(1).click()
+      await page.getByTestId(`collection-detail-remove-contributor-${secondary.candidateUserId}`).click()
+      await page.getByTestId('collection-detail-confirm-remove-contributor').click()
       await expect(page.getByText('Contributor removed')).toBeVisible()
-      await expect(page.getByText(secondary.candidateUserId)).not.toBeVisible()
+      await expect(page.getByTestId(`collection-detail-contributor-${secondary.candidateUserId}`)).not.toBeVisible()
     } finally {
       for (let index = cleanupStack.length - 1; index >= 0; index -= 1) {
         try {
