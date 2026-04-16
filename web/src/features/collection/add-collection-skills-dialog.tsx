@@ -223,7 +223,10 @@ export function AddCollectionSkillsDialog({
                     title={t('collections.addDialogEmptyTitle')}
                     description={t('collections.addDialogEmptyDescription')}
                     action={(
-                      <Link to="/search">
+                      <Link
+                        to="/search"
+                        search={{ q: '', sort: 'relevance', page: 0, starredOnly: false }}
+                      >
                         <Button type="button" variant="outline">
                           {t('collections.addDialogEmptyCta')}
                         </Button>
