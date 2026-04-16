@@ -4,8 +4,11 @@ import React from 'react'
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
-import { collectionApi } from '@/api/client'
+import { ApiError, collectionApi } from '@/api/client'
+import * as apiClient from '@/api/client'
 import {
+  useBulkAddCollectionSkills,
+  useCollectionAddCandidates,
   useCollectionContributors,
   useCreateCollection,
   useMyCollections,
@@ -32,12 +35,16 @@ describe('use-collection-queries', () => {
   const listMineSpy = vi.spyOn(collectionApi, 'listMine')
   const listContributorsSpy = vi.spyOn(collectionApi, 'listContributors')
   const reorderSkillsSpy = vi.spyOn(collectionApi, 'reorderSkills')
+  const addSkillSpy = vi.spyOn(collectionApi, 'addSkill')
+  const fetchJsonSpy = vi.spyOn(apiClient, 'fetchJson')
 
   beforeEach(() => {
     createSpy.mockReset()
     listMineSpy.mockReset()
     listContributorsSpy.mockReset()
     reorderSkillsSpy.mockReset()
+    addSkillSpy.mockReset()
+    fetchJsonSpy.mockReset()
   })
 
   afterEach(() => {
@@ -139,5 +146,116 @@ describe('use-collection-queries', () => {
     expect(reorderSkillsSpy).toHaveBeenCalledWith('42', [200, 100])
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', 'mine'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', '42'] })
+  })
+
+  describe('useCollectionAddCandidates', () => {
+    it('uses stable query key and search pipeline params', async () => {
+      fetchJsonSpy.mockResolvedValue({
+        items: [
+          {
+            id: 100,
+            slug: 'my-skill',
+            displayName: 'My skill',
+            namespace: 'team',
+            summary: 'summary',
+            status: 'PUBLISHED',
+            visibility: 'PUBLIC',
+          },
+        ],
+        total: 1,
+        page: 1,
+        size: 15,
+      })
+      const queryClient = createTestQueryClient()
+
+      const { result } = renderHook(
+        () =>
+          useCollectionAddCandidates({
+            collectionId: '42',
+            q: 'golang',
+            label: 'recommended',
+            sort: 'latest',
+            page: 1,
+            size: 15,
+          }),
+        {
+          wrapper: createWrapper(queryClient),
+        },
+      )
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+      expect(fetchJsonSpy).toHaveBeenCalledTimes(1)
+      expect(fetchJsonSpy).toHaveBeenCalledWith(
+        '/api/web/skills?q=golang&label=recommended&sort=latest&page=1&size=15',
+      )
+      expect(
+        queryClient.getQueryData([
+          'collections',
+          '42',
+          'add-candidates',
+          'golang',
+          'recommended',
+          'latest',
+          1,
+          15,
+        ]),
+      ).toEqual({
+        items: [
+          {
+            id: 100,
+            slug: 'my-skill',
+            displayName: 'My skill',
+            namespace: 'team',
+            summary: 'summary',
+            status: 'PUBLISHED',
+            visibility: 'PUBLIC',
+            alreadyInCollection: false,
+          },
+        ],
+        total: 1,
+        page: 1,
+        size: 15,
+      })
+    })
+  })
+
+  describe('useBulkAddCollectionSkills', () => {
+    it('calls addSkill for each selected id and classifies results', async () => {
+      addSkillSpy
+        .mockResolvedValueOnce({ membershipId: 1, skillId: 101, sortOrder: 0 })
+        .mockRejectedValueOnce(
+          new ApiError(
+            'error.skillCollection.member.duplicate',
+            409,
+            'error.skillCollection.member.duplicate',
+            'error.skillCollection.member.duplicate',
+          ),
+        )
+        .mockRejectedValueOnce(new ApiError('error.server', 500, 'error.server', 'error.server'))
+
+      const queryClient = createTestQueryClient()
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+
+      const { result } = renderHook(() => useBulkAddCollectionSkills(), {
+        wrapper: createWrapper(queryClient),
+      })
+
+      const response = await result.current.mutateAsync({
+        id: '42',
+        skillIds: [101, 102, 103],
+      })
+
+      expect(addSkillSpy).toHaveBeenCalledTimes(3)
+      expect(addSkillSpy).toHaveBeenNthCalledWith(1, '42', 101)
+      expect(addSkillSpy).toHaveBeenNthCalledWith(2, '42', 102)
+      expect(addSkillSpy).toHaveBeenNthCalledWith(3, '42', 103)
+      expect(response).toEqual({
+        addedIds: [101],
+        alreadyInCollectionIds: [102],
+        failedIds: [103],
+      })
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', 'mine'] })
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', '42'] })
+    })
   })
 })
