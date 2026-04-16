@@ -100,7 +100,7 @@ Collections APIs cover creation, detail reads, collaborator management, skill me
 Core web routes:
 
 ```http
-GET    /api/web/collections
+GET    /api/web/me/collections
 POST   /api/web/collections
 GET    /api/web/collections/{id}
 PATCH  /api/web/collections/{id}
@@ -112,7 +112,8 @@ DELETE /api/web/collections/{id}/contributors/{userId}
 POST   /api/web/collections/{id}/skills
 DELETE /api/web/collections/{id}/skills/{skillId}
 
-GET    /api/web/users/{ownerId}/collections/{slug}   # public/share route
+GET    /api/web/public/collections/{ownerId}/{slug}   # public/share (Web)
+GET    /api/v1/public/collections/{ownerId}/{slug}   # public/share (JSON)
 ```
 
 Visibility and safety expectations:

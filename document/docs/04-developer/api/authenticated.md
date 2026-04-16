@@ -100,7 +100,7 @@ POST /api/v1/namespaces/{slug}/skills/{skillId}/promote
 核心路由（Web Portal）：
 
 ```http
-GET    /api/web/collections
+GET    /api/web/me/collections
 POST   /api/web/collections
 GET    /api/web/collections/{id}
 PATCH  /api/web/collections/{id}
@@ -112,7 +112,8 @@ DELETE /api/web/collections/{id}/contributors/{userId}
 POST   /api/web/collections/{id}/skills
 DELETE /api/web/collections/{id}/skills/{skillId}
 
-GET    /api/web/users/{ownerId}/collections/{slug}   # 公开/外链访问
+GET    /api/web/public/collections/{ownerId}/{slug}   # 公开/分享（Web）
+GET    /api/v1/public/collections/{ownerId}/{slug}   # 公开/分享（JSON）
 ```
 
 可见性与安全约束：
