@@ -35,7 +35,7 @@ class SkillCollectionMembershipReconcileTest {
     }
 
     @Test
-    void reconcileDeletesMemberWhenOwnerCannotReadSkill() {
+    void int03ReconcileDeletesMembershipWhenOwnerCannotReadSkill() {
         SkillCollection collection = new SkillCollection("owner-1", "collection", "Title", SkillVisibility.PUBLIC);
         SkillCollectionMember member = new SkillCollectionMember(1L, 42L, 0);
         when(skillCollectionRepository.findById(1L)).thenReturn(Optional.of(collection));

@@ -6,12 +6,12 @@ Deliver **user-owned skill collections** with **owner/contributor** collaboratio
 
 ## Phases
 
-- [x] **Phase 1: Domain & persistence** — Collections aggregate, collaborators, membership ordering; Flyway; repositories; domain services with authorization matrix groundwork.
-- [x] **Phase 2: Application & API** — App services, REST controllers (`/api/web/...` primary), `RouteSecurityPolicyRegistry` updates, admin parity, integrity rules **INT-***, audit alignment **ADM-01**.
-- [x] **Phase 3: Web UI** — Dashboard surfaces **WEB-*** flows; public collection page respects **VIS-***.
-- [ ] **Phase 4: Verification & docs** — Automated + E2E tests **QA-***; short developer/user documentation.
-- [ ] **Phase 5: Переработать UX добавления скиллов в коллекцию (добавление любых видимых скиллов)** — UX flow updates so users can add any skill they can view.
-- [ ] **Phase 6: Переработать цветовую схему с AI Slop на нормальную** — Refresh visual theme to a production-ready color system.
+- **Phase 1: Domain & persistence** — Collections aggregate, collaborators, membership ordering; Flyway; repositories; domain services with authorization matrix groundwork.
+- **Phase 2: Application & API** — App services, REST controllers (`/api/web/...` primary), `RouteSecurityPolicyRegistry` updates, admin parity, integrity rules **INT-***, audit alignment **ADM-01**.
+- **Phase 3: Web UI** — Dashboard surfaces **WEB-*** flows; public collection page respects **VIS-***.
+- **Phase 4: Verification & docs** — Automated + E2E tests **QA-***; short developer/user documentation.
+- **Phase 5: Переработать UX добавления скиллов в коллекцию (добавление любых видимых скиллов)** — UX flow updates so users can add any skill they can view.
+- **Phase 6: Переработать цветовую схему с AI Slop на нормальную** — Refresh visual theme to a production-ready color system.
 
 ## Phase details
 
@@ -33,8 +33,8 @@ Deliver **user-owned skill collections** with **owner/contributor** collaboratio
 
 Plans:
 
-- [x] 01-01-PLAN.md — Flyway V40+ three-table schema, JPA entities, repository ports + infra JPA adapters; blocking `make test-backend`
-- [x] 01-02-PLAN.md — Domain services (CRUD, membership, contributors), policy matrix, caps, slug collisions, mocked `SkillReadableForActorPort` tests
+- 01-01-PLAN.md — Flyway V40+ three-table schema, JPA entities, repository ports + infra JPA adapters; blocking `make test-backend`
+- 01-02-PLAN.md — Domain services (CRUD, membership, contributors), policy matrix, caps, slug collisions, mocked `SkillReadableForActorPort` tests
 
 ### Phase 2: Application & API
 
@@ -54,9 +54,9 @@ Plans:
 
 Plans:
 
-- [x] `02-01-PLAN.md` — DTOs + portal app services + `SkillCollectionController` / `PublicSkillCollectionController`
-- [x] `02-02-PLAN.md` — `RouteSecurityPolicyRegistry` + `RouteSecurityPolicyRegistryTest` + `SkillCollectionSecurityIT`
-- [x] `02-03-PLAN.md` — `reconcileInvisibleSkillsForCollection` + scheduler + **ADM-01** admin audit on commands
+- `02-01-PLAN.md` — DTOs + portal app services + `SkillCollectionController` / `PublicSkillCollectionController`
+- `02-02-PLAN.md` — `RouteSecurityPolicyRegistry` + `RouteSecurityPolicyRegistryTest` + `SkillCollectionSecurityIT`
+- `02-03-PLAN.md` — `reconcileInvisibleSkillsForCollection` + scheduler + **ADM-01** admin audit on commands
 
 ### Phase 3: Web UI
 
@@ -76,9 +76,9 @@ Plans:
 
 Plans:
 
-- [x] 03-01: Routes + list/create/edit screens
-- [x] 03-02: Backend — D-09 aggregate + D-11 contributor reorder merge
-- [x] 03-03: Detail + contributor management + share + public page
+- 03-01: Routes + list/create/edit screens
+- 03-02: Backend — D-09 aggregate + D-11 contributor reorder merge
+- 03-03: Detail + contributor management + share + public page
 
 ### Phase 4: Verification & docs
 
@@ -94,23 +94,26 @@ Plans:
 2. E2E scenario documented and passing locally / CI.
 3. API or user doc merged and linked from existing doc tree.
 
-**Plans:** TBD in `/gsd-plan-phase 4`
+**Plans:** 3/3 plans complete
 
 Plans:
 
-- [ ] 04-01: Unit/integration matrix completion
-- [ ] 04-02: Playwright (or agreed) E2E
-- [ ] 04-03: Documentation pass
+- 04-01: Unit/integration matrix completion
+- 04-02: Playwright (or agreed) E2E
+- 04-03: Documentation pass
 
 ### Phase 5: Переработать UX добавления скиллов в коллекцию (добавление любых видимых скиллов)
 
-**Goal:** [Captured from backlog; to be planned]
+**Goal:** Обновить UX потока добавления навыков в коллекцию так, чтобы owner/contributor/admin могли за один проход добавлять любые видимые им skills через inline-modal picker с full discovery controls и multi-select commit.
 **Depends on:** Phase 4
-**Requirements:** TBD
-**Plans:** 0 plans
+**Requirements:** COL-04, ROL-04, INT-01, VIS-03, WEB-03, QA-02
+**Plans:** 3/3 planned
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 5 to break down)
+
+- 05-01-PLAN.md — Add-flow data layer: candidate discovery hook + bulk add orchestration + hook-level TDD
+- 05-02-PLAN.md — Collection detail UX integration: Add skill modal, role gating, disabled already-in-collection, i18n
+- 05-03-PLAN.md — Verification hardening: regression tests + E2E migration to real modal add-flow
 
 ### Phase 6: Переработать цветовую схему с AI Slop на нормальную
 
@@ -120,9 +123,11 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 6 to break down)
+
+- TBD (run /gsd-plan-phase 6 to break down)
 
 ---
+
 *Roadmap created: 2026-04-15*
 
 ## Backlog
@@ -134,5 +139,5 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
 
+- TBD (promote with /gsd-review-backlog when ready)

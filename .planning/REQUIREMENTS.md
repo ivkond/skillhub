@@ -72,8 +72,8 @@ These are **binding for v1** unless explicitly revised in this file:
 
 - [x] **ADM-01**: Admin override actions are audited if SkillHub already has audit patterns for comparable mutations; if none, log at minimum at service level (**implementation plan** aligns with existing audit module).
 - [x] **QA-01**: Automated tests cover authorization matrix (owner / contributor / stranger / admin) for representative endpoints.
-- [ ] **QA-02**: Playwright or agreed E2E covers: create collection → add skill → public view filter → contributor add/remove.
-- [ ] **QA-03**: Developer-facing note added to `document/` or in-repo docs describing new endpoints for Web (OpenAPI/Swagger already generated if applicable).
+- [x] **QA-02**: Playwright or agreed E2E covers: create collection → add skill → public view filter → contributor add/remove.
+- [x] **QA-03**: Developer-facing note added to `document/` or in-repo docs describing new endpoints for Web (OpenAPI/Swagger already generated if applicable).
 
 ---
 
@@ -109,7 +109,7 @@ These are **binding for v1** unless explicitly revised in this file:
 | INT-01 — INT-03 | Phase 2 | Complete |
 | WEB-01 — WEB-05 | Phase 3 | Pending |
 | ADM-01 | Phase 2 | Complete |
-| QA-01 — QA-03 | Phase 4 | Pending |
+| QA-01 — QA-03 | Phase 4 | Complete |
 
 **Coverage:**
 

@@ -64,6 +64,7 @@ jobs:
       - name: Install Playwright browsers
         run: cd web && pnpm exec playwright install --with-deps chromium
 
+      # QA-02 explicit paths (do not rely on glob drift): e2e/collections-flow.spec.ts e2e/collections-visibility-guard.spec.ts
       - name: Run frontend E2E tests
         run: make test-e2e-frontend
 

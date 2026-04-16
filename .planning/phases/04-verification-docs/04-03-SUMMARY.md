@@ -11,27 +11,28 @@ files_modified:
   - document/docs/04-developer/api/authenticated.md
   - document/i18n/en/docusaurus-plugin-content-docs/current/04-developer/api/authenticated.md
   - docs/e2e.md
+  - document/package.json
 verification:
   - rg -n "collections" document/docs/04-developer/api/authenticated.md document/i18n/en/docusaurus-plugin-content-docs/current/04-developer/api/authenticated.md
   - rg -n "collections-flow.spec.ts|collections-visibility-guard.spec.ts" docs/e2e.md
+  - cd document && npm install && npm run build
 ---
 
 # Phase 04 Plan 03 Summary
 
 Completed QA-03 by integrating collection API and verification guidance into existing developer docs and E2E runbook.
 
-## Task Outcomes
+## Task outcomes
 
-1. **Task 1: Authenticated API docs updated**
-   - Added collection endpoint catalog under authenticated APIs in both Chinese and English docs.
-   - Documented role semantics (`owner/contributor/stranger/admin`) and private visibility non-leak expectations.
-
-2. **Task 2: E2E documentation updated**
-   - Added phase-4 collection specs to the current E2E coverage list.
-   - Added exact local run commands for `collections-flow.spec.ts` and `collections-visibility-guard.spec.ts`.
-   - Clarified that CI already includes these specs via existing `make test-e2e-frontend` workflow.
+1. **Authenticated API docs** — Collections routes and role semantics in ZH + EN `authenticated.md`.
+2. **E2E runbook** — `docs/e2e.md` lists `collections-flow.spec.ts` and `collections-visibility-guard.spec.ts` with exact `pnpm exec playwright` commands.
+3. **Docs build** — `cd document && npm run build` completed successfully after adding an `overrides` pin (`webpack` `5.94.0`) so Docusaurus 3.9.x stays compatible with Webpack’s ProgressPlugin schema (fresh installs were pulling a newer Webpack that rejected the plugin options).
 
 ## Verification
 
-- `rg -n "collections" document/docs/04-developer/api/authenticated.md document/i18n/en/docusaurus-plugin-content-docs/current/04-developer/api/authenticated.md` passed.
-- `rg -n "collections-flow.spec.ts|collections-visibility-guard.spec.ts" docs/e2e.md` passed.
+- `rg` checks on API docs and `docs/e2e.md` — pass.
+- `cd document && npm run build` — **pass** (2026-04-16, orchestrator run).
+
+## OpenAPI
+
+Generated OpenAPI is served from the running Spring app (`/v3/api-docs`); collections routes appear there when the server is up — see developer API doc intro for the usual `openapi-typescript` workflow in `web/package.json`.
