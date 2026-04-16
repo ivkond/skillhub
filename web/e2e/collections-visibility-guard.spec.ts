@@ -63,7 +63,7 @@ test.describe('Collections visibility guard (Real API)', () => {
       await createFreshSession(outsiderPage, testInfo)
 
       await outsiderPage.goto(publicRoute)
-      await expect(outsiderPage.getByRole('heading', { name: 'Collection not found' })).toBeVisible()
+      await expect(outsiderPage.getByTestId('public-collection-not-found')).toBeVisible()
       await expect(outsiderPage.getByText(skillName, { exact: true })).not.toBeVisible()
       await expect(outsiderPage.getByText(seededSkill.slug, { exact: false })).not.toBeVisible()
 
