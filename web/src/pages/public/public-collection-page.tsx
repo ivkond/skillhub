@@ -59,7 +59,7 @@ export function PublicCollectionPage() {
 
     return (
       <div className={APP_SHELL_PAGE_CLASS_NAME}>
-        <Card>
+        <Card data-testid="public-collection-not-found">
           <CardHeader>
             <CardTitle>{t('collections.publicNotFoundTitle')}</CardTitle>
             <CardDescription>{t('collections.publicNotFoundDescription')}</CardDescription>
