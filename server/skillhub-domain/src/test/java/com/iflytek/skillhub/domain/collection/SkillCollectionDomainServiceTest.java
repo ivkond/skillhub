@@ -13,10 +13,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SkillCollectionDomainServiceTest {
@@ -79,10 +80,28 @@ class SkillCollectionDomainServiceTest {
     }
 
     @Test
-    @DisplayName("Admin create requires target owner id")
-    void adminCreateRequiresTargetOwner() {
-        assertThrows(DomainBadRequestException.class, () ->
-                service.createCollection("admin", "T", null, SkillVisibility.PUBLIC, "slug", true, " "));
+    @DisplayName("Admin create without target owner uses acting user as collection owner")
+    void adminCreateDefaultsOwnerToActingUser() {
+        when(skillCollectionRepository.countByOwnerId("admin")).thenReturn(0L);
+        when(skillCollectionRepository.existsByOwnerIdAndSlug("admin", "slug")).thenReturn(false);
+        when(skillCollectionRepository.save(any(SkillCollection.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SkillCollection saved = service.createCollection("admin", "T", null, SkillVisibility.PUBLIC, "slug", true, null);
+
+        assertEquals("admin", saved.getOwnerId());
+        verify(skillCollectionRepository).save(any(SkillCollection.class));
+    }
+
+    @Test
+    @DisplayName("Admin create with explicit target owner assigns that owner")
+    void adminCreateWithExplicitTargetOwner() {
+        when(skillCollectionRepository.countByOwnerId("other")).thenReturn(0L);
+        when(skillCollectionRepository.existsByOwnerIdAndSlug("other", "slug")).thenReturn(false);
+        when(skillCollectionRepository.save(any(SkillCollection.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SkillCollection saved = service.createCollection("admin", "T", null, SkillVisibility.PUBLIC, "slug", true, "other");
+
+        assertEquals("other", saved.getOwnerId());
     }
 
     @Test
@@ -90,5 +109,79 @@ class SkillCollectionDomainServiceTest {
     void namespaceOnlyVisibilityRejected() {
         assertThrows(DomainBadRequestException.class, () ->
                 service.createCollection("owner-1", "T", null, SkillVisibility.NAMESPACE_ONLY, "ok-slug", false, null));
+    }
+
+    @Test
+    @DisplayName("ROL-07: contributor cannot change visibility")
+    void contributorCannotChangeVisibility() {
+        SkillCollection c = new SkillCollection("owner-1", "my-col", "T", SkillVisibility.PUBLIC);
+        when(skillCollectionRepository.findById(10L)).thenReturn(Optional.of(c));
+        when(contributorRepository.existsByCollectionIdAndUserId(10L, "contrib-1")).thenReturn(true);
+
+        assertThrows(DomainBadRequestException.class, () ->
+                service.setVisibility(10L, "contrib-1", SkillVisibility.PRIVATE, false));
+        verify(skillCollectionRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("ROL-08: admin equivalent may change visibility")
+    void adminCanChangeVisibility() {
+        SkillCollection c = new SkillCollection("owner-1", "my-col", "T", SkillVisibility.PUBLIC);
+        when(skillCollectionRepository.findById(10L)).thenReturn(Optional.of(c));
+        when(skillCollectionRepository.save(any(SkillCollection.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SkillCollection saved = service.setVisibility(10L, "admin-1", SkillVisibility.PRIVATE, true);
+
+        assertEquals(SkillVisibility.PRIVATE, saved.getVisibility());
+        verify(skillCollectionRepository).save(c);
+    }
+
+    @Test
+    @DisplayName("ROL-07: contributor cannot delete collection")
+    void contributorCannotDeleteCollection() {
+        SkillCollection c = new SkillCollection("owner-1", "my-col", "T", SkillVisibility.PUBLIC);
+        when(skillCollectionRepository.findById(10L)).thenReturn(Optional.of(c));
+        when(contributorRepository.existsByCollectionIdAndUserId(10L, "contrib-1")).thenReturn(true);
+
+        assertThrows(DomainBadRequestException.class, () ->
+                service.deleteCollection(10L, "contrib-1", false));
+        verify(skillCollectionRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("ROL-08: admin equivalent may delete foreign collection")
+    void adminCanDeleteForeignCollection() {
+        SkillCollection c = new SkillCollection("owner-1", "my-col", "T", SkillVisibility.PUBLIC);
+        when(skillCollectionRepository.findById(10L)).thenReturn(Optional.of(c));
+
+        service.deleteCollection(10L, "admin-1", true);
+
+        verify(skillCollectionRepository).delete(c);
+    }
+
+    @Test
+    @DisplayName("D-06: duplicate slug on metadata update throws")
+    void duplicateSlugOnMetadataUpdate() {
+        SkillCollection c = new SkillCollection("owner-1", "my-col", "T", SkillVisibility.PUBLIC);
+        when(skillCollectionRepository.findById(10L)).thenReturn(Optional.of(c));
+        when(skillCollectionRepository.existsByOwnerIdAndSlugAndIdNot("owner-1", "taken-slug", c.getId()))
+                .thenReturn(true);
+
+        assertThrows(DomainBadRequestException.class, () ->
+                service.updateMetadata(10L, "owner-1", "New", "D", "taken-slug", false));
+        verify(skillCollectionRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Description trim invariant: blank description is normalized to null")
+    void blankDescriptionNormalizedToNull() {
+        SkillCollection c = new SkillCollection("owner-1", "my-col", "T", SkillVisibility.PUBLIC);
+        when(skillCollectionRepository.findById(10L)).thenReturn(Optional.of(c));
+        when(skillCollectionRepository.save(any(SkillCollection.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SkillCollection saved = service.updateMetadata(10L, "owner-1", "New", "   ", null, false);
+
+        assertNull(saved.getDescription());
+        verify(skillCollectionRepository).save(c);
     }
 }
