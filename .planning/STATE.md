@@ -9,21 +9,21 @@ progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 14
-  completed_plans: 11
-  percent: 79
+  completed_plans: 14
+  percent: 86
 ---
 
 # State
 
 ## Current Position
 
-Phase: 04 (verification-docs) — EXECUTING
-Plan: 1 of 3
-**Phase:** 05
+**Phase:** 05 (ux-add-visible-skills)
 **Plan:** Not started
 **Status:** Ready to plan
-**Resume:** .planning/phases/05-ux-add-visible-skills/05-CONTEXT.md
+**Resume:** `.planning/phases/05-ux-add-visible-skills/05-CONTEXT.md`
 **Last activity:** 2026-04-16
+
+Phase 04 (verification-docs) is **complete** (see `04-VERIFICATION.md`).
 
 ## Accumulated Context
 
