@@ -3,15 +3,11 @@ import type { components } from '@/api/generated/schema'
 import { ApiError, collectionApi, fetchJson } from '@/api/client'
 import type { PagedResponse, SearchParams, SkillSummary } from '@/api/types'
 import { buildSkillSearchUrl } from './skill-query-helpers'
+import { mapCollectionAddCandidates, type CollectionAddCandidate } from './use-collection-add-candidates'
 
 type SkillCollectionCreateBody = components['schemas']['SkillCollectionCreateRequest']
 type SkillCollectionUpdateBody = components['schemas']['SkillCollectionUpdateRequest']
 type SkillCollectionVisibility = 'PUBLIC' | 'PRIVATE'
-type CollectionAddCandidate = Pick<SkillSummary, 'id' | 'displayName' | 'namespace' | 'summary' | 'status'> & {
-  visibility?: string
-  alreadyInCollection: boolean
-}
-
 type CollectionAddCandidatesParams = {
   collectionId: string
   q?: string
@@ -19,6 +15,7 @@ type CollectionAddCandidatesParams = {
   sort?: string
   page?: number
   size?: number
+  collectionSkillIds?: number[]
 }
 
 type CollectionAddCandidatesPage = PagedResponse<CollectionAddCandidate>
@@ -48,6 +45,7 @@ function isDuplicateCollectionMemberError(error: unknown): boolean {
 }
 
 function normalizeCollectionAddCandidatesParams(params: CollectionAddCandidatesParams): Required<CollectionAddCandidatesParams> {
+  const collectionSkillIds = Array.from(new Set(params.collectionSkillIds ?? [])).sort((left, right) => left - right)
   return {
     collectionId: params.collectionId,
     q: params.q ?? '',
@@ -55,6 +53,7 @@ function normalizeCollectionAddCandidatesParams(params: CollectionAddCandidatesP
     sort: params.sort ?? '',
     page: params.page ?? 0,
     size: params.size ?? 20,
+    collectionSkillIds,
   }
 }
 
@@ -65,19 +64,6 @@ function toSkillSearchParams(params: Required<CollectionAddCandidatesParams>): S
     sort: params.sort || undefined,
     page: params.page,
     size: params.size,
-  }
-}
-
-function mapCollectionAddCandidate(skill: SkillSummary): CollectionAddCandidate {
-  const skillWithVisibility = skill as SkillSummary & { visibility?: string }
-  return {
-    id: skill.id,
-    displayName: skill.displayName,
-    namespace: skill.namespace,
-    summary: skill.summary,
-    status: skill.status,
-    visibility: skillWithVisibility.visibility,
-    alreadyInCollection: false,
   }
 }
 
@@ -214,7 +200,7 @@ export function useCollectionAddCandidates(params: CollectionAddCandidatesParams
       const response = await fetchJson<PagedResponse<SkillSummary>>(buildSkillSearchUrl(searchParams))
       return {
         ...response,
-        items: response.items.map(mapCollectionAddCandidate),
+        items: mapCollectionAddCandidates(response.items, new Set(normalized.collectionSkillIds)),
       }
     },
     enabled: !!normalized.collectionId,

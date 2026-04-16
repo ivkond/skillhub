@@ -5,7 +5,9 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { ApiError, collectionApi } from '@/api/client'
+import type { SkillSummary } from '@/api/types'
 import * as apiClient from '@/api/client'
+import { mapCollectionAddCandidates } from './use-collection-add-candidates'
 import {
   useBulkAddCollectionSkills,
   useCollectionAddCandidates,
@@ -255,6 +257,67 @@ describe('use-collection-queries', () => {
       })
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', 'mine'] })
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', '42'] })
+    })
+  })
+
+  describe('mapCollectionAddCandidates', () => {
+    it('marks alreadyInCollection based on provided member ids', () => {
+      const candidates: Array<SkillSummary & { visibility?: string }> = [
+        {
+          id: 200,
+          slug: 'skill-200',
+          displayName: 'Skill 200',
+          namespace: 'team',
+          summary: 'A',
+          status: 'PUBLISHED',
+          visibility: 'PUBLIC',
+          downloadCount: 0,
+          starCount: 0,
+          ratingCount: 0,
+          updatedAt: '2026-01-01T00:00:00Z',
+          canSubmitPromotion: false,
+        },
+        {
+          id: 201,
+          slug: 'skill-201',
+          displayName: 'Skill 201',
+          namespace: 'team',
+          summary: 'B',
+          status: 'PUBLISHED',
+          visibility: 'PRIVATE',
+          downloadCount: 0,
+          starCount: 0,
+          ratingCount: 0,
+          updatedAt: '2026-01-01T00:00:00Z',
+          canSubmitPromotion: false,
+        },
+      ]
+
+      const mapped = mapCollectionAddCandidates(
+        candidates,
+        new Set([201]),
+      )
+
+      expect(mapped).toEqual([
+        {
+          id: 200,
+          displayName: 'Skill 200',
+          namespace: 'team',
+          summary: 'A',
+          visibility: 'PUBLIC',
+          status: 'PUBLISHED',
+          alreadyInCollection: false,
+        },
+        {
+          id: 201,
+          displayName: 'Skill 201',
+          namespace: 'team',
+          summary: 'B',
+          visibility: 'PRIVATE',
+          status: 'PUBLISHED',
+          alreadyInCollection: true,
+        },
+      ])
     })
   })
 })
