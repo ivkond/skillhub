@@ -10,6 +10,8 @@ Deliver **user-owned skill collections** with **owner/contributor** collaboratio
 - [x] **Phase 2: Application & API** — App services, REST controllers (`/api/web/...` primary), `RouteSecurityPolicyRegistry` updates, admin parity, integrity rules **INT-***, audit alignment **ADM-01**.
 - [x] **Phase 3: Web UI** — Dashboard surfaces **WEB-*** flows; public collection page respects **VIS-***.
 - [ ] **Phase 4: Verification & docs** — Automated + E2E tests **QA-***; short developer/user documentation.
+- [ ] **Phase 5: Переработать UX добавления скиллов в коллекцию (добавление любых видимых скиллов)** — UX flow updates so users can add any skill they can view.
+- [ ] **Phase 6: Переработать цветовую схему с AI Slop на нормальную** — Refresh visual theme to a production-ready color system.
 
 ## Phase details
 
@@ -100,19 +102,30 @@ Plans:
 - [ ] 04-02: Playwright (or agreed) E2E
 - [ ] 04-03: Documentation pass
 
----
-*Roadmap created: 2026-04-15*
+### Phase 5: Переработать UX добавления скиллов в коллекцию (добавление любых видимых скиллов)
 
-## Backlog
-
-### Phase 999.1: Переработать UX добавления скиллов в коллекцию (добавление любых видимых скиллов) (BACKLOG)
-
-**Goal:** [Captured for future planning]
+**Goal:** [Captured from backlog; to be planned]
+**Depends on:** Phase 4
 **Requirements:** TBD
 **Plans:** 0 plans
 
 Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
+- [ ] TBD (run /gsd-plan-phase 5 to break down)
+
+### Phase 6: Переработать цветовую схему с AI Slop на нормальную
+
+**Goal:** [Captured from backlog; to be planned]
+**Depends on:** Phase 5
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 6 to break down)
+
+---
+*Roadmap created: 2026-04-15*
+
+## Backlog
 
 ### Phase 999.2: Добавить в поиск поиск по коллекциям как first-class citizens (BACKLOG)
 
@@ -123,11 +136,3 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
-### Phase 999.3: Переработать цветовую схему с AI Slop на нормальную (BACKLOG)
-
-**Goal:** [Captured for future planning]
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
