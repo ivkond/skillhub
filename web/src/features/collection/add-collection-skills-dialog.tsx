@@ -108,11 +108,13 @@ export function AddCollectionSkillsDialog({
       skillIds: selectedSkillIds,
     })
 
-    const settledIds = [...result.addedIds, ...result.alreadyInCollectionIds]
-    if (settledIds.length > 0) {
-      setRecentlyAddedIds((previous) => Array.from(new Set([...previous, ...settledIds])))
+    const newlySettledIds = [...result.addedIds, ...result.alreadyInCollectionIds]
+    if (newlySettledIds.length > 0) {
+      setRecentlyAddedIds((previous) => Array.from(new Set([...previous, ...newlySettledIds])))
     }
-    setSelectedSkillIds((previous) => previous.filter((id) => !settledIds.includes(id)))
+    if (result.addedIds.length > 0) {
+      setSelectedSkillIds((previous) => previous.filter((id) => !result.addedIds.includes(id)))
+    }
   }
 
   return (

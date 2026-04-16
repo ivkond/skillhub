@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import type { ReactNode } from 'react'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AddCollectionSkillsDialog } from './add-collection-skills-dialog'
 
@@ -236,5 +236,76 @@ describe('AddCollectionSkillsDialog', () => {
     expect(screen.getByTestId('add-collection-skills-empty-state')).toBeTruthy()
     expect(screen.getByText('No addable skills available')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Browse and publish skills' })).toBeTruthy()
+  })
+
+  it('keeps partial selection and disables duplicate candidate after partial result', async () => {
+    useVisibleLabelsMock.mockReturnValue({
+      data: [
+        { slug: 'recommended', type: 'RECOMMENDED', displayName: 'Recommended' },
+      ],
+    })
+    useCollectionAddCandidatesMock.mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 1,
+            displayName: 'Skill One',
+            namespace: 'team',
+            summary: 'Summary one',
+            status: 'PUBLISHED',
+            visibility: 'PUBLIC',
+            alreadyInCollection: false,
+          },
+          {
+            id: 2,
+            displayName: 'Skill Two',
+            namespace: 'team',
+            summary: 'Summary two',
+            status: 'PUBLISHED',
+            visibility: 'PUBLIC',
+            alreadyInCollection: false,
+          },
+        ],
+        total: 2,
+        page: 0,
+        size: 2,
+      },
+      isLoading: false,
+      isFetching: false,
+    })
+
+    const mutateAsync = vi.fn().mockResolvedValue({
+      addedIds: [1],
+      alreadyInCollectionIds: [2],
+      failedIds: [],
+    })
+
+    useBulkAddCollectionSkillsMock.mockReturnValue({
+      mutateAsync,
+      isPending: false,
+    })
+
+    render(
+      <AddCollectionSkillsDialog collectionId="42" collectionSkillIds={[]}>
+        <button type="button">Add skill</button>
+      </AddCollectionSkillsDialog>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add skill' }))
+    fireEvent.click(screen.getByTestId('add-collection-skills-select-1'))
+    fireEvent.click(screen.getByTestId('add-collection-skills-select-2'))
+    fireEvent.click(screen.getByRole('button', { name: 'Add selected (2)' }))
+
+    await waitFor(() => {
+      expect(mutateAsync).toHaveBeenCalledWith({
+        id: '42',
+        skillIds: [1, 2],
+      })
+    })
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Add selected (1)' })).toBeTruthy()
+    })
+    expect(screen.getByTestId('add-collection-skills-select-2').hasAttribute('disabled')).toBe(true)
   })
 })

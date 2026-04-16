@@ -258,6 +258,42 @@ describe('use-collection-queries', () => {
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', 'mine'] })
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', '42'] })
     })
+
+    it('classifies duplicate with partial success for toast context', async () => {
+      addSkillSpy
+        .mockRejectedValueOnce(
+          new ApiError(
+            'error.skillCollection.member.duplicate',
+            409,
+            'error.skillCollection.member.duplicate',
+            'error.skillCollection.member.duplicate',
+          ),
+        )
+        .mockResolvedValueOnce({ membershipId: 2, skillId: 202, sortOrder: 1 })
+
+      const queryClient = createTestQueryClient()
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+
+      const { result } = renderHook(() => useBulkAddCollectionSkills(), {
+        wrapper: createWrapper(queryClient),
+      })
+
+      const response = await result.current.mutateAsync({
+        id: '42',
+        skillIds: [201, 202],
+      })
+
+      expect(addSkillSpy).toHaveBeenCalledTimes(2)
+      expect(addSkillSpy).toHaveBeenNthCalledWith(1, '42', 201)
+      expect(addSkillSpy).toHaveBeenNthCalledWith(2, '42', 202)
+      expect(response).toEqual({
+        addedIds: [202],
+        alreadyInCollectionIds: [201],
+        failedIds: [],
+      })
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', 'mine'] })
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['collections', '42'] })
+    })
   })
 
   describe('mapCollectionAddCandidates', () => {
