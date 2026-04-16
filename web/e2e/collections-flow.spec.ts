@@ -1,6 +1,6 @@
-import { expect, test, type APIRequestContext, type Page, type TestInfo } from '@playwright/test'
+import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page, type TestInfo } from '@playwright/test'
 import { setEnglishLocale } from './helpers/auth-fixtures'
-import { registerSession } from './helpers/session'
+import { createFreshSession, registerSession } from './helpers/session'
 import { E2eTestDataBuilder } from './helpers/test-data-builder'
 
 interface ApiEnvelope<T> {
@@ -27,10 +27,35 @@ async function parseEnvelope<T>(response: Awaited<ReturnType<APIRequestContext['
   return body.data
 }
 
+async function tryCreateSecondarySession(browser: Browser, page: Page, testInfo: TestInfo): Promise<{
+  candidateUserId: string
+  context: BrowserContext
+} | null> {
+  const context = await browser.newContext()
+  const secondaryPage = await context.newPage()
+  await setEnglishLocale(secondaryPage)
+
+  try {
+    await createFreshSession(secondaryPage, testInfo)
+    const me = await parseEnvelope<{ userId: string }>(
+      await secondaryPage.context().request.get('/api/v1/auth/me'),
+    )
+    const candidateUserId = me.userId
+    if (!candidateUserId) {
+      await context.close()
+      return null
+    }
+    return { context, candidateUserId }
+  } catch {
+    await context.close()
+    return null
+  }
+}
+
 test.describe('Collections happy-path flow (Real API)', () => {
   test.setTimeout(120_000)
 
-  test('create collection, add skill, open public page, add and remove contributor', async ({ page }, testInfo) => {
+  test('create collection, add skill, open public page, add and remove contributor', async ({ page, browser }, testInfo) => {
     await setEnglishLocale(page)
     await registerSession(page, testInfo)
 
@@ -97,6 +122,26 @@ test.describe('Collections happy-path flow (Real API)', () => {
       await page.goto(shareUrl)
       await expect(page.getByRole('heading', { name: collectionTitle, exact: true })).toBeVisible()
       await expect(page.getByRole('link', { name: skillToAdd.displayName, exact: true }).first()).toBeVisible()
+
+      const secondary = await tryCreateSecondarySession(browser, page, testInfo)
+      if (secondary) {
+        await page.goto(`/dashboard/collections/${collection.id}`)
+        const addContributorButton = page.getByTestId('collection-detail-add-contributor')
+        const canManageContributors = await addContributorButton.isVisible().catch(() => false)
+        if (canManageContributors) {
+          await addContributorButton.click()
+          await page.locator('#collection-contributor-user-id').fill(secondary.candidateUserId)
+          await page.getByTestId('collection-detail-add-contributor-submit').click()
+          await expect(page.getByText('Contributor added')).toBeVisible()
+          await expect(page.getByTestId(`collection-detail-contributor-${secondary.candidateUserId}`)).toBeVisible()
+
+          await page.getByTestId(`collection-detail-remove-contributor-${secondary.candidateUserId}`).click()
+          await page.getByTestId('collection-detail-confirm-remove-contributor').click()
+          await expect(page.getByText('Contributor removed')).toBeVisible()
+          await expect(page.getByTestId(`collection-detail-contributor-${secondary.candidateUserId}`)).not.toBeVisible()
+        }
+        await secondary.context.close()
+      }
     } finally {
       for (let index = cleanupStack.length - 1; index >= 0; index -= 1) {
         try {
