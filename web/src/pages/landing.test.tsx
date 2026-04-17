@@ -69,5 +69,6 @@ describe('LandingPage', () => {
 
     expect(html).toContain('SkillHub')
     expect(html).toContain('landing.hero.title')
+    expect(html).toContain('bg-background')
   })
 })
