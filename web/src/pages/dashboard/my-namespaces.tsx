@@ -61,12 +61,12 @@ export function MyNamespacesPage() {
 
   const resolveStatusClassName = (status: string) => {
     if (status === 'FROZEN') {
-      return 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+      return 'state-warning'
     }
     if (status === 'ARCHIVED') {
-      return 'bg-slate-500/10 text-slate-500 border-slate-500/20'
+      return 'border-border/60 bg-secondary/40 text-muted-foreground'
     }
-    return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+    return 'state-success'
   }
 
   const resolveHint = (status: string, type: string) => {

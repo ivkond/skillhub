@@ -170,27 +170,6 @@
   background-size: 24px 24px;
 }
 
-/* ─── Gradient glow orbs ─── */
-.glow-orb-primary {
-  position: fixed;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, hsl(var(--glow-primary) / 0.08) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glow-orb-accent {
-  position: fixed;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle, hsl(var(--glow-accent) / 0.06) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
 /* ─── Glass morphism ─── */
 .glass {
   background: hsl(var(--surface-glass) / 0.7);
@@ -239,11 +218,6 @@
   100% { background-position: 200% 0; }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
@@ -283,10 +257,6 @@
   animation: shimmer 1.8s ease-in-out infinite;
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
 /* Stagger delays */
 .delay-1 { animation-delay: 0.1s; }
 .delay-2 { animation-delay: 0.2s; }
@@ -311,7 +281,7 @@
 }
 
 .dark .text-gradient-hero {
-  background: linear-gradient(135deg, #8183FF, #C77EFF);
+  background: linear-gradient(135deg, hsl(var(--action-primary)), hsl(var(--state-info)));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -327,7 +297,7 @@
 .card-hover:hover {
   transform: translateY(-4px);
   box-shadow: 0 20px 40px -12px hsl(var(--primary) / 0.1),
-              0 8px 16px -8px hsl(0 0% 0% / 0.2);
+              0 8px 16px -8px hsl(var(--foreground) / 0.16);
   border-color: hsl(var(--primary) / 0.3);
 }
 
@@ -380,9 +350,9 @@
   padding: 4px 10px;
   font-size: 12px;
   font-weight: 500;
-  color: #0369a1;
-  background: #e0f2fe;
-  border: 1px solid #7dd3fc;
+  color: hsl(var(--state-info));
+  background: hsl(var(--state-info) / 0.14);
+  border: 1px solid hsl(var(--state-info) / 0.35);
   border-radius: 9999px;
 }
 
@@ -398,10 +368,10 @@
   color: white;
 }
 
-.status-pill--published { background: #16a34a; }
-.status-pill--review { background: #ea580c; }
-.status-pill--archived { background: #6b7280; }
-.status-pill--rejected { background: #dc2626; }
+.status-pill--published { background: hsl(var(--state-success)); }
+.status-pill--review { background: hsl(var(--state-warning)); }
+.status-pill--archived { background: hsl(var(--content-muted)); }
+.status-pill--rejected { background: hsl(var(--state-danger)); }
 
 /* ─── Role pill ─── */
 .role-pill {
@@ -426,19 +396,19 @@
 }
 
 .badge-soft-green {
-  background: #dcfce7;
-  color: #166534;
+  background: hsl(var(--state-success) / 0.14);
+  color: hsl(var(--state-success));
 }
 
 .badge-soft-blue {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: hsl(var(--state-info) / 0.14);
+  color: hsl(var(--state-info));
 }
 
 /* ─── Tab active ─── */
 .tab-active {
-  border-bottom: 2px solid #3b82f6;
-  color: #1d4ed8;
+  border-bottom: 2px solid hsl(var(--action-primary));
+  color: hsl(var(--action-primary));
 }
 
 /* ─── Code block ─── */
@@ -488,7 +458,7 @@
 .hljs-type,
 .hljs-built_in,
 .hljs-params {
-  color: hsl(218 70% 45%);
+  color: hsl(var(--state-info) / 0.9);
 }
 
 .hljs-function,
@@ -501,7 +471,7 @@
 .hljs-regexp,
 .hljs-subst,
 .hljs-doctag {
-  color: hsl(24 85% 52%);
+  color: hsl(var(--state-warning) / 0.9);
 }
 
 .hljs-deletion {
@@ -517,7 +487,7 @@
 
 .upload-zone:hover {
   border-color: var(--brand-start);
-  background: rgba(106, 109, 255, 0.04);
+  background: hsl(var(--action-primary) / 0.04);
 }
 
 .upload-zone .upload-zone-icon {
@@ -529,9 +499,21 @@
   color: var(--brand-start);
 }
 
-/* ─── Feature icon shadow ─── */
-.feature-icon {
-  box-shadow: 0 14px 30px rgba(106, 109, 255, 0.45);
+/* ─── Semantic state helpers ─── */
+.state-danger {
+  @apply border border-state-danger/30 bg-state-danger/10 text-state-danger;
+}
+
+.state-warning {
+  @apply border border-state-warning/30 bg-state-warning/10 text-state-warning;
+}
+
+.state-success {
+  @apply border border-state-success/30 bg-state-success/10 text-state-success;
+}
+
+.state-info {
+  @apply border border-state-info/30 bg-state-info/10 text-state-info;
 }
 
 /* ─── Hero input placeholder ─── */

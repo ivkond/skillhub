@@ -13,17 +13,17 @@ type VersionStatus =
 
 const statusStyles: Record<VersionStatus, string> = {
   PUBLISHED:
-    'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+    'border-state-success/30 bg-state-success/10 text-state-success',
   UPLOADED:
-    'border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-400',
+    'border-state-info/30 bg-state-info/10 text-state-info',
   PENDING_REVIEW:
-    'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400',
+    'border-state-warning/30 bg-state-warning/10 text-state-warning',
   REJECTED:
-    'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400',
+    'border-state-danger/30 bg-state-danger/10 text-state-danger',
   SCANNING:
-    'border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-400',
+    'border-state-info/30 bg-state-info/10 text-state-info',
   SCAN_FAILED:
-    'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400',
+    'border-state-danger/30 bg-state-danger/10 text-state-danger',
   YANKED:
     'border-border/60 bg-secondary/40 text-muted-foreground',
   DRAFT:
@@ -44,15 +44,15 @@ const i18nKeys: Record<VersionStatus, string> = {
 /** Color-coded row styles (left-border + subtle background) for version cards. */
 export const versionRowStyles: Record<VersionStatus, string> = {
   UPLOADED:
-    'border-l-4 !border-l-blue-500 bg-blue-500/[0.03]',
+    'border-l-4 !border-l-state-info bg-state-info/5',
   PENDING_REVIEW:
-    'border-l-4 !border-l-amber-500 bg-amber-500/[0.03]',
+    'border-l-4 !border-l-state-warning bg-state-warning/5',
   REJECTED:
-    'border-l-4 !border-l-red-500 bg-red-500/[0.04]',
+    'border-l-4 !border-l-state-danger bg-state-danger/5',
   SCANNING:
-    'border-l-4 !border-l-purple-500 bg-purple-500/[0.03]',
+    'border-l-4 !border-l-state-info bg-state-info/5',
   SCAN_FAILED:
-    'border-l-4 !border-l-red-500 bg-red-500/[0.04]',
+    'border-l-4 !border-l-state-danger bg-state-danger/5',
   PUBLISHED: '',
   YANKED: '',
   DRAFT: '',

@@ -45,10 +45,10 @@ function formatRelativeTime(dateStr: string, lang: string): string {
 function CategoryBadge({ category }: { category: NotificationItem['category'] }) {
   const { t } = useTranslation()
   const colorMap: Record<NotificationItem['category'], string> = {
-    PUBLISH: 'bg-blue-100 text-blue-700',
-    REVIEW: 'bg-yellow-100 text-yellow-700',
-    PROMOTION: 'bg-green-100 text-green-700',
-    REPORT: 'bg-red-100 text-red-700',
+    PUBLISH: 'state-info',
+    REVIEW: 'state-warning',
+    PROMOTION: 'state-success',
+    REPORT: 'state-danger',
   }
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${colorMap[category]}`}>
@@ -149,7 +149,7 @@ export function NotificationsPage() {
                   >
                     <span
                       className={`mt-2 h-2 w-2 flex-shrink-0 rounded-full ${
-                        item.status === 'UNREAD' ? 'bg-red-500' : 'bg-transparent'
+                        item.status === 'UNREAD' ? 'bg-state-info' : 'bg-transparent'
                       }`}
                     />
                     <div className="flex-1 min-w-0">

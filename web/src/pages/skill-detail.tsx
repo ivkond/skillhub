@@ -726,7 +726,7 @@ export function SkillDetailPage() {
                 'badge-soft',
                 skill.status === 'ACTIVE' && 'badge-soft-green',
                 skill.status === 'ARCHIVED' && 'bg-secondary text-muted-foreground',
-                skill.status === 'HIDDEN' && 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+                skill.status === 'HIDDEN' && 'state-warning',
                 !['ACTIVE', 'ARCHIVED', 'HIDDEN'].includes(skill.status) && 'badge-soft-blue',
               )}>
                 {resolveSkillStatusLabel(skill.status)}
@@ -736,7 +736,7 @@ export function SkillDetailPage() {
               <span className={cn(
                 'badge-soft inline-flex items-center gap-1',
                 skill.visibility === 'PUBLIC' && 'badge-soft-green',
-                skill.visibility === 'PRIVATE' && 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+                skill.visibility === 'PRIVATE' && 'state-info',
                 skill.visibility === 'NAMESPACE_ONLY' && 'badge-soft-blue',
               )}>
                 {skill.visibility === 'PUBLIC' && <Globe className="h-3 w-3" />}
@@ -780,8 +780,8 @@ export function SkillDetailPage() {
                   className={cn(
                     'inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium',
                     label.type === 'PRIVILEGED'
-                      ? 'border-amber-500/40 bg-amber-100 text-amber-900'
-                      : 'border-slate-300 bg-slate-100 text-slate-800',
+                      ? 'border-state-warning/30 bg-state-warning/10 text-state-warning'
+                      : 'border-border bg-secondary text-foreground',
                   )}
                 >
                   {label.displayName}
@@ -790,16 +790,16 @@ export function SkillDetailPage() {
             </div>
           )}
           {isPendingPreview && (
-            <Card className="border-amber-500/30 bg-amber-500/5 p-4 text-sm text-muted-foreground">
+            <Card className="border-state-warning/30 bg-state-warning/10 p-4 text-sm text-muted-foreground">
               <div className="font-medium text-foreground">{t('skillDetail.pendingPreviewTitle')}</div>
               <p className="mt-1">{t('skillDetail.pendingPreviewDescription')}</p>
             </Card>
           )}
           {hasRejectedOwnerPreview && (
-            <Card className="border-red-500/30 bg-red-500/5 p-4 text-sm text-muted-foreground">
+            <Card className="border-state-danger/30 bg-state-danger/10 p-4 text-sm text-muted-foreground">
               <div className="font-medium text-foreground">{t('skillDetail.rejectedFeedbackTitle')}</div>
               <p className="mt-1">{t('skillDetail.rejectedPreviewDescription')}</p>
-              <div className="mt-3 rounded-xl border border-red-500/20 bg-background/80 p-3">
+              <div className="mt-3 rounded-xl border border-state-danger/20 bg-background/80 p-3">
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">
                   {t('skillDetail.rejectedFeedbackLabel')}
                 </div>
@@ -1109,10 +1109,10 @@ export function SkillDetailPage() {
         )}
 
         {hasPublishedPendingReview && ownerPreviewVersion && (
-          <Card className="border-amber-500/30 bg-amber-500/5 p-5 space-y-4">
+          <Card className="border-state-warning/30 bg-state-warning/10 p-5 space-y-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-amber-600" />
+                <Clock className="w-4 h-4 text-state-warning" />
                 <span className="text-sm font-semibold font-heading text-foreground">{t('skillDetail.pendingReviewSectionTitle')}</span>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -1123,7 +1123,7 @@ export function SkillDetailPage() {
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-amber-500/20 bg-background/70 p-3">
+              <div className="rounded-xl border border-state-warning/20 bg-background/70 p-3">
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">
                   {t('skillDetail.pendingReviewVersionLabel')}
                 </div>
@@ -1131,11 +1131,11 @@ export function SkillDetailPage() {
                   v{ownerPreviewVersion.version}
                 </div>
               </div>
-              <div className="rounded-xl border border-amber-500/20 bg-background/70 p-3">
+              <div className="rounded-xl border border-state-warning/20 bg-background/70 p-3">
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">
                   {t('skillDetail.pendingReviewStatusLabel')}
                 </div>
-                <div className="mt-2 text-sm font-semibold text-amber-700">
+                <div className="mt-2 text-sm font-semibold text-state-warning">
                   {t('skillDetail.pendingReviewStatusValue')}
                 </div>
               </div>

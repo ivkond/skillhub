@@ -50,32 +50,32 @@ export function LandingPage() {
 
   const features = [
     {
-      icon: <Shield className="w-6 h-6 text-white" strokeWidth={2} />,
+      icon: <Shield className="w-6 h-6 text-primary" strokeWidth={2} />,
       title: t('landing.features.secure.title'),
       description: t('landing.features.secure.description'),
     },
     {
-      icon: <Users className="w-6 h-6 text-white" strokeWidth={2} />,
+      icon: <Users className="w-6 h-6 text-primary" strokeWidth={2} />,
       title: t('landing.features.community.title'),
       description: t('landing.features.community.description'),
     },
     {
-      icon: <PackageOpen className="w-6 h-6 text-white" strokeWidth={2} />,
+      icon: <PackageOpen className="w-6 h-6 text-primary" strokeWidth={2} />,
       title: t('landing.features.integration.title'),
       description: t('landing.features.integration.description'),
     },
     {
-      icon: <GitBranch className="w-6 h-6 text-white" strokeWidth={2} />,
+      icon: <GitBranch className="w-6 h-6 text-primary" strokeWidth={2} />,
       title: t('landing.features.versionControl.title', { defaultValue: 'Version control' }),
       description: t('landing.features.versionControl.description', { defaultValue: 'Managed release flows keep skill packages traceable and easier to review.' }),
     },
     {
-      icon: <Terminal className="w-6 h-6 text-white" strokeWidth={2} />,
+      icon: <Terminal className="w-6 h-6 text-primary" strokeWidth={2} />,
       title: t('landing.features.cli.title', { defaultValue: 'CLI tooling' }),
       description: t('landing.features.cli.description', { defaultValue: 'Command-line workflows support publishing, installing, and operating skills quickly.' }),
     },
     {
-      icon: <Settings className="w-6 h-6 text-white" strokeWidth={2} />,
+      icon: <Settings className="w-6 h-6 text-primary" strokeWidth={2} />,
       title: t('landing.features.governance.title', { defaultValue: 'Governance' }),
       description: t('landing.features.governance.description', { defaultValue: 'Built-in review and permission flows help teams enforce skill quality.' }),
     },
@@ -90,35 +90,25 @@ export function LandingPage() {
   return (
     <>
       {/* Hero Section */}
-      <main ref={heroView.ref} className={`relative z-10 flex flex-col items-center pt-16 pb-20 px-4 md:pt-24 scroll-fade-up${heroView.inView ? ' in-view' : ''}`}>
+      <main ref={heroView.ref} className={`relative z-10 flex flex-col items-center bg-background text-foreground pt-16 pb-20 px-4 md:pt-24 scroll-fade-up${heroView.inView ? ' in-view' : ''}`}>
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-brand-gradient mb-4">
           SkillHub
         </h1>
-        <h2
-          className="text-xl md:text-2xl font-semibold tracking-tight text-center mb-3"
-          style={{ color: 'hsl(var(--foreground))' }}
-        >
+        <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-center text-foreground mb-3">
           {t('landing.hero.title')}
         </h2>
-        <p
-          className="text-base md:text-lg text-center max-w-2xl mb-10 leading-relaxed"
-          style={{ color: 'hsl(var(--text-secondary))' }}
-        >
+        <p className="text-base md:text-lg text-center max-w-2xl text-content-secondary mb-10 leading-relaxed">
           {t('landing.hero.subtitle')}
         </p>
 
         {/* Search box */}
         <div className="w-full max-w-2xl mb-8">
-          <div
-            className="flex items-center bg-white rounded-xl border shadow-sm px-5 py-3.5"
-            style={{ borderColor: 'hsl(var(--border))' }}
-          >
-            <SearchIcon className="w-5 h-5 flex-shrink-0 mr-3" style={{ color: 'hsl(var(--text-placeholder))' }} strokeWidth={1.5} />
+          <div className="flex items-center rounded-xl border border-border bg-card shadow-sm px-5 py-3.5">
+            <SearchIcon className="w-5 h-5 flex-shrink-0 mr-3 text-muted-foreground" strokeWidth={1.5} />
             <input
               type="text"
               placeholder={t('landing.hero.searchPlaceholder')}
-              className="hero-input flex-1 bg-transparent outline-none text-base"
-              style={{ color: 'hsl(var(--foreground))' }}
+              className="hero-input flex-1 bg-transparent outline-none text-base text-foreground"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   handleSearch((e.target as HTMLInputElement).value)
@@ -133,18 +123,13 @@ export function LandingPage() {
           <Link
             to="/search"
             search={{ q: '', sort: 'relevance', page: 0, starredOnly: false }}
-            className="px-8 py-3.5 rounded-xl text-base font-medium text-white bg-brand-gradient shadow-sm hover:opacity-95 transition-opacity"
+            className="px-8 py-3.5 rounded-xl text-base font-medium bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
           >
             {t('landing.hero.exploreSkills')}
           </Link>
           <Link
             to="/dashboard/publish"
-            className="px-8 py-3.5 rounded-xl text-base font-medium border transition-colors"
-            style={{
-              background: 'hsl(var(--secondary))',
-              borderColor: 'hsl(var(--muted-foreground))',
-              color: 'hsl(var(--muted-foreground))',
-            }}
+            className="px-8 py-3.5 rounded-xl text-base font-medium border border-border bg-secondary text-secondary-foreground transition-colors hover:bg-secondary/80"
           >
             {t('landing.hero.publishSkill', { defaultValue: '开始构建' })}
           </Link>
@@ -157,7 +142,7 @@ export function LandingPage() {
               <span className="text-3xl md:text-4xl font-bold tracking-tight text-brand-gradient mb-1">
                 {stat.value}
               </span>
-              <span className="text-sm font-normal" style={{ color: 'hsl(var(--foreground))' }}>
+              <span className="text-sm font-normal text-foreground">
                 {stat.label}
               </span>
             </div>
@@ -166,13 +151,13 @@ export function LandingPage() {
       </main>
 
       {/* Features Section */}
-      <section ref={featuresView.ref} className={`relative z-10 w-full py-20 md:py-24 px-6 scroll-fade-up${featuresView.inView ? ' in-view' : ''}`} style={{ background: 'var(--bg-page, hsl(var(--background)))' }}>
+      <section ref={featuresView.ref} className={`relative z-10 w-full bg-background py-20 md:py-24 px-6 scroll-fade-up${featuresView.inView ? ' in-view' : ''}`}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3" style={{ color: 'hsl(var(--foreground))' }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-3">
               {t('landing.whySkillHub.title', { defaultValue: '为什么选择 SkillHub' })}
             </h2>
-            <p className="text-base md:text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: 'hsl(var(--text-secondary))' }}>
+            <p className="text-base md:text-lg max-w-2xl mx-auto text-content-secondary leading-relaxed">
               {t('landing.whySkillHub.subtitle', { defaultValue: '专为企业打造的私有化 Agent 技能管理平台' })}
             </p>
           </div>
@@ -181,16 +166,15 @@ export function LandingPage() {
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="bg-white rounded-xl p-8 border shadow-sm transition-shadow hover:shadow-md"
-                style={{ borderColor: 'hsl(var(--border-card))' }}
+                className="rounded-xl border border-stroke-subtle bg-card p-8 shadow-sm transition-shadow hover:shadow-md"
               >
-                <div className="feature-icon w-12 h-12 rounded-2xl flex items-center justify-center mb-6 mx-auto bg-brand-gradient">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 mx-auto bg-primary/10">
                   {feature.icon}
                 </div>
-                <h3 className="text-lg font-semibold text-center mb-3" style={{ color: 'hsl(var(--foreground))' }}>
+                <h3 className="text-lg font-semibold text-center text-foreground mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-center leading-relaxed" style={{ color: 'hsl(var(--text-secondary))' }}>
+                <p className="text-sm text-center text-content-secondary leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -205,14 +189,14 @@ export function LandingPage() {
       </div>
 
       {/* Popular Downloads Section */}
-      <section ref={popularView.ref} className={`relative z-10 w-full py-20 md:py-24 px-6 scroll-fade-up${popularView.inView ? ' in-view' : ''}`} style={{ background: 'var(--bg-page, hsl(var(--background)))' }}>
+      <section ref={popularView.ref} className={`relative z-10 w-full bg-background py-20 md:py-24 px-6 scroll-fade-up${popularView.inView ? ' in-view' : ''}`}>
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight mb-2" style={{ color: 'hsl(var(--foreground))' }}>
+              <h2 className="text-3xl font-bold tracking-tight text-foreground mb-2">
                 {t('home.popularTitle')}
               </h2>
-              <p style={{ color: 'hsl(var(--text-secondary))' }}>{t('home.popularDescription')}</p>
+              <p className="text-content-secondary">{t('home.popularDescription')}</p>
             </div>
             <Button
               variant="ghost"
@@ -239,14 +223,14 @@ export function LandingPage() {
       </section>
 
       {/* Latest Releases Section */}
-      <section ref={latestView.ref} className={`relative z-10 w-full py-20 md:py-24 px-6 scroll-fade-up${latestView.inView ? ' in-view' : ''}`} style={{ background: 'var(--bg-page, hsl(var(--background)))' }}>
+      <section ref={latestView.ref} className={`relative z-10 w-full bg-background py-20 md:py-24 px-6 scroll-fade-up${latestView.inView ? ' in-view' : ''}`}>
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight mb-2" style={{ color: 'hsl(var(--foreground))' }}>
+              <h2 className="text-3xl font-bold tracking-tight text-foreground mb-2">
                 {t('home.latestTitle')}
               </h2>
-              <p style={{ color: 'hsl(var(--text-secondary))' }}>{t('home.latestDescription')}</p>
+              <p className="text-content-secondary">{t('home.latestDescription')}</p>
             </div>
             <Button
               variant="ghost"

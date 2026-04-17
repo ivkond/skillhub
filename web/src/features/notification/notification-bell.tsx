@@ -45,7 +45,7 @@ export function NotificationBell() {
         type="button"
         aria-label={t('notification.title')}
         onClick={() => setOpen((v) => !v)}
-        className="relative flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors"
+        className="relative flex items-center justify-center w-8 h-8 rounded-full text-foreground hover:bg-secondary transition-colors"
       >
         {/* Bell SVG */}
         <svg
@@ -67,7 +67,7 @@ export function NotificationBell() {
         {/* Unread badge */}
         {unreadCount > 0 && (
           <span
-            className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-semibold leading-none"
+            className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 flex items-center justify-center rounded-full bg-state-danger text-primary-foreground text-[10px] font-semibold leading-none"
             aria-label={`${unreadCount} unread`}
           >
             {badgeLabel}
