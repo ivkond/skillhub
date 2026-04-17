@@ -1,5 +1,9 @@
 package com.iflytek.skillhub.auth.oauth;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.iflytek.skillhub.auth.identity.IdentityBindingService;
 import com.iflytek.skillhub.auth.policy.AccessDecision;
 import com.iflytek.skillhub.auth.policy.AccessPolicy;
@@ -21,6 +25,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -208,10 +213,67 @@ class OAuthLoginFlowServiceTest {
         verify(identityBindingService, never()).createPendingUserIfAbsent(any(OAuthClaims.class));
     }
 
+    @Test
+    void loadLoginContext_doesNotLogFullOAuthAttributesOnInfoWarnLevels() {
+        OAuthClaimsExtractor extractor = mock(OAuthClaimsExtractor.class);
+        AccessPolicy accessPolicy = mock(AccessPolicy.class);
+        IdentityBindingService identityBindingService = mock(IdentityBindingService.class);
+        OAuthClaims claims = new OAuthClaims(
+                "google",
+                "google-subject-5",
+                "private@example.com",
+                true,
+                "Privacy User",
+                Map.of(
+                        "sub", "google-subject-5",
+                        "email", "private@example.com",
+                        "email_verified", true,
+                        "avatar_url", "https://avatar.example/private-user"
+                )
+        );
+        PlatformPrincipal principal = new PlatformPrincipal(
+                "user-privacy",
+                "Privacy User",
+                "private@example.com",
+                null,
+                "google",
+                Set.of("USER")
+        );
+        OAuthLoginFlowService service = serviceWithDelegate(extractor, accessPolicy, identityBindingService, upstreamUser());
+
+        when(extractor.getProvider()).thenReturn("google");
+        when(extractor.extract(any(OAuth2UserRequest.class), any(OAuth2User.class))).thenReturn(claims);
+        when(accessPolicy.evaluate(claims)).thenReturn(AccessDecision.ALLOW);
+        when(identityBindingService.bindOrCreate(claims, UserStatus.ACTIVE)).thenReturn(principal);
+
+        Logger logger = (Logger) LoggerFactory.getLogger(OAuthLoginFlowService.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            service.loadLoginContext(oauth2UserRequest("google"));
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+
+        List<String> infoWarnMessages = appender.list.stream()
+                .filter(event -> event.getLevel() == Level.INFO || event.getLevel() == Level.WARN)
+                .map(ILoggingEvent::getFormattedMessage)
+                .toList();
+
+        assertThat(infoWarnMessages).noneMatch(message ->
+                message.contains("email_verified")
+                        || message.contains("avatar_url")
+                        || message.contains("private@example.com")
+                        || message.contains("attributes"));
+    }
+
     private OAuthLoginFlowService serviceWithDelegate(OAuthClaimsExtractor extractor,
                                                       AccessPolicy accessPolicy,
                                                       IdentityBindingService identityBindingService,
                                                       OAuth2User upstreamUser) {
+        when(extractor.getProvider()).thenReturn("google");
         OAuthLoginFlowService service = new OAuthLoginFlowService(
                 List.of(extractor),
                 accessPolicy,
