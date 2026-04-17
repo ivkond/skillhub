@@ -59,8 +59,8 @@
     --glow-accent: var(--state-info);
     --success: var(--state-success);
     --warning: var(--state-warning);
-    --code-surface: 220 29% 13%;
-    --code-foreground: 214 29% 90%;
+    --code-surface: 210 34% 96%;
+    --code-foreground: 218 39% 14%;
 
     /* Brand */
     --brand-start: hsl(var(--action-primary));
