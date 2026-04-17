@@ -108,7 +108,7 @@ export function LandingPage() {
             <input
               type="text"
               placeholder={t('landing.hero.searchPlaceholder')}
-              className="hero-input flex-1 bg-transparent outline-none text-base text-foreground"
+              className="hero-input flex-1 bg-transparent text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   handleSearch((e.target as HTMLInputElement).value)

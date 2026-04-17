@@ -4,4 +4,4 @@
  * This flag controls only whether the toggle is shown to end users.
  * It must never be used as a security or policy gate.
  */
-export const THEME_TOGGLE_RELEASED = false
+export const THEME_TOGGLE_RELEASED = true

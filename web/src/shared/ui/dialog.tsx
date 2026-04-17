@@ -42,6 +42,24 @@ const Dialog = ({ open: controlledOpen, onOpenChange, children }: DialogProps) =
     }
   }, [open])
 
+  React.useEffect(() => {
+    if (!open || typeof document === 'undefined') {
+      return undefined
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.key !== 'Escape') {
+        return
+      }
+      handleOpenChange(false)
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [open, handleOpenChange])
+
   return (
     <DialogContext.Provider value={{ open, onOpenChange: handleOpenChange }}>
       {children}

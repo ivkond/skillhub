@@ -501,19 +501,31 @@
 
 /* ─── Semantic state helpers ─── */
 .state-danger {
-  @apply border border-state-danger/30 bg-state-danger/10 text-state-danger;
+  @apply border;
+  border-color: hsl(var(--state-danger) / 0.3);
+  background-color: hsl(var(--state-danger) / 0.1);
+  color: hsl(var(--state-danger));
 }
 
 .state-warning {
-  @apply border border-state-warning/30 bg-state-warning/10 text-state-warning;
+  @apply border;
+  border-color: hsl(var(--state-warning) / 0.3);
+  background-color: hsl(var(--state-warning) / 0.1);
+  color: hsl(var(--state-warning));
 }
 
 .state-success {
-  @apply border border-state-success/30 bg-state-success/10 text-state-success;
+  @apply border;
+  border-color: hsl(var(--state-success) / 0.3);
+  background-color: hsl(var(--state-success) / 0.1);
+  color: hsl(var(--state-success));
 }
 
 .state-info {
-  @apply border border-state-info/30 bg-state-info/10 text-state-info;
+  @apply border;
+  border-color: hsl(var(--state-info) / 0.3);
+  background-color: hsl(var(--state-info) / 0.1);
+  color: hsl(var(--state-info));
 }
 
 /* ─── Hero input placeholder ─── */
