@@ -13,6 +13,7 @@
     "test:e2e:smoke": "playwright test -c playwright.smoke.config.ts",
     "test:e2e:ui": "playwright test --ui",
     "check:colors": "node scripts/check-no-hardcoded-colors.mjs",
+    "check:motion": "node scripts/check-motion-effects.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "generate-api": "openapi-typescript http://localhost:8080/v3/api-docs -o src/api/generated/schema.d.ts"

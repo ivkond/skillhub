@@ -59,6 +59,18 @@ export function applyThemeMode(mode: ThemeMode): void {
   root.classList.add(mode)
 }
 
+export function setThemePreference(preference: ThemePreference): ThemeMode {
+  persistThemePreference(preference)
+  const mode = resolveThemeMode(preference, getSystemPrefersDark())
+  applyThemeMode(mode)
+
+  if (typeof document !== 'undefined') {
+    document.documentElement.dataset.themeMode = mode
+  }
+
+  return mode
+}
+
 function getSystemPrefersDark(): boolean | undefined {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
     return undefined

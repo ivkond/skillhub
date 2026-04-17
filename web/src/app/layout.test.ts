@@ -51,31 +51,35 @@ vi.mock('./layout-main-content', () => ({
   }),
 }))
 
-import { Layout } from './layout'
+async function importLayoutWithGate(released: boolean) {
+  vi.resetModules()
+  vi.doMock('@/shared/theme/theme-release', () => ({
+    THEME_TOGGLE_RELEASED: released,
+  }))
+  const module = await import('./layout')
+  return module.Layout
+}
 
 describe('Layout', () => {
   afterEach(() => {
     cleanup()
     vi.clearAllMocks()
-    vi.resetModules()
   })
 
-  it('exports a named Layout component function', () => {
+  it('exports a named Layout component function', async () => {
+    const Layout = await importLayoutWithGate(false)
     expect(typeof Layout).toBe('function')
     expect(Layout.name).toBe('Layout')
   })
 
-  it('keeps Layout export stable for theme wiring integration', () => {
+  it('keeps Layout export stable for theme wiring integration', async () => {
+    const Layout = await importLayoutWithGate(false)
     expect(Layout).toBeDefined()
     expect(typeof Layout).toBe('function')
   })
 
   it('hides theme controls when THEME_TOGGLE_RELEASED is false', async () => {
-    vi.doMock('@/shared/theme/theme-release', () => ({
-      THEME_TOGGLE_RELEASED: false,
-    }))
-
-    const { Layout: GatedLayout } = await import('./layout')
+    const GatedLayout = await importLayoutWithGate(false)
     render(createElement(GatedLayout))
 
     expect(screen.queryByText('Light')).toBeNull()
@@ -84,11 +88,7 @@ describe('Layout', () => {
   })
 
   it('shows Light/Dark/System options when THEME_TOGGLE_RELEASED is true', async () => {
-    vi.doMock('@/shared/theme/theme-release', () => ({
-      THEME_TOGGLE_RELEASED: true,
-    }))
-
-    const { Layout: GatedLayout } = await import('./layout')
+    const GatedLayout = await importLayoutWithGate(true)
     render(createElement(GatedLayout))
 
     expect(screen.getByText('Light')).toBeTruthy()
@@ -96,7 +96,8 @@ describe('Layout', () => {
     expect(screen.getByText('System')).toBeTruthy()
   })
 
-  it('does not render legacy decorative orb class and keeps semantic shell tokens', () => {
+  it('does not render legacy decorative orb class and keeps semantic shell tokens', async () => {
+    const Layout = await importLayoutWithGate(false)
     const { container } = render(createElement(Layout))
 
     expect(container.querySelector('.bg-brand-gradient.opacity-20.blur-3xl')).toBeNull()
