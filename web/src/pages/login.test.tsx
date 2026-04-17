@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AuthMethod } from '@/api/types'
 
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children }: { children: unknown }) => children,
+  Link: ({ children }: { children: ReactNode }) => children,
   useNavigate: () => vi.fn(),
   useSearch: () => ({ returnTo: '' }),
 }))
@@ -18,6 +19,9 @@ vi.mock('react-i18next', async () => {
       t: (key: string, options?: { name?: string }) => {
         if (key === 'loginButton.loginWith') {
           return `Continue with ${options?.name ?? 'provider'}`
+        }
+        if (key === 'login.oauthHint') {
+          return 'Continue with your OAuth provider and you will be redirected back to this page.'
         }
         return key
       },
@@ -47,13 +51,6 @@ const authMethods: AuthMethod[] = [
     displayName: 'Google',
     actionUrl: '/oauth2/authorization/google?returnTo=%2F',
   },
-  {
-    id: 'oauth-github',
-    methodType: 'OAUTH_REDIRECT',
-    provider: 'github',
-    displayName: 'GitHub',
-    actionUrl: '/oauth2/authorization/github?returnTo=%2F',
-  },
 ]
 
 vi.mock('@/features/auth/use-auth-methods', () => ({
@@ -69,7 +66,7 @@ vi.mock('@/features/auth/use-password-login', () => ({
 }))
 
 vi.mock('@/shared/ui/button', () => ({
-  Button: ({ children, ...props }: { children: unknown } & Record<string, unknown>) => <button {...props}>{children}</button>,
+  Button: ({ children, ...props }: { children: ReactNode } & Record<string, unknown>) => <button {...props}>{children}</button>,
 }))
 
 vi.mock('@/shared/ui/input', () => ({
@@ -77,10 +74,10 @@ vi.mock('@/shared/ui/input', () => ({
 }))
 
 vi.mock('@/shared/ui/tabs', () => ({
-  Tabs: ({ children }: { children: unknown }) => <div>{children}</div>,
-  TabsContent: ({ children }: { children: unknown }) => <div>{children}</div>,
-  TabsList: ({ children }: { children: unknown }) => <div>{children}</div>,
-  TabsTrigger: ({ children }: { children: unknown }) => <button type="button">{children}</button>,
+  Tabs: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  TabsContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  TabsList: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  TabsTrigger: ({ children }: { children: ReactNode }) => <button type="button">{children}</button>,
 }))
 
 import { LoginPage } from './login'
@@ -123,6 +120,8 @@ describe('LoginPage', () => {
     fireEvent.click(googleButton)
 
     expect(googleButton).toBeTruthy()
+    expect(screen.getByText('Continue with your OAuth provider and you will be redirected back to this page.')).toBeTruthy()
+    expect(screen.queryByText(/After GitHub authentication/i)).toBeNull()
     expect(window.location.href).toBe('/oauth2/authorization/google?returnTo=%2F')
   })
 })

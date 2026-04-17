@@ -212,7 +212,7 @@
     "forgotPassword": "忘记密码？",
     "noAccount": "还没有账号？",
     "register": "立即注册",
-    "oauthHint": "使用 GitHub 登录时，认证完成后会自动返回当前站点。",
+    "oauthHint": "使用任意 OAuth 提供方登录后，认证完成会自动返回当前页面。",
     "passwordCompatHint": "当前部署已启用账号密码兼容接入层。表单将路由到 {{name}}，而不是固定使用本地账号接口。",
     "enterpriseSsoTitle": "企业单点登录",
     "enterpriseSsoHint": "当前部署已启用兼容接入层。若浏览器中已存在 {{name}} 会话，可直接尝试建立 SkillHub 登录态。",
@@ -1209,7 +1209,8 @@
   },
   "loginButton": {
     "loading": "加载中...",
-    "loginWith": "使用 {{name}} 登录"
+    "loginWith": "使用 {{name}} 登录",
+    "providerUnavailable": "该登录提供方暂时不可用"
   },
   "ratingInput": {
     "yourRating": "你的评分: {{score}} 星"

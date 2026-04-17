@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import type { ReactElement } from 'react'
 import { Button } from '@/shared/ui/button'
 import { useAuthMethods } from './use-auth-methods'
 
@@ -8,7 +9,7 @@ interface LoginButtonProps {
 
 interface ProviderVisual {
   buttonClassName: string
-  icon: JSX.Element
+  icon: ReactElement
 }
 
 function getProviderVisual(providerId: string): ProviderVisual {

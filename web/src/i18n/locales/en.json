@@ -212,7 +212,7 @@
     "forgotPassword": "Forgot password?",
     "noAccount": "Don't have an account?",
     "register": "Sign up now",
-    "oauthHint": "After GitHub authentication, you will be automatically redirected back to this site.",
+    "oauthHint": "Continue with your OAuth provider and you will be redirected back to this page.",
     "passwordCompatHint": "This deployment has the password compatibility layer enabled. The form will route to {{name}} instead of the fixed local account endpoint.",
     "enterpriseSsoTitle": "Enterprise SSO",
     "enterpriseSsoHint": "This deployment has the compatibility layer enabled. If your browser already has a {{name}} session, you can try establishing a SkillHub session directly.",
@@ -1208,7 +1208,8 @@
   },
   "loginButton": {
     "loading": "Loading...",
-    "loginWith": "Login with {{name}}"
+    "loginWith": "Login with {{name}}",
+    "providerUnavailable": "Provider is temporarily unavailable"
   },
   "ratingInput": {
     "yourRating": "Your rating: {{score}} stars"
