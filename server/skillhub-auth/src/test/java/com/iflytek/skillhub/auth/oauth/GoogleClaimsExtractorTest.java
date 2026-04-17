@@ -14,6 +14,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GoogleClaimsExtractorTest {
 
@@ -66,13 +68,15 @@ class GoogleClaimsExtractorTest {
     @Test
     void extract_withoutSub_throwsInvalidUserInfo() {
         GoogleClaimsExtractor extractor = new GoogleClaimsExtractor();
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        when(oAuth2User.getAttributes()).thenReturn(Map.of(
+                "email", "missing-sub@example.com",
+                "email_verified", true
+        ));
 
         assertThatThrownBy(() -> extractor.extract(
                 oauth2UserRequest(),
-                oauth2User(Map.of(
-                        "email", "missing-sub@example.com",
-                        "email_verified", true
-                ))
+                oAuth2User
         ))
                 .isInstanceOf(OAuth2AuthenticationException.class)
                 .extracting(throwable -> ((OAuth2AuthenticationException) throwable).getError().getErrorCode())
