@@ -18,7 +18,7 @@ describe('buttonVariants', () => {
   it('applies outline variant classes', () => {
     const classes = buttonVariants({ variant: 'outline' })
     expect(classes).toContain('border')
-    expect(classes).toContain('bg-transparent')
+    expect(classes).toContain('bg-secondary/40')
   })
 
   it('applies secondary variant classes', () => {

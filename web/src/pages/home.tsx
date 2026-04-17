@@ -38,14 +38,13 @@ export function HomePage() {
 
         <div className="flex items-center justify-center gap-4 animate-fade-up delay-2">
           <button
-            className="px-8 py-3.5 rounded-xl text-base font-medium text-white bg-brand-gradient shadow-sm hover:opacity-95 transition-opacity"
+            className="px-8 py-3.5 rounded-xl text-base font-medium text-primary-foreground bg-brand-gradient shadow-[0_8px_20px_-12px_hsl(var(--primary)/0.62)] transition-all hover:brightness-[1.02] hover:shadow-[0_10px_24px_-14px_hsl(var(--primary)/0.58)]"
             onClick={() => navigate({ to: '/search', search: { q: '', sort: 'relevance', page: 0, starredOnly: false } })}
           >
             {t('home.browseSkills')}
           </button>
           <button
-            className="px-8 py-3.5 rounded-xl text-base font-medium border transition-colors"
-            style={{ background: 'var(--bg-secondary-btn, #F7FAFC)', borderColor: 'hsl(var(--muted-foreground))', color: 'hsl(var(--muted-foreground))' }}
+            className="px-8 py-3.5 rounded-xl text-base font-medium border border-border/70 bg-secondary/80 text-secondary-foreground transition-colors hover:bg-secondary"
             onClick={() => navigate({ to: '/dashboard/publish' })}
           >
             {t('home.publishSkill')}
