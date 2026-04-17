@@ -42,14 +42,19 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
           <ChevronDown className="h-3.5 w-3.5 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="flex min-w-[9rem] flex-col gap-1.5 p-2">
+      <DropdownMenuContent
+        align="end"
+        className="flex min-w-[9rem] flex-col gap-1.5 border-border bg-card p-2 text-card-foreground"
+      >
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             onClick={() => changeLanguage(lang.code)}
             className={cn(
-              'cursor-pointer rounded-md px-3 py-2',
-              currentLangCode === lang.code ? 'bg-accent' : ''
+              'cursor-pointer rounded-md px-3 py-2 text-foreground hover:bg-accent hover:text-accent-foreground',
+              currentLangCode === lang.code
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground'
+                : ''
             )}
           >
             {lang.name}
