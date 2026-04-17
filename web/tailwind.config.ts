@@ -35,6 +35,21 @@ const config: Config = {
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        surface: {
+          0: 'hsl(var(--surface-0))',
+          1: 'hsl(var(--surface-1))',
+          2: 'hsl(var(--surface-2))',
+        },
+        content: {
+          primary: 'hsl(var(--content-primary))',
+          secondary: 'hsl(var(--content-secondary))',
+          muted: 'hsl(var(--content-muted))',
+        },
+        action: {
+          primary: 'hsl(var(--action-primary))',
+          'primary-hover': 'hsl(var(--action-primary-hover))',
+          'ghost-hover': 'hsl(var(--action-ghost-hover))',
+        },
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -62,6 +77,17 @@ const config: Config = {
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
+        },
+        state: {
+          success: 'hsl(var(--state-success))',
+          warning: 'hsl(var(--state-warning))',
+          danger: 'hsl(var(--state-danger))',
+          info: 'hsl(var(--state-info))',
+        },
+        stroke: {
+          subtle: 'hsl(var(--stroke-subtle))',
+          DEFAULT: 'hsl(var(--stroke-default))',
+          strong: 'hsl(var(--stroke-strong))',
         },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

@@ -4,76 +4,133 @@
 
 @layer base {
   :root {
-    /* SkillHub — 浅色主题 (indigo-violet brand) */
-    --background: 210 20% 98%;
-    --foreground: 220 26% 14%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 26% 14%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 26% 14%;
-    /* Indigo primary (#6A6DFF) */
-    --primary: 239 100% 71%;
+    /* COLOR_POLICY_ALLOW_START:token-definitions */
+    /* Enterprise Blue/Slate semantic tokens — light mode */
+    --surface-0: 210 36% 98%;
+    --surface-1: 210 31% 96%;
+    --surface-2: 214 26% 91%;
+
+    --content-primary: 218 39% 14%;
+    --content-secondary: 217 24% 31%;
+    --content-muted: 216 15% 47%;
+
+    --action-primary: 214 88% 43%;
+    --action-primary-hover: 214 88% 37%;
+    --action-ghost-hover: 214 40% 92%;
+
+    --state-success: 154 62% 36%;
+    --state-warning: 35 92% 48%;
+    --state-danger: 0 74% 48%;
+    --state-info: 206 90% 44%;
+
+    --stroke-subtle: 214 30% 90%;
+    --stroke-default: 214 22% 82%;
+    --stroke-strong: 214 18% 70%;
+
+    --effect-shadow-alpha-max: 0.24;
+    --effect-glow-alpha-max: 0.18;
+    --effect-blur-max: 16px;
+
+    /* Legacy-compatible aliases mapped to semantic groups */
+    --background: var(--surface-0);
+    --foreground: var(--content-primary);
+    --card: var(--surface-1);
+    --card-foreground: var(--content-primary);
+    --popover: var(--surface-0);
+    --popover-foreground: var(--content-primary);
+    --primary: var(--action-primary);
     --primary-foreground: 0 0% 100%;
-    /* Surface tones */
-    --secondary: 210 30% 96%;
-    --secondary-foreground: 220 26% 14%;
-    --muted: 210 25% 95%;
-    --muted-foreground: 215 14% 46%;
-    /* Violet accent (#B85EFF) */
-    --accent: 271 100% 68%;
+    --secondary: var(--surface-1);
+    --secondary-foreground: var(--content-primary);
+    --muted: var(--surface-2);
+    --muted-foreground: var(--content-muted);
+    --accent: var(--action-primary);
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 55%;
+    --destructive: var(--state-danger);
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 239 100% 71%;
+    --border: var(--stroke-default);
+    --input: var(--stroke-default);
+    --ring: var(--action-primary);
     --radius: 0.75rem;
 
     /* Extended palette */
-    --surface-glass: 210 30% 97%;
-    --glow-primary: 239 100% 71%;
-    --glow-accent: 271 100% 68%;
-    --success: 160 60% 45%;
-    --warning: 38 92% 58%;
+    --surface-glass: 210 31% 96%;
+    --glow-primary: var(--action-primary);
+    --glow-accent: var(--state-info);
+    --success: var(--state-success);
+    --warning: var(--state-warning);
+    --code-surface: 220 29% 13%;
+    --code-foreground: 214 29% 90%;
 
     /* Brand */
-    --brand-start: #6A6DFF;
-    --brand-end: #B85EFF;
-    --brand-gradient: linear-gradient(135deg, #6A6DFF 0%, #B85EFF 100%);
+    --brand-start: hsl(var(--action-primary));
+    --brand-end: hsl(var(--state-info));
+    --brand-gradient: linear-gradient(135deg, var(--brand-start) 0%, var(--brand-end) 100%);
 
     /* Text semantic */
-    --text-secondary: 215 19% 35%;
-    --text-muted: 215 14% 46%;
-    --text-placeholder: 213 12% 63%;
+    --text-secondary: var(--content-secondary);
+    --text-muted: var(--content-muted);
+    --text-placeholder: 215 13% 61%;
 
     /* Border semantic */
-    --border-card: 220 26% 94%;
+    --border-card: var(--stroke-subtle);
+    /* COLOR_POLICY_ALLOW_END:token-definitions */
   }
 
   .dark {
-    /* Dark theme (preserved, not default) */
-    --background: 222 47% 6%;
-    --foreground: 210 40% 96%;
-    --card: 222 40% 9%;
-    --card-foreground: 210 40% 96%;
-    --popover: 222 40% 9%;
-    --popover-foreground: 210 40% 96%;
-    --primary: 239 100% 75%;
+    /* COLOR_POLICY_ALLOW_START:token-definitions */
+    /* Enterprise Blue/Slate semantic tokens — dark mode */
+    --surface-0: 222 42% 8%;
+    --surface-1: 222 34% 12%;
+    --surface-2: 221 27% 17%;
+
+    --content-primary: 210 35% 94%;
+    --content-secondary: 214 20% 80%;
+    --content-muted: 215 16% 64%;
+
+    --action-primary: 214 90% 62%;
+    --action-primary-hover: 214 90% 68%;
+    --action-ghost-hover: 222 22% 20%;
+
+    --state-success: 154 59% 47%;
+    --state-warning: 36 94% 60%;
+    --state-danger: 0 78% 62%;
+    --state-info: 206 92% 66%;
+
+    --stroke-subtle: 222 18% 22%;
+    --stroke-default: 222 16% 30%;
+    --stroke-strong: 220 18% 44%;
+
+    --effect-shadow-alpha-max: 0.24;
+    --effect-glow-alpha-max: 0.18;
+    --effect-blur-max: 16px;
+
+    /* Legacy-compatible aliases mapped to semantic groups */
+    --background: var(--surface-0);
+    --foreground: var(--content-primary);
+    --card: var(--surface-1);
+    --card-foreground: var(--content-primary);
+    --popover: var(--surface-1);
+    --popover-foreground: var(--content-primary);
+    --primary: var(--action-primary);
     --primary-foreground: 222 47% 6%;
-    --secondary: 222 30% 13%;
-    --secondary-foreground: 210 30% 85%;
-    --muted: 222 25% 15%;
-    --muted-foreground: 215 20% 55%;
-    --accent: 271 100% 72%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 55%;
+    --secondary: var(--surface-2);
+    --secondary-foreground: var(--content-secondary);
+    --muted: var(--surface-2);
+    --muted-foreground: var(--content-muted);
+    --accent: var(--action-primary);
+    --accent-foreground: 222 47% 6%;
+    --destructive: var(--state-danger);
     --destructive-foreground: 0 0% 100%;
-    --border: 222 20% 18%;
-    --input: 222 20% 18%;
-    --ring: 239 100% 75%;
-    --surface-glass: 222 35% 11%;
-    --glow-primary: 239 100% 75%;
-    --glow-accent: 271 100% 72%;
+    --border: var(--stroke-default);
+    --input: var(--stroke-default);
+    --ring: var(--action-primary);
+    --surface-glass: var(--surface-1);
+    --glow-primary: var(--action-primary);
+    --glow-accent: var(--state-info);
+    --code-surface: 222 24% 12%;
+    --code-foreground: 214 26% 90%;
+    /* COLOR_POLICY_ALLOW_END:token-definitions */
   }
 }
 
@@ -386,8 +443,9 @@
 
 /* ─── Code block ─── */
 .code-block {
-  background: #1A202C;
-  color: #e5e7eb;
+  background: hsl(var(--code-surface));
+  color: hsl(var(--code-foreground));
+  border: 1px solid hsl(var(--border) / 0.6);
   border-radius: 12px;
 }
 
