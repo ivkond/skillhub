@@ -32,9 +32,6 @@ public class SkillCollectionDomainService {
                                             boolean adminEquivalent,
                                             String targetOwnerId) {
         if (adminEquivalent) {
-            if (targetOwnerId == null || targetOwnerId.isBlank()) {
-                throw new DomainBadRequestException("error.skillCollection.create.targetOwnerRequired");
-            }
             authorizationPolicy.checkAllowed(false, false, true,
                     SkillCollectionAuthorizationPolicy.CollectionOperation.CREATE_COLLECTION);
         } else {
@@ -45,7 +42,9 @@ public class SkillCollectionDomainService {
         if (title == null || title.trim().isEmpty()) {
             throw new DomainBadRequestException("error.skillCollection.title.blank");
         }
-        String ownerId = adminEquivalent ? targetOwnerId.trim() : actingUserId;
+        String ownerId = adminEquivalent
+                ? (targetOwnerId != null && !targetOwnerId.isBlank() ? targetOwnerId.trim() : actingUserId)
+                : actingUserId;
         if (skillCollectionRepository.countByOwnerId(ownerId) >= SkillCollectionLimits.MAX_COLLECTIONS_PER_OWNER) {
             throw new DomainBadRequestException("error.skillCollection.cap.collectionsPerOwner");
         }
