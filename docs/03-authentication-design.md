@@ -642,3 +642,21 @@ window.location.href = '/oauth2/authorization/github'
 | `GET /api/v1/resolve` | 可选（匿名仅限全局 namespace 下的 PUBLIC） | visibility + namespace type + version status |
 | `GET /api/v1/download/{slug}/{version}` | 可选（匿名仅限全局 namespace 下的 PUBLIC） | visibility + namespace type + version status |
 | `POST /api/v1/publish` | Bearer Token + `skill:publish` | 普通用户要求目标 namespace 成员；`SUPER_ADMIN` 可绕过（namespace 由 canonical slug 解析） |
+
+## Google OAuth Configuration (Phase 07)
+
+### Spring Security registration keys
+
+`properties
+spring.security.oauth2.client.registration.google.client-id=
+spring.security.oauth2.client.registration.google.client-secret=
+spring.security.oauth2.client.registration.google.scope=openid,profile,email
+spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/login/oauth2/code/google
+`
+
+### Runtime contract
+
+- egistrationId=google is resolved through GoogleClaimsExtractor.
+- sub is mandatory and mapped to providerSubject; missing value raises invalid_user_info.
+- mail_verified controls verified-email semantics and must not be inferred from presence of mail alone.
+- Provider onboarding must reuse OAuthLoginFlowService policy and identity-binding flow without provider-specific bypasses.

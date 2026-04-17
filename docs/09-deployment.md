@@ -266,3 +266,41 @@ Flyway 仍是唯一 schema 变更入口：
 - 路径：`server/skillhub-app/src/main/resources/db/migration/`
 - 命名：`V{version}__{description}.sql`
 - 启动策略：应用容器启动时自动执行迁移
+
+## Google OAuth rollout keys (Phase 07)
+
+### Required env values
+
+- oauth2-google-client-id
+- oauth2-google-client-secret
+
+### Compose mapping example
+
+`yaml
+environment:
+  OAUTH2_GOOGLE_CLIENT_ID: 
+  OAUTH2_GOOGLE_CLIENT_SECRET: 
+`
+
+### Kubernetes mapping example
+
+`yaml
+env:
+  - name: OAUTH2_GOOGLE_CLIENT_ID
+    valueFrom:
+      secretKeyRef:
+        name: skillhub-auth
+        key: oauth2-google-client-id
+  - name: OAUTH2_GOOGLE_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: skillhub-auth
+        key: oauth2-google-client-secret
+`
+
+### Minimal rollout checklist
+
+1. Configure Google OAuth redirect URI: {baseUrl}/login/oauth2/code/google.
+2. Inject both Google secrets into backend runtime.
+3. Verify /api/v1/auth/providers and /api/v1/auth/methods expose Google entries.
+4. Verify malicious eturnTo is sanitized and does not leak external redirects.
