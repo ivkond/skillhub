@@ -16,6 +16,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -393,7 +394,7 @@ class PostgresFullTextQueryServiceTest {
     }
 
     @Test
-    void platformWideAccessShouldBypassNamespaceVisibilityRestrictions() {
+    void platformWideAccessShouldNotBypassVisibilityInPortalSearch() {
         EntityManager entityManager = mock(EntityManager.class);
         Query nativeQuery = mock(Query.class);
         Query countQuery = mock(Query.class);
@@ -418,12 +419,15 @@ class PostgresFullTextQueryServiceTest {
 
         ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
         verify(entityManager, org.mockito.Mockito.times(2)).createNativeQuery(sqlCaptor.capture());
+        // Portal search should not include platformWideAccess bypass logic
         assertThat(sqlCaptor.getAllValues().getFirst())
-                .contains("OR (d.visibility = 'NAMESPACE_ONLY' AND :platformWideAccess = TRUE)")
-                .contains("OR (d.visibility = 'PRIVATE' AND :platformWideAccess = TRUE)")
-                .contains("OR :platformWideAccess = TRUE");
-        verify(nativeQuery).setParameter("platformWideAccess", true);
-        verify(countQuery).setParameter("platformWideAccess", true);
+                .doesNotContain("platformWideAccess")
+                .doesNotContain("PRIVATE")
+                .doesNotContain(":adminNamespaceIds");
+        verify(nativeQuery, never()).setParameter("platformWideAccess", true);
+        verify(countQuery, never()).setParameter("platformWideAccess", true);
+        verify(nativeQuery, never()).setParameter(eq("adminNamespaceIds"), org.mockito.ArgumentMatchers.any());
+        verify(countQuery, never()).setParameter(eq("adminNamespaceIds"), org.mockito.ArgumentMatchers.any());
     }
 
     @Test
