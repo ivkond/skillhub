@@ -140,6 +140,9 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+    env:
+      BLOCKS_TEAM_WEBHOOK_URL: ${{ secrets.BLOCKS_TEAM_WEBHOOK_URL }}
+      HAS_BLOCKS_WEBHOOK: ${{ secrets.BLOCKS_TEAM_WEBHOOK_URL != '' }}
 
     steps:
       - name: Collect PR context for AI agent
@@ -209,9 +212,8 @@ jobs:
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Notify blocks.team webhook
-        if: ${{ secrets.BLOCKS_TEAM_WEBHOOK_URL != '' }}
+        if: ${{ env.HAS_BLOCKS_WEBHOOK == 'true' }}
         env:
-          BLOCKS_TEAM_WEBHOOK_URL: ${{ secrets.BLOCKS_TEAM_WEBHOOK_URL }}
           PAYLOAD: ${{ steps.context.outputs.json }}
         run: |
           curl -fsSL -X POST "${BLOCKS_TEAM_WEBHOOK_URL}" \
@@ -219,5 +221,5 @@ jobs:
             --data "${PAYLOAD}"
 
       - name: Skip notification when webhook is missing
-        if: ${{ secrets.BLOCKS_TEAM_WEBHOOK_URL == '' }}
+        if: ${{ env.HAS_BLOCKS_WEBHOOK != 'true' }}
         run: echo "BLOCKS_TEAM_WEBHOOK_URL is not configured; webhook notification skipped."
