@@ -25,6 +25,11 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -121,6 +126,50 @@ class OAuthLoginFlowServiceTest {
         OAuthLoginFlowService.AuthenticatedLoginContext context = service.loadLoginContext(oauth2UserRequest("google"));
 
         assertThat(context.principal()).isEqualTo(principal);
+        verify(accessPolicy).evaluate(claims);
+        verify(identityBindingService).bindOrCreate(claims, UserStatus.ACTIVE);
+        verify(identityBindingService, never()).createPendingUserIfAbsent(any(OAuthClaims.class));
+    }
+
+    @Test
+    void loadOidcLoginContext_withGoogleRegistration_evaluatesPolicyAndBindsIdentity() {
+        OAuthClaimsExtractor extractor = mock(OAuthClaimsExtractor.class);
+        AccessPolicy accessPolicy = mock(AccessPolicy.class);
+        IdentityBindingService identityBindingService = mock(IdentityBindingService.class);
+        OAuthClaims claims = new OAuthClaims(
+                "google",
+                "google-oidc-subject-1",
+                "oidc-user@example.com",
+                true,
+                "Google OIDC User",
+                Map.of("sub", "google-oidc-subject-1")
+        );
+        PlatformPrincipal principal = new PlatformPrincipal(
+                "user-oidc-1",
+                "Google OIDC User",
+                "oidc-user@example.com",
+                null,
+                "google",
+                Set.of("USER")
+        );
+        OidcUserRequest userRequest = mock(OidcUserRequest.class);
+        when(userRequest.getClientRegistration()).thenReturn(clientRegistration("google"));
+        OAuthLoginFlowService service = serviceWithOidcDelegate(
+                extractor,
+                accessPolicy,
+                identityBindingService,
+                upstreamOidcUser()
+        );
+
+        when(extractor.getProvider()).thenReturn("google");
+        when(extractor.extract(any(OAuth2UserRequest.class), any(OAuth2User.class))).thenReturn(claims);
+        when(accessPolicy.evaluate(claims)).thenReturn(AccessDecision.ALLOW);
+        when(identityBindingService.bindOrCreate(claims, UserStatus.ACTIVE)).thenReturn(principal);
+
+        OAuthLoginFlowService.AuthenticatedLoginContext context = service.loadOidcLoginContext(userRequest);
+
+        assertThat(context.principal()).isEqualTo(principal);
+        assertThat(context.upstreamUser()).isInstanceOf(OidcUser.class);
         verify(accessPolicy).evaluate(claims);
         verify(identityBindingService).bindOrCreate(claims, UserStatus.ACTIVE);
         verify(identityBindingService, never()).createPendingUserIfAbsent(any(OAuthClaims.class));
@@ -285,8 +334,37 @@ class OAuthLoginFlowServiceTest {
         return service;
     }
 
+    private OAuthLoginFlowService serviceWithOidcDelegate(OAuthClaimsExtractor extractor,
+                                                          AccessPolicy accessPolicy,
+                                                          IdentityBindingService identityBindingService,
+                                                          OidcUser upstreamUser) {
+        when(extractor.getProvider()).thenReturn("google");
+        OAuthLoginFlowService service = new OAuthLoginFlowService(
+                List.of(extractor),
+                accessPolicy,
+                identityBindingService
+        );
+        OidcUserService oidcDelegate = mock(OidcUserService.class);
+        when(oidcDelegate.loadUser(any(OidcUserRequest.class))).thenReturn(upstreamUser);
+        ReflectionTestUtils.setField(service, "oidcDelegate", oidcDelegate);
+        return service;
+    }
+
     private OAuth2UserRequest oauth2UserRequest(String registrationId) {
-        ClientRegistration registration = ClientRegistration.withRegistrationId(registrationId)
+        ClientRegistration registration = clientRegistration(registrationId);
+
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(
+                OAuth2AccessToken.TokenType.BEARER,
+                "token-value",
+                Instant.now(),
+                Instant.now().plusSeconds(300)
+        );
+
+        return new OAuth2UserRequest(registration, accessToken);
+    }
+
+    private ClientRegistration clientRegistration(String registrationId) {
+        return ClientRegistration.withRegistrationId(registrationId)
                 .clientId("client-id")
                 .clientSecret("client-secret")
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
@@ -298,15 +376,6 @@ class OAuthLoginFlowServiceTest {
                 .scope("openid", "profile", "email")
                 .clientName("Google")
                 .build();
-
-        OAuth2AccessToken accessToken = new OAuth2AccessToken(
-                OAuth2AccessToken.TokenType.BEARER,
-                "token-value",
-                Instant.now(),
-                Instant.now().plusSeconds(300)
-        );
-
-        return new OAuth2UserRequest(registration, accessToken);
     }
 
     private OAuth2User upstreamUser() {
@@ -320,5 +389,20 @@ class OAuthLoginFlowServiceTest {
                 ),
                 "sub"
         );
+    }
+
+    private OidcUser upstreamOidcUser() {
+        OidcIdToken idToken = new OidcIdToken(
+                "id-token-value",
+                Instant.now(),
+                Instant.now().plusSeconds(300),
+                Map.of(
+                        "sub", "google-oidc-subject-upstream",
+                        "email", "upstream-oidc@example.com",
+                        "email_verified", true,
+                        "name", "Upstream OIDC User"
+                )
+        );
+        return new DefaultOidcUser(List.of(), idToken, "sub");
     }
 }

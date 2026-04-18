@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
@@ -109,6 +110,32 @@ class AuthControllerTest {
             .andExpect(jsonPath("$.data.platformRoles[0]").value("USER"))
             .andExpect(jsonPath("$.timestamp").isNotEmpty())
             .andExpect(jsonPath("$.requestId").isNotEmpty());
+    }
+
+    @Test
+    void meShouldRestoreAuthenticationFromSessionPrincipal() throws Exception {
+        given(namespaceMemberRepository.findByUserId("user-42")).willReturn(List.of());
+        given(userAccountRepository.findById("user-42"))
+                .willReturn(java.util.Optional.of(new UserAccount("user-42", "tester", "tester@example.com", "https://example.com/avatar.png")));
+        given(userRoleBindingRepository.findByUserId("user-42")).willReturn(List.of());
+
+        PlatformPrincipal principal = new PlatformPrincipal(
+                "user-42",
+                "tester",
+                "tester@example.com",
+                "https://example.com/avatar.png",
+                "google",
+                Set.of("USER")
+        );
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("platformPrincipal", principal);
+
+        mockMvc.perform(get("/api/v1/auth/me").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.userId").value("user-42"))
+                .andExpect(jsonPath("$.data.oauthProvider").value("google"));
     }
 
     // ===== AC-P-002: Session refresh when displayName changes =====

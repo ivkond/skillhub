@@ -5,6 +5,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      SKILLHUB_SCANNER_USE_LLM: true
       SKILL_SCANNER_LLM_API_KEY: ${SKILL_SCANNER_LLM_API_KEY:-}
       SKILL_SCANNER_LLM_BASE_URL: ${SKILL_SCANNER_LLM_BASE_URL:-}
       SKILL_SCANNER_LLM_MODEL: ${SKILL_SCANNER_LLM_MODEL:-}
@@ -83,6 +84,8 @@ services:
       SKILLHUB_STORAGE_S3_REGION: us-east-1
       SKILLHUB_STORAGE_S3_FORCE_PATH_STYLE: "true"
       SKILLHUB_STORAGE_S3_AUTO_CREATE_BUCKET: "true"
+      OAUTH2_GOOGLE_CLIENT_ID: ${OAUTH2_GOOGLE_CLIENT_ID:-}
+      OAUTH2_GOOGLE_CLIENT_SECRET: ${OAUTH2_GOOGLE_CLIENT_SECRET:-}
     volumes:
       - server_storage:/var/lib/skillhub/storage
     depends_on:

@@ -27,7 +27,13 @@ export default defineConfig({
       },
       '/oauth2': {
         target: devProxyTarget,
-        changeOrigin: true,
+        changeOrigin: false,
+        xfwd: true,
+      },
+      '/login/oauth2': {
+        target: devProxyTarget,
+        changeOrigin: false,
+        xfwd: true,
       },
     },
   },

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { createElement } from 'react'
+import { createElement, type ReactNode } from 'react'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import * as mod from './language-switcher'
@@ -17,9 +17,9 @@ vi.mock('react-i18next', () => ({
 }))
 
 vi.mock('@/shared/ui/dropdown-menu', () => ({
-  DropdownMenu: ({ children }: { children: unknown }) => createElement('div', { 'data-testid': 'menu-root' }, children),
-  DropdownMenuTrigger: ({ children }: { children: unknown }) => createElement('div', {}, children),
-  DropdownMenuContent: ({ children, className }: { children: unknown; className?: string }) => (
+  DropdownMenu: ({ children }: { children: ReactNode }) => createElement('div', { 'data-testid': 'menu-root' }, children),
+  DropdownMenuTrigger: ({ children }: { children: ReactNode }) => createElement('div', {}, children),
+  DropdownMenuContent: ({ children, className }: { children: ReactNode; className?: string }) => (
     createElement('div', { 'data-testid': 'menu-content', className }, children)
   ),
   DropdownMenuItem: ({
@@ -27,7 +27,7 @@ vi.mock('@/shared/ui/dropdown-menu', () => ({
     className,
     onClick,
   }: {
-    children: unknown
+    children: ReactNode
     className?: string
     onClick?: () => void
   }) => createElement('button', { type: 'button', className, onClick }, children),

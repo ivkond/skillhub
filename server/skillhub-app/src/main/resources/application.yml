@@ -54,6 +54,11 @@ spring:
             client-id: ${OAUTH2_GITHUB_CLIENT_ID:placeholder}
             client-secret: ${OAUTH2_GITHUB_CLIENT_SECRET:placeholder}
             scope: read:user,user:email
+          google:
+            client-id: ${OAUTH2_GOOGLE_CLIENT_ID:placeholder}
+            client-secret: ${OAUTH2_GOOGLE_CLIENT_SECRET:placeholder}
+            scope: openid,email,profile
+            client-name: Google
         provider:
           github:
             user-info-uri: https://api.github.com/user

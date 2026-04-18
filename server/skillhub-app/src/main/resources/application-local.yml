@@ -22,6 +22,11 @@ spring:
           github:
             client-id: ${OAUTH2_GITHUB_CLIENT_ID:local-placeholder}
             client-secret: ${OAUTH2_GITHUB_CLIENT_SECRET:local-placeholder}
+          google:
+            client-id: ${OAUTH2_GOOGLE_CLIENT_ID:local-placeholder}
+            client-secret: ${OAUTH2_GOOGLE_CLIENT_SECRET:local-placeholder}
+            scope: openid,email,profile
+            client-name: Google
 
 skillhub:
   auth:

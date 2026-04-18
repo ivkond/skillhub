@@ -77,6 +77,25 @@ These are **binding for v1** unless explicitly revised in this file:
 
 ---
 
+## Post-v1.0 / vNext Requirements (Phase 7 — Google OAuth)
+
+### OAuth provider integration (OAUTH)
+
+- [ ] **OAUTH-01**: Новый provider id — backend registration key `google`.
+- [ ] **OAUTH-02**: Google claims extraction реализуется отдельным `OAuthClaimsExtractor` в существующей extractor pipeline.
+- [ ] **OAUTH-03**: Canonical identity key для Google: `(provider='google', provider_subject)`; email участвует только в controlled bind/create policy.
+- [ ] **OAUTH-04**: `/api/v1/auth/providers` и `/api/v1/auth/methods` публикуют Google при наличии `spring.security.oauth2.client.registration.google.*`.
+- [ ] **OAUTH-05**: Login UI рендерит Google как стандартный `OAUTH_REDIRECT` метод из backend catalog без hardcoded frontend routes.
+- [ ] **OAUTH-06**: Failure behavior совместим с текущими auth pages (`/login`, `/access-denied`, `/pending-approval`).
+
+### Security invariants (SEC)
+
+- [ ] **SEC-01**: `returnTo` для OAuth flow проходит через существующий sanitize/consume механизм; open redirect не допускается.
+- [ ] **SEC-02**: Existing policy gates (`AccessPolicy`, pending/disabled handling) остаются единым enforcement point для Google.
+- [ ] **SEC-03**: Не добавляются provider-specific bypass ветки в `SecurityConfig`; Google интегрируется через общий OAuth2 pipeline.
+
+---
+
 ## v2 Requirements (deferred)
 
 - **VIS-U01**: `unlisted` visibility (share link only, not listed in public gallery).
@@ -101,6 +120,8 @@ These are **binding for v1** unless explicitly revised in this file:
 
 ## Traceability
 
+### v1.0 Traceability
+
 | Requirement | Phase | Status |
 | ----------- | ----- | ------ |
 | COL-01 — COL-07 | Phase 1 | Pending |
@@ -111,12 +132,27 @@ These are **binding for v1** unless explicitly revised in this file:
 | ADM-01 | Phase 2 | Complete |
 | QA-01 — QA-03 | Phase 4 | Complete |
 
-**Coverage:**
+**v1 Coverage:**
 
 - v1 requirements: **27** total  
 - Mapped to phases: **27**  
 - Unmapped: **0** ✓
 
+### Post-v1.0 / vNext Traceability (Phase 7)
+
+| Requirement | Phase | Status |
+| ----------- | ----- | ------ |
+| OAUTH-01 — OAUTH-03 | Phase 7 (Plan 01) | Pending |
+| OAUTH-04 — OAUTH-05 | Phase 7 (Plan 02) | Pending |
+| OAUTH-06 | Phase 7 (Plan 03) | Pending |
+| SEC-01 — SEC-03 | Phase 7 (Plan 01 + Plan 03) | Pending |
+
+**Post-v1 Coverage:**
+
+- post-v1 Phase 7 requirements: **9** total  
+- Mapped to phases: **9**  
+- Unmapped: **0** ✓
+
 ---
 *Requirements defined: 2026-04-15*  
-*Last updated: 2026-04-15 after `/gsd-new-milestone`*
+*Last updated: 2026-04-17 after Phase 07 cross-review remediation*

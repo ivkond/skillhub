@@ -53,7 +53,7 @@ public class PlatformSessionService {
                                              Authentication authentication,
                                              HttpServletRequest request,
                                              boolean rotateSessionId) {
-        persist(principal, authentication, request, rotateSessionId);
+        persist(principal, normalizeAuthentication(principal, authentication), request, rotateSessionId);
     }
 
     private void persist(PlatformPrincipal principal,
@@ -70,5 +70,21 @@ public class PlatformSessionService {
         }
         request.getSession().setAttribute("platformPrincipal", principal);
         request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+    }
+
+    private Authentication normalizeAuthentication(PlatformPrincipal principal, Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() instanceof PlatformPrincipal) {
+            return authentication != null ? authentication : buildSessionAuthentication(principal);
+        }
+        UsernamePasswordAuthenticationToken sessionAuthentication = buildSessionAuthentication(principal);
+        sessionAuthentication.setDetails(authentication.getDetails());
+        return sessionAuthentication;
+    }
+
+    private UsernamePasswordAuthenticationToken buildSessionAuthentication(PlatformPrincipal principal) {
+        var authorities = principal.platformRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .toList();
+        return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }
 }

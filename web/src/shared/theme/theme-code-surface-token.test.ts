@@ -1,5 +1,17 @@
-import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+
+declare global {
+  interface ImportMeta {
+    glob(
+      pattern: string,
+      options: {
+        eager: true
+        import: 'default'
+        query: '?raw'
+      }
+    ): Record<string, string>
+  }
+}
 
 function extractBlock(cssSource: string, selector: string): string {
   const escapedSelector = selector.replace('.', '\\.')
@@ -27,8 +39,16 @@ function parseHslLightness(tokenValue: string): number {
 }
 
 describe('theme code surface token', () => {
-  const cssPath = new URL('../../index.css', import.meta.url)
-  const cssSource = readFileSync(cssPath, 'utf8')
+  const cssFiles = import.meta.glob('../../index.css', {
+    eager: true,
+    import: 'default',
+    query: '?raw',
+  })
+  const cssSource = cssFiles['../../index.css']
+
+  if (typeof cssSource !== 'string') {
+    throw new Error('Failed to load CSS source for token test')
+  }
 
   it('test_code_surface_when_light_theme_then_uses_light_background_token', () => {
     const rootBlock = extractBlock(cssSource, ':root')
