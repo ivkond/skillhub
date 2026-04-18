@@ -2,20 +2,22 @@ name: Checkmarx Scan
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
     types: [opened, reopened, synchronize]
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  gate:
+  checkmarx:
     runs-on: ubuntu-latest
-    outputs:
-      has_checkmarx_secrets: ${{ steps.gate.outputs.has_checkmarx_secrets }}
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     steps:
       - name: Detect Checkmarx secret availability
         id: gate
@@ -26,25 +28,17 @@ jobs:
           CX_TENANT: ${{ secrets.CX_TENANT }}
         run: |
           if [[ -n "${CX_CLIENT_ID}" && -n "${CX_CLIENT_SECRET}" && -n "${CX_TENANT}" ]]; then
-            echo "has_checkmarx_secrets=true" >> "${GITHUB_OUTPUT}"
+            echo "enabled=true" >> "${GITHUB_OUTPUT}"
           else
-            echo "has_checkmarx_secrets=false" >> "${GITHUB_OUTPUT}"
+            echo "enabled=false" >> "${GITHUB_OUTPUT}"
           fi
 
-  checkmarx:
-    needs: gate
-    if: ${{ needs.gate.outputs.has_checkmarx_secrets == 'true' }}
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    runs-on: ubuntu-latest
-
-    steps:
       - name: Checkout repository
+        if: steps.gate.outputs.enabled == 'true'
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Checkmarx One scan
+        if: steps.gate.outputs.enabled == 'true'
         uses: checkmarx/ast-github-action@8e887bb93dacc44e0f5b64ee2b06d5815f89d4fc
         with:
           base_uri: https://ast.checkmarx.net
@@ -54,14 +48,11 @@ jobs:
           additional_params: --report-format sarif --output-path .
 
       - name: Upload SARIF file
+        if: steps.gate.outputs.enabled == 'true'
         uses: github/codeql-action/upload-sarif@b25d0ebf40e5b63ee81e1bd6e5d2a12b7c2aeb61 # v4
         with:
           sarif_file: cx_result.sarif
 
-  checkmarx-not-configured:
-    needs: gate
-    if: ${{ needs.gate.outputs.has_checkmarx_secrets != 'true' }}
-    runs-on: ubuntu-latest
-    steps:
       - name: Explain skip reason
+        if: steps.gate.outputs.enabled != 'true'
         run: echo "::warning::Skipping Checkmarx scan because CX_CLIENT_ID/CX_CLIENT_SECRET/CX_TENANT secrets are not fully configured."
