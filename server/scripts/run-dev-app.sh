@@ -7,11 +7,11 @@ PROFILE="${SPRING_PROFILES_ACTIVE:-local}"
 
 cd "$SERVER_DIR"
 
-./mvnw -pl skillhub-app -am clean package -DskipTests >/dev/null
+./gradlew :skillhub-app:clean :skillhub-app:bootJar -x test >/dev/null
 
-APP_JAR="$(find skillhub-app/target -maxdepth 1 -type f -name 'skillhub-app-*.jar' ! -name '*.original' | head -n 1)"
+APP_JAR="$(find skillhub-app/build/libs -maxdepth 1 -type f -name 'skillhub-app.jar' | head -n 1)"
 if [[ -z "$APP_JAR" ]]; then
-  echo "Could not locate packaged skillhub-app jar under skillhub-app/target" >&2
+  echo "Could not locate packaged skillhub-app jar under skillhub-app/build/libs" >&2
   exit 1
 fi
 

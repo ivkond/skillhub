@@ -147,7 +147,7 @@ make generate-api           # 重新生成 OpenAPI 类型
 ./scripts/smoke-test.sh http://localhost:8080  # 运行冒烟测试
 ```
 
-说明：不要在 `server/` 下直接执行 `./mvnw -pl skillhub-app clean test`。`skillhub-app` 依赖同仓库的 sibling modules，单独 clean 构建时会回退到本地 Maven 仓库里的旧产物并出现大量 `cannot find symbol` / 签名不匹配错误。需要使用 `-am`，或者直接使用上面的 `make test-backend-app` / `make build-backend-app`。
+说明：建议通过上面的 `make test-backend-app` / `make build-backend-app` 执行模块级 Gradle 任务。`skillhub-app` 依赖同仓库 sibling modules，这两个目标会按依赖关系完成构建与测试。
 
 ### 项目结构
 

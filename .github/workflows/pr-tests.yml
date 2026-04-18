@@ -58,10 +58,10 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-          cache: maven
+          cache: gradle
 
-      - name: Ensure Maven wrapper is executable
-        run: chmod +x server/mvnw
+      - name: Ensure Gradle wrapper is executable
+        run: chmod +x server/gradlew
 
       - name: Run backend unit tests
         run: make test-backend

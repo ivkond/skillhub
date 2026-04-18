@@ -2,28 +2,32 @@
 FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
 
-# Cache dependencies
-COPY pom.xml .
-COPY skillhub-domain/pom.xml skillhub-domain/
-COPY skillhub-auth/pom.xml skillhub-auth/
-COPY skillhub-search/pom.xml skillhub-search/
-COPY skillhub-infra/pom.xml skillhub-infra/
-COPY skillhub-storage/pom.xml skillhub-storage/
-COPY skillhub-notification/pom.xml skillhub-notification/
-COPY skillhub-app/pom.xml skillhub-app/
-COPY mvnw .
-COPY .mvn .mvn
-RUN ./mvnw dependency:go-offline -B
+# Cache Gradle wrapper and build scripts
+COPY gradlew gradlew
+COPY gradlew.bat gradlew.bat
+COPY gradle gradle
+COPY gradle.properties gradle.properties
+COPY settings.gradle.kts settings.gradle.kts
+COPY buildSrc buildSrc
+COPY skillhub-domain/build.gradle.kts skillhub-domain/build.gradle.kts
+COPY skillhub-auth/build.gradle.kts skillhub-auth/build.gradle.kts
+COPY skillhub-search/build.gradle.kts skillhub-search/build.gradle.kts
+COPY skillhub-infra/build.gradle.kts skillhub-infra/build.gradle.kts
+COPY skillhub-storage/build.gradle.kts skillhub-storage/build.gradle.kts
+COPY skillhub-notification/build.gradle.kts skillhub-notification/build.gradle.kts
+COPY skillhub-app/build.gradle.kts skillhub-app/build.gradle.kts
+RUN chmod +x ./gradlew
+RUN ./gradlew help --no-daemon
 
 COPY . .
-RUN ./mvnw package -DskipTests -B
+RUN ./gradlew :skillhub-app:bootJar -x test --no-daemon
 
 # ---- Runtime Stage ----
 FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S app && adduser -S app -G app
 WORKDIR /app
 
-COPY --from=build /app/skillhub-app/target/*.jar app.jar
+COPY --from=build /app/skillhub-app/build/libs/skillhub-app.jar app.jar
 
 # Create storage directory and set permissions
 RUN mkdir -p /var/lib/skillhub/storage && \
