@@ -61,4 +61,11 @@ describe('language-switcher module exports', () => {
     fireEvent.click(screen.getByRole('button', { name: '中文' }))
     expect(changeLanguage).toHaveBeenCalledWith('zh')
   })
+
+  it('changes language to russian when russian option is clicked', () => {
+    render(createElement(mod.LanguageSwitcher))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Русский' }))
+    expect(changeLanguage).toHaveBeenCalledWith('ru')
+  })
 })
