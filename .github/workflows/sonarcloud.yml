@@ -12,11 +12,13 @@ permissions:
   pull-requests: read
 
 jobs:
-  sonarcloud:
+  gate:
     runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.detect.outputs.enabled }}
     steps:
       - name: Detect SonarCloud availability
-        id: gate
+        id: detect
         shell: bash
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -29,12 +31,15 @@ jobs:
             echo "enabled=false" >> "${GITHUB_OUTPUT}"
           fi
 
+  analysis:
+    runs-on: ubuntu-latest
+    needs: gate
+    if: needs.gate.outputs.enabled == 'true'
+    steps:
       - name: Checkout repository
-        if: steps.gate.outputs.enabled == 'true'
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Analyze with SonarCloud
-        if: steps.gate.outputs.enabled == 'true'
         uses: SonarSource/sonarcloud-github-action@4006f663ecaf1f8093e8e4abb9227f6041f52216
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -45,6 +50,10 @@ jobs:
             -Dsonar.qualitygate.wait=true
           projectBaseDir: .
 
+  sonar-not-configured:
+    runs-on: ubuntu-latest
+    needs: gate
+    if: needs.gate.outputs.enabled != 'true'
+    steps:
       - name: Explain skip reason
-        if: steps.gate.outputs.enabled != 'true'
         run: echo "::warning::Skipping SonarCloud analysis because SONAR_TOKEN, SONAR_PROJECT_KEY, or SONAR_ORGANIZATION is not configured."
