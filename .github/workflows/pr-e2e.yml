@@ -1,20 +1,6 @@
 name: PR E2E Tests
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
-    paths:
-      - 'web/**'
-      - 'server/**'
-      - 'scripts/**'
-      - 'docker-compose.yml'
-      - 'docker-compose.staging.yml'
-      - 'Makefile'
-      - '.github/workflows/pr-e2e.yml'
   workflow_dispatch:
 
 concurrency:
