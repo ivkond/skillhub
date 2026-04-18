@@ -11,8 +11,26 @@ permissions:
   contents: read
 
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      has_snyk_token: ${{ steps.gate.outputs.has_snyk_token }}
+    steps:
+      - name: Detect Snyk token availability
+        id: gate
+        shell: bash
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          if [[ -n "${SNYK_TOKEN}" ]]; then
+            echo "has_snyk_token=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "has_snyk_token=false" >> "${GITHUB_OUTPUT}"
+          fi
+
   snyk:
-    if: ${{ secrets.SNYK_TOKEN != '' }}
+    needs: gate
+    if: ${{ needs.gate.outputs.has_snyk_token == 'true' }}
     permissions:
       contents: read
       security-events: write
@@ -41,7 +59,8 @@ jobs:
           sarif_file: snyk-code.sarif
 
   snyk-not-configured:
-    if: ${{ secrets.SNYK_TOKEN == '' }}
+    needs: gate
+    if: ${{ needs.gate.outputs.has_snyk_token != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Explain skip reason
