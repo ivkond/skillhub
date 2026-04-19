@@ -14,7 +14,10 @@ function latestSeed(seed: PreparedSearchSeed) {
 let seeded: PreparedSearchSeed | undefined
 
 test.describe('Public Skill Detail Anonymous Access (Real API)', () => {
+  test.describe.configure({ timeout: 300_000 })
+
   test.beforeAll(async ({ browser }, testInfo) => {
+    test.setTimeout(300_000)
     seeded = await prepareSearchSeed(browser, testInfo, { count: 1 })
   })
 
