@@ -67,9 +67,55 @@ jobs:
       - name: Run backend unit tests
         run: make test-backend
 
+  e2e-scope:
+    name: Detect E2E-impacting changes
+    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      run_e2e: ${{ steps.detect.outputs.run_e2e }}
+
+    steps:
+      - name: Detect whether E2E should run for this PR
+        id: detect
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            if (context.eventName !== 'pull_request' || !context.payload.pull_request) {
+              core.setOutput('run_e2e', 'true');
+              return;
+            }
+
+            const includePrefixes = ['web/', 'server/', 'scanner/'];
+            const includeExact = new Set([
+              'Makefile',
+              'docker-compose.yml',
+              'docker-compose.override.yml',
+              '.github/workflows/ci-orchestrator.yml',
+              '.github/workflows/pr-e2e.yml',
+            ]);
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+
+            const runE2E = files.some((file) =>
+              includeExact.has(file.filename) ||
+              includePrefixes.some((prefix) => file.filename.startsWith(prefix))
+            );
+
+            core.info(`Changed files: ${files.length}; run_e2e=${runE2E}`);
+            core.setOutput('run_e2e', runE2E ? 'true' : 'false');
+
   e2e-tests:
     name: E2E (Real Services)
-    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
+    if: ${{ (github.event_name != 'pull_request' || !github.event.pull_request.draft) && needs.e2e-scope.outputs.run_e2e == 'true' }}
+    needs:
+      - e2e-scope
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
@@ -151,7 +197,7 @@ jobs:
     steps:
       - name: Collect PR context for AI agent
         id: context
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -181,8 +227,9 @@ jobs:
               e2e: '${{ needs.e2e-tests.result }}',
             };
 
+            const failingStates = new Set(['failure', 'cancelled', 'timed_out', 'action_required']);
             const failedJobs = Object.entries(ciJobs)
-              .filter(([, result]) => result !== 'success')
+              .filter(([, result]) => failingStates.has(result))
               .map(([name, result]) => `${name}:${result}`);
 
             const payload = {
