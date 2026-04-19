@@ -232,7 +232,21 @@ export async function prepareSearchSeed(
     await adminBuilder.approveReview(reviewTaskId)
   }
 
-  await seed.builder.waitForSearchResults(seed.keyword, seed.skills.map((skill) => skill.slug))
+  const expectedSlugs = seed.skills.map((skill) => skill.slug)
+  const shouldForceRebuildInCi = Boolean(process.env.CI || process.env.GITHUB_ACTIONS)
+  if (shouldForceRebuildInCi) {
+    await adminBuilder.rebuildSearchIndexIfPermitted()
+  }
+
+  try {
+    await seed.builder.waitForSearchResults(seed.keyword, expectedSlugs)
+  } catch (initialError) {
+    const rebuildTriggered = await adminBuilder.rebuildSearchIndexIfPermitted()
+    if (!rebuildTriggered) {
+      throw initialError
+    }
+    await seed.builder.waitForSearchResults(seed.keyword, expectedSlugs)
+  }
 
   return {
     ...seed,

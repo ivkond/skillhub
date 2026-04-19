@@ -483,6 +483,16 @@ export class E2eTestDataBuilder {
     )
   }
 
+  async rebuildSearchIndexIfPermitted(): Promise<boolean> {
+    const response = await this.request.post('/api/v1/admin/search/rebuild')
+    if (response.status() === 401 || response.status() === 403) {
+      return false
+    }
+
+    await parseEnvelope<unknown>(response)
+    return true
+  }
+
   async searchNamespaceMemberCandidates(slug: string, search: string): Promise<NamespaceCandidate[]> {
     const query = new URLSearchParams({ search })
     return parseEnvelope<NamespaceCandidate[]>(
