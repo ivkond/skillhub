@@ -139,6 +139,7 @@ jobs:
     if: ${{ always() && github.event_name == 'pull_request' && !cancelled() }}
     permissions:
       contents: read
+      issues: read
       pull-requests: read
     env:
       BLOCKS_TEAM_WEBHOOK_URL: ${{ secrets.BLOCKS_TEAM_WEBHOOK_URL }}
