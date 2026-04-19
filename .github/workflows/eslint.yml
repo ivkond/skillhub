@@ -42,7 +42,7 @@ jobs:
         env:
           SARIF_ESLINT_IGNORE_SUPPRESSED: "true"
         working-directory: web
-        run: pnpm exec eslint . --ext .ts,.tsx --format @microsoft/eslint-formatter-sarif --output-file ../eslint-results.sarif
+        run: pnpm exec eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --format @microsoft/eslint-formatter-sarif --output-file ../eslint-results.sarif
 
       - name: Upload analysis results to GitHub
         uses: github/codeql-action/upload-sarif@b25d0ebf40e5b63ee81e1bd6e5d2a12b7c2aeb61 # v4

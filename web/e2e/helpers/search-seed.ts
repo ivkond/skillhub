@@ -54,6 +54,10 @@ function hasPublisherCredentials() {
   return Boolean(getOptionalEnv('E2E_PUBLISH_USERNAME') && getOptionalEnv('E2E_PUBLISH_PASSWORD'))
 }
 
+function hasExplicitCiAdminCredentials() {
+  return Boolean(getOptionalEnv('E2E_ADMIN_USERNAME') && getOptionalEnv('E2E_ADMIN_PASSWORD'))
+}
+
 function buildSearchKeyword(seedSuffix: string, explicitKeyword?: string): string {
   if (explicitKeyword) {
     return explicitKeyword
@@ -209,7 +213,7 @@ export async function prepareSearchSeed(
   const keyword = buildSearchKeyword(seedSuffix, options?.keyword)
   const description = options?.description || `Searchable ${keyword} skill for Playwright E2E coverage.`
   const useProvidedPublisher = count <= 3 && hasPublisherCredentials()
-  const useAdminPublisher = Boolean((process.env.CI || process.env.GITHUB_ACTIONS) && count <= 3)
+  const useAdminPublisher = Boolean((process.env.CI || process.env.GITHUB_ACTIONS) && count <= 3 && hasExplicitCiAdminCredentials())
   const publisherSessions: PublisherSession[] = [
     useAdminPublisher
       ? await openAdminPublisherSession(browser, testInfo)
