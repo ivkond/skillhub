@@ -58,6 +58,8 @@ interface ApiFailure extends Error {
 }
 
 const cleanupTimeoutMs = process.env.CI ? 8_000 : 5_000
+const eventualConsistencyTimeoutMs = process.env.CI ? 180_000 : 60_000
+const eventualConsistencyPollIntervalMs = process.env.CI ? 1_000 : 300
 
 export interface SeedSkillOptions {
   name?: string
@@ -95,6 +97,10 @@ async function runCleanupTaskWithTimeout(task: CleanupTask): Promise<void> {
         reject(error)
       })
   })
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 function buildSkillPackageContent(suffix: string, options?: SeedSkillOptions) {
@@ -383,8 +389,9 @@ export class E2eTestDataBuilder {
 
   async waitForSearchResult(query: string, expectedSlug?: string): Promise<void> {
     const encodedQuery = encodeURIComponent(query)
+    const deadline = Date.now() + eventualConsistencyTimeoutMs
 
-    for (let attempt = 0; attempt < 20; attempt += 1) {
+    while (Date.now() < deadline) {
       try {
         const page = await parseEnvelope<{
           items: Array<{ slug: string }>
@@ -398,7 +405,7 @@ export class E2eTestDataBuilder {
         // Search indexing can lag briefly behind publish in local environments.
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)))
+      await delay(eventualConsistencyPollIntervalMs)
     }
 
     throw new Error(`Timed out waiting for search result "${query}"${expectedSlug ? ` (${expectedSlug})` : ''}`)
@@ -411,8 +418,9 @@ export class E2eTestDataBuilder {
     }
 
     const encodedQuery = encodeURIComponent(query)
+    const deadline = Date.now() + eventualConsistencyTimeoutMs
 
-    for (let attempt = 0; attempt < 20; attempt += 1) {
+    while (Date.now() < deadline) {
       try {
         const page = await parseEnvelope<{
           items: Array<{ slug: string }>
@@ -431,14 +439,16 @@ export class E2eTestDataBuilder {
         // Search indexing can lag briefly behind publish in local environments.
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)))
+      await delay(eventualConsistencyPollIntervalMs)
     }
 
     throw new Error(`Timed out waiting for search results "${query}" (${Array.from(pending).join(', ')})`)
   }
 
   async waitForPendingReview(namespaceSlug: string, skillSlug: string, version: string): Promise<number> {
-    for (let attempt = 0; attempt < 20; attempt += 1) {
+    const deadline = Date.now() + eventualConsistencyTimeoutMs
+
+    while (Date.now() < deadline) {
       try {
         const page = await parseEnvelope<{
           items: ReviewTaskSummary[]
@@ -459,7 +469,7 @@ export class E2eTestDataBuilder {
         // Review list can lag behind publish very briefly.
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)))
+      await delay(eventualConsistencyPollIntervalMs)
     }
 
     throw new Error(`Timed out waiting for pending review ${namespaceSlug}/${skillSlug}@${version}`)
