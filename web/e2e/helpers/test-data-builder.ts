@@ -517,19 +517,36 @@ export class E2eTestDataBuilder {
   async publishSkill(namespaceSlug: string, options?: SeedSkillOptions): Promise<SeededSkill> {
     const unique = `${this.suffix}_${Math.random().toString(36).slice(2, 6)}`
     const zipBuffer = buildSkillPackageZipBuffer(unique, options)
+    let result: SeededSkill | null = null
 
-    const result = await parseEnvelope<SeededSkill>(
-      await this.request.post(`/api/web/skills/${encodeURIComponent(namespaceSlug)}/publish`, {
-        multipart: {
-          file: {
-            name: 'sample-skill.zip',
-            mimeType: 'application/zip',
-            buffer: zipBuffer,
-          },
-          visibility: 'PUBLIC',
-        },
-      }),
-    )
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        result = await parseEnvelope<SeededSkill>(
+          await this.request.post(`/api/web/skills/${encodeURIComponent(namespaceSlug)}/publish`, {
+            multipart: {
+              file: {
+                name: 'sample-skill.zip',
+                mimeType: 'application/zip',
+                buffer: zipBuffer,
+              },
+              visibility: 'PUBLIC',
+            },
+          }),
+        )
+        break
+      } catch (error) {
+        const failure = error as ApiFailure
+        const isRateLimited = failure.status === 429 || failure.code === 429
+        if (!isRateLimited || attempt === 2) {
+          throw error
+        }
+        await delay(1_000 * (attempt + 1))
+      }
+    }
+
+    if (!result) {
+      throw new Error(`Failed to publish skill into namespace ${namespaceSlug}`)
+    }
 
     this.cleanupTasks.push(async () => {
       await this.request.delete(`/api/web/skills/${encodeURIComponent(result.namespace)}/${encodeURIComponent(result.slug)}`)

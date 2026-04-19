@@ -54,6 +54,16 @@ function hasPublisherCredentials() {
   return Boolean(getOptionalEnv('E2E_PUBLISH_USERNAME') && getOptionalEnv('E2E_PUBLISH_PASSWORD'))
 }
 
+function buildSearchKeyword(seedSuffix: string, explicitKeyword?: string): string {
+  if (explicitKeyword) {
+    return explicitKeyword
+  }
+
+  const compactSeed = seedSuffix.toLowerCase().replace(/[^a-z]/g, '')
+  const randomSuffix = compactSeed.slice(0, 12) || Math.random().toString(36).replace(/[^a-z]/g, '').slice(0, 12)
+  return `agent${randomSuffix}`.slice(0, 32)
+}
+
 async function openProvidedPublisherSession(browser: Browser, testInfo: TestInfo): Promise<PublisherSession> {
   const context = await browser.newContext()
   const page = await context.newPage()
@@ -146,7 +156,7 @@ export async function seedPublicSearchSkills(
   const count = options?.count ?? 1
   const builder = new E2eTestDataBuilder(page, testInfo)
   const seedSuffix = `${testInfo.parallelIndex ?? 0}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
-  const keyword = options?.keyword || `agent-${seedSuffix}`.slice(0, 32)
+  const keyword = buildSearchKeyword(seedSuffix, options?.keyword)
 
   await loginWithCredentials(page, publisherCredentials(), testInfo)
   await builder.init()
@@ -196,10 +206,10 @@ export async function prepareSearchSeed(
 ): Promise<PreparedSearchSeed> {
   const count = options?.count ?? 1
   const seedSuffix = `${testInfo.parallelIndex ?? 0}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
-  const keyword = options?.keyword || `agent-${seedSuffix}`.slice(0, 32)
+  const keyword = buildSearchKeyword(seedSuffix, options?.keyword)
   const description = options?.description || `Searchable ${keyword} skill for Playwright E2E coverage.`
   const useProvidedPublisher = count <= 3 && hasPublisherCredentials()
-  const useAdminPublisher = Boolean(process.env.CI || process.env.GITHUB_ACTIONS)
+  const useAdminPublisher = Boolean((process.env.CI || process.env.GITHUB_ACTIONS) && count <= 3)
   const publisherSessions: PublisherSession[] = [
     useAdminPublisher
       ? await openAdminPublisherSession(browser, testInfo)
