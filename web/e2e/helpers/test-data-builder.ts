@@ -387,9 +387,9 @@ export class E2eTestDataBuilder {
     }
   }
 
-  async waitForSearchResult(query: string, expectedSlug?: string): Promise<void> {
+  async waitForSearchResult(query: string, expectedSlug?: string, timeoutMs = eventualConsistencyTimeoutMs): Promise<void> {
     const encodedQuery = encodeURIComponent(query)
-    const deadline = Date.now() + eventualConsistencyTimeoutMs
+    const deadline = Date.now() + timeoutMs
 
     while (Date.now() < deadline) {
       try {
@@ -411,14 +411,14 @@ export class E2eTestDataBuilder {
     throw new Error(`Timed out waiting for search result "${query}"${expectedSlug ? ` (${expectedSlug})` : ''}`)
   }
 
-  async waitForSearchResults(query: string, expectedSlugs: string[]): Promise<void> {
+  async waitForSearchResults(query: string, expectedSlugs: string[], timeoutMs = eventualConsistencyTimeoutMs): Promise<void> {
     const pending = new Set(expectedSlugs)
     if (pending.size === 0) {
       return
     }
 
     const encodedQuery = encodeURIComponent(query)
-    const deadline = Date.now() + eventualConsistencyTimeoutMs
+    const deadline = Date.now() + timeoutMs
 
     while (Date.now() < deadline) {
       try {
@@ -483,14 +483,20 @@ export class E2eTestDataBuilder {
     )
   }
 
-  async rebuildSearchIndexIfPermitted(): Promise<boolean> {
-    const response = await this.request.post('/api/v1/admin/search/rebuild')
-    if (response.status() === 401 || response.status() === 403) {
-      return false
+  async rebuildSearchIndexIfPermitted(timeoutMs = 20_000): Promise<boolean> {
+    try {
+      const response = await this.request.post('/api/v1/admin/search/rebuild', { timeout: timeoutMs })
+      if (response.status() === 401 || response.status() === 403) {
+        return false
+      }
+      await parseEnvelope<unknown>(response)
+      return true
+    } catch (error) {
+      if (error instanceof Error && /timed out/i.test(error.message)) {
+        return false
+      }
+      throw error
     }
-
-    await parseEnvelope<unknown>(response)
-    return true
   }
 
   async searchNamespaceMemberCandidates(slug: string, search: string): Promise<NamespaceCandidate[]> {

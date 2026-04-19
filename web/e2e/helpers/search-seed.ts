@@ -70,6 +70,22 @@ async function openProvidedPublisherSession(browser: Browser, testInfo: TestInfo
   }
 }
 
+async function openAdminPublisherSession(browser: Browser, testInfo: TestInfo): Promise<PublisherSession> {
+  const context = await browser.newContext()
+  const page = await context.newPage()
+  const builder = new E2eTestDataBuilder(page, testInfo)
+
+  await loginWithCredentials(page, adminCredentials(), testInfo)
+  await builder.init()
+
+  return {
+    builder,
+    context,
+    namespace: await builder.ensureWritableNamespace(),
+    page,
+  }
+}
+
 async function openAdhocPublisherSession(browser: Browser, testInfo: TestInfo): Promise<PublisherSession> {
   const context = await browser.newContext()
   const page = await context.newPage()
@@ -183,8 +199,11 @@ export async function prepareSearchSeed(
   const keyword = options?.keyword || `agent-${seedSuffix}`.slice(0, 32)
   const description = options?.description || `Searchable ${keyword} skill for Playwright E2E coverage.`
   const useProvidedPublisher = count <= 3 && hasPublisherCredentials()
+  const useAdminPublisher = Boolean(process.env.CI || process.env.GITHUB_ACTIONS)
   const publisherSessions: PublisherSession[] = [
-    useProvidedPublisher
+    useAdminPublisher
+      ? await openAdminPublisherSession(browser, testInfo)
+      : useProvidedPublisher
       ? await openProvidedPublisherSession(browser, testInfo)
       : await openAdhocPublisherSession(browser, testInfo),
   ]
@@ -193,7 +212,7 @@ export async function prepareSearchSeed(
   let publishedCount = 0
 
   while (publishedCount < count) {
-    if (publishedCount >= 10 && publisherSessions.length === 1) {
+    if (!useAdminPublisher && publishedCount >= 10 && publisherSessions.length === 1) {
       publisherSessions.push(await openAdhocPublisherSession(browser, testInfo))
     }
 
@@ -220,38 +239,48 @@ export async function prepareSearchSeed(
     skillNames,
   }
 
-  const adminContext = await browser.newContext()
-  const adminPage = await adminContext.newPage()
-  const adminBuilder = new E2eTestDataBuilder(adminPage, testInfo)
+  const expectedSlugs = seed.skills.map((skill) => skill.slug)
+  let adminContext: Awaited<ReturnType<Browser['newContext']>> | undefined
+  let adminBuilder: E2eTestDataBuilder | undefined
 
-  await loginWithCredentials(adminPage, adminCredentials(), testInfo)
-  await adminBuilder.init()
-
-  for (const skill of seed.skills) {
-    const reviewTaskId = await adminBuilder.waitForPendingReview(skill.namespace, skill.slug, skill.version)
-    await adminBuilder.approveReview(reviewTaskId)
+  const ensureAdminBuilder = async () => {
+    if (adminBuilder) {
+      return adminBuilder
+    }
+    adminContext = await browser.newContext()
+    const adminPage = await adminContext.newPage()
+    adminBuilder = new E2eTestDataBuilder(adminPage, testInfo)
+    await loginWithCredentials(adminPage, adminCredentials(), testInfo)
+    await adminBuilder.init()
+    return adminBuilder
   }
 
-  const expectedSlugs = seed.skills.map((skill) => skill.slug)
-  const shouldForceRebuildInCi = Boolean(process.env.CI || process.env.GITHUB_ACTIONS)
-  if (shouldForceRebuildInCi) {
-    await adminBuilder.rebuildSearchIndexIfPermitted()
+  const needsReviewApproval = seed.skills.some((skill) => skill.status !== 'PUBLISHED')
+  if (needsReviewApproval) {
+    const reviewer = await ensureAdminBuilder()
+    for (const skill of seed.skills) {
+      const reviewTaskId = await reviewer.waitForPendingReview(skill.namespace, skill.slug, skill.version)
+      await reviewer.approveReview(reviewTaskId)
+    }
   }
 
   try {
     await seed.builder.waitForSearchResults(seed.keyword, expectedSlugs)
   } catch (initialError) {
-    const rebuildTriggered = await adminBuilder.rebuildSearchIndexIfPermitted()
+    const privilegedBuilder = useAdminPublisher ? seed.builder : await ensureAdminBuilder()
+    const rebuildTriggered = await privilegedBuilder.rebuildSearchIndexIfPermitted(20_000)
     if (!rebuildTriggered) {
       throw initialError
     }
-    await seed.builder.waitForSearchResults(seed.keyword, expectedSlugs)
+    await seed.builder.waitForSearchResults(seed.keyword, expectedSlugs, 90_000)
   }
 
   return {
     ...seed,
     dispose: async () => {
-      await adminContext.close()
+      if (adminContext) {
+        await adminContext.close()
+      }
       for (let index = publisherSessions.length - 1; index >= 0; index -= 1) {
         await cleanupSearchSeed({
           builder: publisherSessions[index].builder,
