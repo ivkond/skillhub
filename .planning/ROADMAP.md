@@ -193,3 +193,63 @@ Plans:
 Plans:
 
 - TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.4: Добавить источник skill-ссылок из LobeHub (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+
+- TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.5: Добавить источник skill-ссылок из skills.sh (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+
+- TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.6: Добавить единый источник GitHub для skill-ссылок (репозитории/collections) (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+
+- TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.7: Добавить источник skill-ссылок из Smithery (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+
+- TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.8: Добавить источник skill-ссылок из MCP.Directory (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+
+- TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.9: Добавить источник skill-ссылок из Glama MCP Registry (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+
+- TBD (promote with /gsd-review-backlog when ready)
