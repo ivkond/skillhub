@@ -102,9 +102,6 @@ public class PostgresFullTextQueryService implements SearchQueryService {
         Set<Long> memberNamespaceIds = query.visibilityScope().memberNamespaceIds().isEmpty()
                 ? Set.of(-1L)
                 : query.visibilityScope().memberNamespaceIds();
-        Set<Long> adminNamespaceIds = query.visibilityScope().adminNamespaceIds().isEmpty()
-                ? Set.of(-1L)
-                : query.visibilityScope().adminNamespaceIds();
 
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT d.skill_id ");
@@ -190,7 +187,6 @@ public class PostgresFullTextQueryService implements SearchQueryService {
 
         if (query.visibilityScope().userId() != null) {
             nativeQuery.setParameter("memberNamespaceIds", memberNamespaceIds);
-            nativeQuery.setParameter("adminNamespaceIds", adminNamespaceIds);
         }
 
         if (query.namespaceId() != null) {
@@ -235,7 +231,6 @@ public class PostgresFullTextQueryService implements SearchQueryService {
 
         if (query.visibilityScope().userId() != null) {
             countQuery.setParameter("memberNamespaceIds", memberNamespaceIds);
-            countQuery.setParameter("adminNamespaceIds", adminNamespaceIds);
         }
 
         if (query.namespaceId() != null) {

@@ -15,7 +15,11 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -390,6 +394,40 @@ class PostgresFullTextQueryServiceTest {
         var sqlCaptor = org.mockito.ArgumentCaptor.forClass(String.class);
         verify(entityManager, org.mockito.Mockito.times(2)).createNativeQuery(sqlCaptor.capture());
         assertThat(sqlCaptor.getAllValues().getFirst()).contains("OR d.namespace_id IN :memberNamespaceIds");
+    }
+
+    @Test
+    void authenticatedQueriesShouldNotBindUnusedAdminNamespaceParameter() {
+        EntityManager entityManager = mock(EntityManager.class);
+        Query nativeQuery = mock(Query.class);
+        Query countQuery = mock(Query.class);
+        when(entityManager.createNativeQuery(anyString()))
+                .thenReturn(nativeQuery)
+                .thenReturn(countQuery);
+        when(nativeQuery.setParameter(anyString(), any())).thenReturn(nativeQuery);
+        when(countQuery.setParameter(anyString(), any())).thenReturn(countQuery);
+        doThrow(new IllegalArgumentException("Could not locate named parameter [adminNamespaceIds]"))
+                .when(nativeQuery).setParameter(eq("adminNamespaceIds"), any());
+        doThrow(new IllegalArgumentException("Could not locate named parameter [adminNamespaceIds]"))
+                .when(countQuery).setParameter(eq("adminNamespaceIds"), any());
+        when(nativeQuery.getResultList()).thenReturn(List.of());
+        when(countQuery.getSingleResult()).thenReturn(0L);
+
+        PostgresFullTextQueryService service = new PostgresFullTextQueryService(entityManager);
+
+        assertThatCode(() -> service.search(new SearchQuery(
+                "agentr",
+                null,
+                new SearchVisibilityScope("user-1", Set.of(7L), Set.of(9L)),
+                "relevance",
+                0,
+                50
+        ))).doesNotThrowAnyException();
+
+        verify(nativeQuery).setParameter("memberNamespaceIds", Set.of(7L));
+        verify(countQuery).setParameter("memberNamespaceIds", Set.of(7L));
+        verify(nativeQuery, never()).setParameter(eq("adminNamespaceIds"), any());
+        verify(countQuery, never()).setParameter(eq("adminNamespaceIds"), any());
     }
 
     @Test
