@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { DashboardPageHeader } from '@/shared/components/dashboard-page-header'
 import { useCreateCollection } from '@/shared/hooks/use-collection-queries'
+import { buildCollectionSlugFromTitle } from '@/shared/lib/collection-slug'
 import { mapCollectionMutationError } from '@/shared/lib/skill-collection-form-errors'
 import { Button, buttonVariants } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -28,6 +29,7 @@ export function CollectionNewPage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [slug, setSlug] = useState('')
+  const [isSlugAuto, setIsSlugAuto] = useState(true)
   const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PRIVATE')
 
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<'title' | 'description' | 'visibility' | 'slug', string>>>({})
@@ -40,6 +42,14 @@ export function CollectionNewPage() {
       return next
     })
   }
+
+  const generatedSlug = useMemo(() => buildCollectionSlugFromTitle(title), [title])
+
+  useEffect(() => {
+    if (isSlugAuto) {
+      setSlug(generatedSlug)
+    }
+  }, [generatedSlug, isSlugAuto])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -122,7 +132,9 @@ export function CollectionNewPage() {
             data-testid="collection-new-slug-input"
             value={slug}
             onChange={(e) => {
-              setSlug(e.target.value)
+              const nextSlug = e.target.value
+              setSlug(nextSlug)
+              setIsSlugAuto(nextSlug.trim() === generatedSlug)
               clearFieldError('slug')
             }}
             autoComplete="off"
