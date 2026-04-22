@@ -102,6 +102,7 @@ public class PostgresFullTextQueryService implements SearchQueryService {
         Set<Long> memberNamespaceIds = query.visibilityScope().memberNamespaceIds().isEmpty()
                 ? Set.of(-1L)
                 : query.visibilityScope().memberNamespaceIds();
+
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT d.skill_id ");
         sql.append("FROM skill_search_document d ");

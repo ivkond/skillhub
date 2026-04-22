@@ -58,6 +58,8 @@ interface ApiFailure extends Error {
 }
 
 const cleanupTimeoutMs = process.env.CI ? 8_000 : 5_000
+const eventualConsistencyTimeoutMs = process.env.CI ? 180_000 : 60_000
+const eventualConsistencyPollIntervalMs = process.env.CI ? 1_000 : 300
 
 export interface SeedSkillOptions {
   name?: string
@@ -95,6 +97,10 @@ async function runCleanupTaskWithTimeout(task: CleanupTask): Promise<void> {
         reject(error)
       })
   })
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 function buildSkillPackageContent(suffix: string, options?: SeedSkillOptions) {
@@ -399,10 +405,11 @@ export class E2eTestDataBuilder {
     }
   }
 
-  async waitForSearchResult(query: string, expectedSlug?: string): Promise<void> {
+  async waitForSearchResult(query: string, expectedSlug?: string, timeoutMs = eventualConsistencyTimeoutMs): Promise<void> {
     const encodedQuery = encodeURIComponent(query)
+    const deadline = Date.now() + timeoutMs
 
-    for (let attempt = 0; attempt < 20; attempt += 1) {
+    while (Date.now() < deadline) {
       try {
         const page = await parseEnvelope<{
           items: Array<{ slug: string }>
@@ -416,21 +423,22 @@ export class E2eTestDataBuilder {
         // Search indexing can lag briefly behind publish in local environments.
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)))
+      await delay(eventualConsistencyPollIntervalMs)
     }
 
     throw new Error(`Timed out waiting for search result "${query}"${expectedSlug ? ` (${expectedSlug})` : ''}`)
   }
 
-  async waitForSearchResults(query: string, expectedSlugs: string[]): Promise<void> {
+  async waitForSearchResults(query: string, expectedSlugs: string[], timeoutMs = eventualConsistencyTimeoutMs): Promise<void> {
     const pending = new Set(expectedSlugs)
     if (pending.size === 0) {
       return
     }
 
     const encodedQuery = encodeURIComponent(query)
+    const deadline = Date.now() + timeoutMs
 
-    for (let attempt = 0; attempt < 20; attempt += 1) {
+    while (Date.now() < deadline) {
       try {
         const page = await parseEnvelope<{
           items: Array<{ slug: string }>
@@ -449,14 +457,16 @@ export class E2eTestDataBuilder {
         // Search indexing can lag briefly behind publish in local environments.
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)))
+      await delay(eventualConsistencyPollIntervalMs)
     }
 
     throw new Error(`Timed out waiting for search results "${query}" (${Array.from(pending).join(', ')})`)
   }
 
   async waitForPendingReview(namespaceSlug: string, skillSlug: string, version: string): Promise<number> {
-    for (let attempt = 0; attempt < 20; attempt += 1) {
+    const deadline = Date.now() + eventualConsistencyTimeoutMs
+
+    while (Date.now() < deadline) {
       try {
         const page = await parseEnvelope<{
           items: ReviewTaskSummary[]
@@ -477,7 +487,7 @@ export class E2eTestDataBuilder {
         // Review list can lag behind publish very briefly.
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)))
+      await delay(eventualConsistencyPollIntervalMs)
     }
 
     throw new Error(`Timed out waiting for pending review ${namespaceSlug}/${skillSlug}@${version}`)
@@ -489,6 +499,22 @@ export class E2eTestDataBuilder {
         data: { comment },
       }),
     )
+  }
+
+  async rebuildSearchIndexIfPermitted(timeoutMs = 20_000): Promise<boolean> {
+    try {
+      const response = await this.request.post('/api/v1/admin/search/rebuild', { timeout: timeoutMs })
+      if (response.status() === 401 || response.status() === 403) {
+        return false
+      }
+      await parseEnvelope<unknown>(response)
+      return true
+    } catch (error) {
+      if (error instanceof Error && /timed out/i.test(error.message)) {
+        return false
+      }
+      throw error
+    }
   }
 
   async searchNamespaceMemberCandidates(slug: string, search: string): Promise<NamespaceCandidate[]> {
@@ -509,19 +535,36 @@ export class E2eTestDataBuilder {
   async publishSkill(namespaceSlug: string, options?: SeedSkillOptions): Promise<SeededSkill> {
     const unique = `${this.suffix}_${Math.random().toString(36).slice(2, 6)}`
     const zipBuffer = buildSkillPackageZipBuffer(unique, options)
+    let result: SeededSkill | null = null
 
-    const result = await parseEnvelope<SeededSkill>(
-      await this.request.post(`/api/web/skills/${encodeURIComponent(namespaceSlug)}/publish`, {
-        multipart: {
-          file: {
-            name: 'sample-skill.zip',
-            mimeType: 'application/zip',
-            buffer: zipBuffer,
-          },
-          visibility: 'PUBLIC',
-        },
-      }),
-    )
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        result = await parseEnvelope<SeededSkill>(
+          await this.request.post(`/api/web/skills/${encodeURIComponent(namespaceSlug)}/publish`, {
+            multipart: {
+              file: {
+                name: 'sample-skill.zip',
+                mimeType: 'application/zip',
+                buffer: zipBuffer,
+              },
+              visibility: 'PUBLIC',
+            },
+          }),
+        )
+        break
+      } catch (error) {
+        const failure = error as ApiFailure
+        const isRateLimited = failure.status === 429 || failure.code === 429
+        if (!isRateLimited || attempt === 2) {
+          throw error
+        }
+        await delay(1_000 * (attempt + 1))
+      }
+    }
+
+    if (!result) {
+      throw new Error(`Failed to publish skill into namespace ${namespaceSlug}`)
+    }
 
     this.cleanupTasks.push(async () => {
       await this.request.delete(`/api/web/skills/${encodeURIComponent(result.namespace)}/${encodeURIComponent(result.slug)}`)

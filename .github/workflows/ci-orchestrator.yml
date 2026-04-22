@@ -1,0 +1,276 @@
+name: CI Orchestrator
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  workflow_dispatch:
+
+concurrency:
+  group: ci-orchestrator-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-tests:
+    name: Web Build And Test
+    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Build frontend
+        run: make build-frontend
+
+      - name: Run frontend unit tests
+        run: make test-frontend
+
+  server-tests:
+    name: Server Unit Tests
+    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Ensure Maven wrapper is executable
+        run: chmod +x server/mvnw
+
+      - name: Run backend unit tests
+        run: make test-backend
+
+  e2e-scope:
+    name: Detect E2E-impacting changes
+    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      run_e2e: ${{ steps.detect.outputs.run_e2e }}
+
+    steps:
+      - name: Detect whether E2E should run for this PR
+        id: detect
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            if (context.eventName !== 'pull_request' || !context.payload.pull_request) {
+              core.setOutput('run_e2e', 'true');
+              return;
+            }
+
+            const includePrefixes = ['web/', 'server/', 'scanner/'];
+            const includeExact = new Set([
+              'Makefile',
+              'docker-compose.yml',
+              'docker-compose.override.yml',
+              '.github/workflows/ci-orchestrator.yml',
+              '.github/workflows/pr-e2e.yml',
+            ]);
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+
+            const runE2E = files.some((file) =>
+              includeExact.has(file.filename) ||
+              includePrefixes.some((prefix) => file.filename.startsWith(prefix))
+            );
+
+            core.info(`Changed files: ${files.length}; run_e2e=${runE2E}`);
+            core.setOutput('run_e2e', runE2E ? 'true' : 'false');
+
+  e2e-tests:
+    name: E2E (Real Services)
+    if: ${{ (github.event_name != 'pull_request' || !github.event.pull_request.draft) && needs.e2e-scope.outputs.run_e2e == 'true' }}
+    needs:
+      - e2e-scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Ensure Maven wrapper is executable
+        run: chmod +x server/mvnw
+
+      - name: Start full dev stack
+        run: make dev-all
+
+      - name: Install Playwright browsers
+        run: cd web && pnpm exec playwright install --with-deps chromium
+
+      - name: Run frontend E2E tests
+        run: make test-e2e-frontend
+
+      - name: Upload Playwright HTML report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: web/playwright-report/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload Playwright raw test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: web/test-results/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop full dev stack
+        if: ${{ always() }}
+        run: make dev-all-down
+
+  ai-agent-trigger:
+    name: AI Agent Trigger
+    runs-on: ubuntu-latest
+    needs:
+      - web-tests
+      - server-tests
+      - e2e-tests
+    if: ${{ always() && github.event_name == 'pull_request' && !cancelled() }}
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    env:
+      BLOCKS_TEAM_WEBHOOK_URL: ${{ secrets.BLOCKS_TEAM_WEBHOOK_URL }}
+      HAS_BLOCKS_WEBHOOK: ${{ secrets.BLOCKS_TEAM_WEBHOOK_URL != '' }}
+
+    steps:
+      - name: Collect PR context for AI agent
+        id: context
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                per_page: 100,
+              }
+            );
+
+            const reviewComments = await github.paginate(
+              github.rest.pulls.listReviewComments,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                per_page: 100,
+              }
+            );
+
+            const ciJobs = {
+              web: '${{ needs.web-tests.result }}',
+              server: '${{ needs.server-tests.result }}',
+              e2e: '${{ needs.e2e-tests.result }}',
+            };
+
+            const failingStates = new Set(['failure', 'cancelled', 'timed_out', 'action_required']);
+            const failedJobs = Object.entries(ciJobs)
+              .filter(([, result]) => failingStates.has(result))
+              .map(([name, result]) => `${name}:${result}`);
+
+            const payload = {
+              repository: `${context.repo.owner}/${context.repo.repo}`,
+              pr_number: pr.number,
+              pr_url: pr.html_url,
+              head_sha: pr.head.sha,
+              ci_jobs: ciJobs,
+              failed_jobs: failedJobs,
+              issue_comments_count: comments.length,
+              review_comments_count: reviewComments.length,
+              run_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              triggered_at: new Date().toISOString(),
+            };
+
+            core.setOutput('json', JSON.stringify(payload));
+            core.setOutput('has_failures', failedJobs.length > 0 ? 'true' : 'false');
+
+      - name: Write AI trigger summary
+        run: |
+          {
+            echo "### AI orchestration context"
+            echo
+            echo "- PR: #${{ github.event.pull_request.number }}"
+            echo "- Web tests: ${{ needs.web-tests.result }}"
+            echo "- Server tests: ${{ needs.server-tests.result }}"
+            echo "- E2E tests: ${{ needs.e2e-tests.result }}"
+            echo "- Issue comments: see payload"
+            echo "- Review comments: see payload"
+            echo "- Run URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Notify blocks.team webhook
+        if: ${{ env.HAS_BLOCKS_WEBHOOK == 'true' }}
+        env:
+          PAYLOAD: ${{ steps.context.outputs.json }}
+        run: |
+          curl -fsSL -X POST "${BLOCKS_TEAM_WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            --data "${PAYLOAD}"
+
+      - name: Skip notification when webhook is missing
+        if: ${{ env.HAS_BLOCKS_WEBHOOK != 'true' }}
+        run: echo "BLOCKS_TEAM_WEBHOOK_URL is not configured; webhook notification skipped."
