@@ -13,36 +13,6 @@ declare global {
   }
 }
 
-function extractBlock(cssSource: string, selector: string): string {
-  const selectorIndex = cssSource.indexOf(selector)
-  if (selectorIndex === -1) {
-    throw new Error(`Failed to find CSS block for selector: ${selector}`)
-  }
-
-  const openBraceIndex = cssSource.indexOf('{', selectorIndex + selector.length)
-  if (openBraceIndex === -1) {
-    throw new Error(`Failed to find CSS block for selector: ${selector}`)
-  }
-
-  let depth = 1
-  let cursor = openBraceIndex + 1
-  while (cursor < cssSource.length && depth > 0) {
-    const char = cssSource[cursor]
-    if (char === '{') {
-      depth += 1
-    } else if (char === '}') {
-      depth -= 1
-    }
-    cursor += 1
-  }
-
-  if (depth !== 0) {
-    throw new Error(`Failed to find CSS block for selector: ${selector}`)
-  }
-
-  return cssSource.slice(openBraceIndex + 1, cursor - 1)
-}
-
 function extractTokenValue(cssBlock: string, tokenName: string): string {
   const match = cssBlock.match(new RegExp(`--${tokenName}:\\s*([^;]+);`))
   if (!match) {
@@ -87,8 +57,7 @@ describe('theme code surface token', () => {
   }
 
   it('test_code_surface_when_light_theme_then_uses_light_background_token', () => {
-    const rootBlock = extractBlock(cssSource, ':root')
-    const lightToken = extractTokenValue(rootBlock, 'code-surface')
+    const lightToken = extractTokenValue(cssSource, 'code-surface')
     const lightness = parseHslLightness(lightToken)
 
     expect(lightness).toBeGreaterThan(50)

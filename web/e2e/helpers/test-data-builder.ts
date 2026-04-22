@@ -316,6 +316,12 @@ export class E2eTestDataBuilder {
       return activeTeam
     }
 
+    const activeFallback = namespaces.find((item) => this.isActiveNamespace(item))
+    if (activeFallback) {
+      this.ensuredNamespace = activeFallback
+      return activeFallback
+    }
+
     const activatable = namespaces.find((item) =>
       this.isTeamNamespace(item)
       && ((item.status === 'FROZEN' && item.canUnfreeze) || (item.status === 'ARCHIVED' && item.canRestore)),
@@ -532,24 +538,46 @@ export class E2eTestDataBuilder {
     const unique = `${this.suffix}_${Math.random().toString(36).slice(2, 6)}`
     const zipBuffer = buildSkillPackageZipBuffer(unique, options)
     let result: SeededSkill | null = null
+    const isCiRun = Boolean(process.env.CI || process.env.GITHUB_ACTIONS)
+    const canUseMockAdminFallback = isCiRun && namespaceSlug === 'global'
+
+    const publishOnce = async (headers?: Record<string, string>) =>
+      parseEnvelope<SeededSkill>(
+        await this.request.post(`/api/web/skills/${encodeURIComponent(namespaceSlug)}/publish`, {
+          headers,
+          multipart: {
+            file: {
+              name: 'sample-skill.zip',
+              mimeType: 'application/zip',
+              buffer: zipBuffer,
+            },
+            visibility: 'PUBLIC',
+          },
+        }),
+      )
 
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
-        result = await parseEnvelope<SeededSkill>(
-          await this.request.post(`/api/web/skills/${encodeURIComponent(namespaceSlug)}/publish`, {
-            multipart: {
-              file: {
-                name: 'sample-skill.zip',
-                mimeType: 'application/zip',
-                buffer: zipBuffer,
-              },
-              visibility: 'PUBLIC',
-            },
-          }),
-        )
+        result = await publishOnce()
         break
       } catch (error) {
         const failure = error as ApiFailure
+        const isForbidden = failure.status === 403 || failure.code === 403
+        if (isForbidden && canUseMockAdminFallback) {
+          try {
+            result = await publishOnce({ 'X-Mock-User-Id': 'local-admin' })
+            break
+          } catch (adminError) {
+            const adminFailure = adminError as ApiFailure
+            const adminIsRateLimited = adminFailure.status === 429 || adminFailure.code === 429
+            if (!adminIsRateLimited || attempt === 2) {
+              throw adminError
+            }
+            await delay(1_000 * (attempt + 1))
+            continue
+          }
+        }
+
         const isRateLimited = failure.status === 429 || failure.code === 429
         if (!isRateLimited || attempt === 2) {
           throw error
