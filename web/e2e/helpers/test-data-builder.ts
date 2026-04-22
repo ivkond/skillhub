@@ -316,12 +316,6 @@ export class E2eTestDataBuilder {
       return activeTeam
     }
 
-    const activeFallback = namespaces.find((item) => this.isActiveNamespace(item))
-    if (activeFallback) {
-      this.ensuredNamespace = activeFallback
-      return activeFallback
-    }
-
     const activatable = namespaces.find((item) =>
       this.isTeamNamespace(item)
       && ((item.status === 'FROZEN' && item.canUnfreeze) || (item.status === 'ARCHIVED' && item.canRestore)),

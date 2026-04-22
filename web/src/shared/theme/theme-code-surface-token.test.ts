@@ -14,12 +14,33 @@ declare global {
 }
 
 function extractBlock(cssSource: string, selector: string): string {
-  const escapedSelector = selector.replace('.', '\\.')
-  const match = cssSource.match(new RegExp(`${escapedSelector}\\s*\\{([\\s\\S]*?)\\n\\s*\\}`))
-  if (!match) {
+  const selectorIndex = cssSource.indexOf(selector)
+  if (selectorIndex === -1) {
     throw new Error(`Failed to find CSS block for selector: ${selector}`)
   }
-  return match[1]
+
+  const openBraceIndex = cssSource.indexOf('{', selectorIndex + selector.length)
+  if (openBraceIndex === -1) {
+    throw new Error(`Failed to find CSS block for selector: ${selector}`)
+  }
+
+  let depth = 1
+  let cursor = openBraceIndex + 1
+  while (cursor < cssSource.length && depth > 0) {
+    const char = cssSource[cursor]
+    if (char === '{') {
+      depth += 1
+    } else if (char === '}') {
+      depth -= 1
+    }
+    cursor += 1
+  }
+
+  if (depth !== 0) {
+    throw new Error(`Failed to find CSS block for selector: ${selector}`)
+  }
+
+  return cssSource.slice(openBraceIndex + 1, cursor - 1)
 }
 
 function extractTokenValue(cssBlock: string, tokenName: string): string {

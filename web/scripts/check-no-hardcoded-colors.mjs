@@ -6,7 +6,7 @@ import process from 'node:process'
 import { execFileSync } from 'node:child_process'
 
 export const HARD_CODED_COLOR_PATTERN =
-  /#(?:[0-9a-fA-F]{3,8})\b|rgba?\([^)]*\)|hsla?\([^)]*\d[^)]*\)/g
+  /#(?:[0-9a-fA-F]{3,8})\b|\brgba?\(\s*[^()\n]{1,128}\)|\bhsla?\(\s*[^()\n]{1,128}\)/g
 export const FORBIDDEN_UTILITY_CLASS_PATTERN =
   /(?:^|[\s"'`])(?:text|bg|border|ring|stroke|fill)-(?:red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-\d{2,3}(?:\/\d{1,3})?(?=$|[\s"'`])/g
 export const INLINE_COLOR_STYLE_PATTERN =
@@ -20,6 +20,32 @@ const TOKEN_ALLOW_START = '/* COLOR_POLICY_ALLOW_START:token-definitions */'
 const TOKEN_ALLOW_END = '/* COLOR_POLICY_ALLOW_END:token-definitions */'
 const DEFAULT_ALLOWLIST_PATH = path.resolve(process.cwd(), 'scripts/check-no-hardcoded-colors.allowlist.json')
 const DEFAULT_SCOPE = path.resolve(process.cwd(), 'src')
+const GIT_BINARY_PATHS = process.platform === 'win32'
+  ? [
+      'C:/Program Files/Git/cmd/git.exe',
+      'C:/Program Files/Git/bin/git.exe',
+    ]
+  : [
+      '/usr/bin/git',
+      '/usr/local/bin/git',
+    ]
+
+function resolveGitBinary() {
+  const configured = process.env.CHECK_COLORS_GIT_BIN
+  if (configured) {
+    return configured
+  }
+
+  for (const candidate of GIT_BINARY_PATHS) {
+    if (fs.existsSync(candidate)) {
+      return candidate
+    }
+  }
+
+  return null
+}
+
+const GIT_BINARY = resolveGitBinary()
 
 function parseArgs(argv) {
   const args = {
@@ -80,8 +106,12 @@ function parseArgs(argv) {
 }
 
 function runGit(args) {
+  if (!GIT_BINARY) {
+    return null
+  }
+
   try {
-    return execFileSync('git', args, {
+    return execFileSync(GIT_BINARY, args, {
       cwd: process.cwd(),
       stdio: ['ignore', 'pipe', 'pipe'],
       encoding: 'utf8',
