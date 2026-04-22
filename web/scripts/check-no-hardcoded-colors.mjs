@@ -96,7 +96,7 @@ function isResolvableGitRef(reference) {
     return false
   }
 
-  return runGit(`git rev-parse --verify ${reference}`) !== null
+  return runGit(['rev-parse', '--verify', reference]) !== null
 }
 
 function resolveBaseRef(explicitBaseRef) {
@@ -104,7 +104,7 @@ function resolveBaseRef(explicitBaseRef) {
     explicitBaseRef ? { source: '--base-ref', value: explicitBaseRef } : null,
     process.env.CHECK_COLORS_BASE_REF ? { source: 'CHECK_COLORS_BASE_REF', value: process.env.CHECK_COLORS_BASE_REF } : null,
     { source: 'origin/main', value: 'origin/main' },
-    { source: 'merge-base HEAD HEAD~1', value: runGit('git merge-base HEAD HEAD~1') },
+    { source: 'merge-base HEAD HEAD~1', value: runGit(['merge-base', 'HEAD', 'HEAD~1']) },
   ].filter(Boolean)
 
   for (const candidate of candidates) {
@@ -490,47 +490,50 @@ function main() {
     return
   }
 
-  if (options.mode === 'strict') {
-    if (scannedFiles.length === 0) {
-      throw new Error(`Strict mode requires at least one scannable file in scope '${options.scope}'.`)
-    }
+  switch (options.mode) {
+    case 'strict': {
+      if (scannedFiles.length === 0) {
+        throw new Error(`Strict mode requires at least one scannable file in scope '${options.scope}'.`)
+      }
 
-    if (allViolations.length > 0) {
-      printViolations(allViolations)
-      process.exitCode = 1
+      if (allViolations.length > 0) {
+        printViolations(allViolations)
+        process.exitCode = 1
+        return
+      }
+      console.log('check:colors strict passed with 0 violations.')
       return
     }
-    console.log('check:colors strict passed with 0 violations.')
-    return
-  }
-
-  if (options.mode === 'baseline-diff') {
-    const baselineSet = loadBaseline(options.baselinePath)
-    const newViolations = allViolations.filter((violation) => !baselineSet.has(serializeViolation(violation)))
-    if (newViolations.length > 0) {
-      printViolations(newViolations, 'NEW')
-      process.exitCode = 1
+    case 'baseline-diff': {
+      const baselineSet = loadBaseline(options.baselinePath)
+      const newViolations = allViolations.filter((violation) => !baselineSet.has(serializeViolation(violation)))
+      if (newViolations.length > 0) {
+        printViolations(newViolations, 'NEW')
+        process.exitCode = 1
+        return
+      }
+      console.log(`check:colors baseline-diff passed (${allViolations.length} current violations, 0 new).`)
       return
     }
-    console.log(`check:colors baseline-diff passed (${allViolations.length} current violations, 0 new).`)
-    return
-  }
+    case 'changed': {
+      const resolved = resolveBaseRef(options.baseRef)
+      const { changedLines } = getChangedScope(options.scope, resolved.baseRef)
+      const changedViolations = allViolations.filter((violation) =>
+        changedLines.has(`${violation.file}:${violation.line}`),
+      )
 
-  if (options.mode === 'changed') {
-    const resolved = resolveBaseRef(options.baseRef)
-    const { changedLines } = getChangedScope(options.scope, resolved.baseRef)
-    const changedViolations = allViolations.filter((violation) =>
-      changedLines.has(`${violation.file}:${violation.line}`),
-    )
+      if (changedViolations.length > 0) {
+        printViolations(changedViolations, 'CHANGED')
+        process.exitCode = 1
+        return
+      }
 
-    if (changedViolations.length > 0) {
-      printViolations(changedViolations, 'CHANGED')
-      process.exitCode = 1
+      console.log(`check:colors changed passed with 0 violations (base ref source: ${resolved.source}).`)
       return
     }
-
-    console.log(`check:colors changed passed with 0 violations (base ref source: ${resolved.source}).`)
-    return
+    default: {
+      throw new Error(`Unsupported mode '${options.mode}'.`)
+    }
   }
 }
 

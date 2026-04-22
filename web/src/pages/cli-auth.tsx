@@ -10,14 +10,20 @@ import { ORIGINAL_URL_SEARCH } from '@/app/router'
 // Parse the original URL params captured before TanStack Router rewrites
 const ORIGINAL_PARAMS = new URLSearchParams(ORIGINAL_URL_SEARCH)
 
-function isValidRedirectUri(uri: string): boolean {
+function resolveLoopbackRedirect(uri: string): URL | null {
   try {
     const url = new URL(uri)
-    // Only allow localhost/127.0.0.1/::1 on HTTP
-    const validHosts = ['localhost', '127.0.0.1', '[::1]', '::1']
-    return url.protocol === 'http:' && validHosts.includes(url.hostname.toLowerCase())
+    const validHosts = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
+    const hostname = url.hostname.toLowerCase()
+    const port = Number(url.port)
+    const hasValidPort = Number.isInteger(port) && port > 0 && port <= 65_535
+    if (url.protocol !== 'http:' || !validHosts.has(hostname) || !hasValidPort || url.username || url.password) {
+      return null
+    }
+
+    return new URL(`http://127.0.0.1:${port}/`)
   } catch {
-    return false
+    return null
   }
 }
 
@@ -50,13 +56,6 @@ export function CliAuthPage() {
   const labelPlain = ORIGINAL_PARAMS.get('label')?.trim() || undefined
   const label = decodeLabel(labelB64, labelPlain)
 
-  // Debug: log search params and raw URL
-  console.log('CLI Auth - Original search (from router.tsx):', ORIGINAL_URL_SEARCH)
-  console.log('CLI Auth - Current URL:', typeof window !== 'undefined' ? window.location.href : 'SSR')
-  console.log('CLI Auth - redirectUri:', redirectUri)
-  console.log('CLI Auth - state:', state)
-  console.log('CLI Auth - label:', label)
-
   useEffect(() => {
     // Check authentication status
     getCurrentUser()
@@ -83,7 +82,8 @@ export function CliAuthPage() {
     }
 
     // Validate redirect_uri
-    if (!redirectUri || !isValidRedirectUri(redirectUri)) {
+    const safeRedirect = redirectUri ? resolveLoopbackRedirect(redirectUri) : null
+    if (!safeRedirect) {
       setStatus('error')
       setErrorMessage(t('cliAuth.invalidRedirectUri'))
       return
@@ -93,7 +93,7 @@ export function CliAuthPage() {
     if (!state) {
       setStatus('error')
       // Special error message for Windows users with missing state
-      if (redirectUri && typeof window !== 'undefined' && navigator.platform.includes('Win')) {
+      if (safeRedirect && typeof window !== 'undefined' && navigator.platform.includes('Win')) {
         setErrorMessage(t('cliAuth.windowsUrlBug'))
       } else {
         setErrorMessage(t('cliAuth.missingState'))
@@ -119,10 +119,11 @@ export function CliAuthPage() {
         hashParams.set('registry', registryUrl)
         hashParams.set('state', state)
 
-        const redirectUrl = `${redirectUri}#${hashParams.toString()}`
+        const redirectUrl = new URL(safeRedirect.toString())
+        redirectUrl.hash = hashParams.toString()
 
         // Redirect to CLI's loopback server
-        window.location.assign(redirectUrl)
+        window.location.assign(redirectUrl.toString())
       })
       .catch((error) => {
         setStatus('error')

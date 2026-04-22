@@ -31,11 +31,26 @@ function extractTokenValue(cssBlock: string, tokenName: string): string {
 }
 
 function parseHslLightness(tokenValue: string): number {
-  const match = tokenValue.match(/(\d+(?:\.\d+)?)%\s*$/)
-  if (!match) {
+  const percentIndex = tokenValue.lastIndexOf('%')
+  if (percentIndex <= 0) {
     throw new Error(`Token value is not an HSL triplet: ${tokenValue}`)
   }
-  return Number(match[1])
+
+  let start = percentIndex - 1
+  while (start >= 0) {
+    const char = tokenValue[start]
+    if ((char >= '0' && char <= '9') || char === '.') {
+      start -= 1
+      continue
+    }
+    break
+  }
+
+  const value = Number(tokenValue.slice(start + 1, percentIndex))
+  if (!Number.isFinite(value)) {
+    throw new Error(`Token value is not an HSL triplet: ${tokenValue}`)
+  }
+  return value
 }
 
 describe('theme code surface token', () => {

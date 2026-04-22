@@ -42,11 +42,22 @@ function transliterateCyrillicToLatin(value: string): string {
     .join('')
 }
 
+function trimOuterDashes(value: string): string {
+  let start = 0
+  let end = value.length
+  while (start < end && value[start] === '-') {
+    start += 1
+  }
+  while (end > start && value[end - 1] === '-') {
+    end -= 1
+  }
+  return value.slice(start, end)
+}
+
 /**
  * Builds a URL-safe collection slug from a human-readable title.
  */
 export function buildCollectionSlugFromTitle(title: string): string {
-  return transliterateCyrillicToLatin(title)
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+  const normalized = transliterateCyrillicToLatin(title).replace(/[^a-z0-9]+/g, '-')
+  return trimOuterDashes(normalized)
 }
