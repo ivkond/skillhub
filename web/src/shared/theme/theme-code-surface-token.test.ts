@@ -1,24 +1,15 @@
+import { existsSync, readFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
-declare global {
-  interface ImportMeta {
-    glob(
-      pattern: string,
-      options: {
-        eager: true
-        import: 'default'
-        query: '?raw'
-      }
-    ): Record<string, string>
-  }
-}
-
-function extractTokenValue(cssBlock: string, tokenName: string): string {
-  const match = cssBlock.match(new RegExp(`--${tokenName}:\\s*([^;]+);`))
-  if (!match) {
+function extractTokenValue(cssSource: string, tokenName: string): string {
+  const pattern = new RegExp(`--${tokenName}:\\s*([^;]+);`, 'g')
+  const matches = Array.from(cssSource.matchAll(pattern))
+  if (matches.length === 0) {
     throw new Error(`Failed to find token: --${tokenName}`)
   }
-  return match[1].trim()
+  return matches[0][1].trim()
 }
 
 function parseHslLightness(tokenValue: string): number {
@@ -45,15 +36,24 @@ function parseHslLightness(tokenValue: string): number {
 }
 
 describe('theme code surface token', () => {
-  const cssFiles = import.meta.glob('../../index.css', {
-    eager: true,
-    import: 'default',
-    query: '?raw',
-  })
-  const cssSource = cssFiles['../../index.css']
+  const currentFilePath = fileURLToPath(import.meta.url)
+  const currentDir = path.dirname(currentFilePath)
+  const cssPathCandidates = [
+    path.resolve(currentDir, '../../index.css'),
+    path.resolve(process.cwd(), 'web', 'src', 'index.css'),
+    path.resolve(process.cwd(), 'src', 'index.css'),
+    path.resolve(process.cwd(), 'index.css'),
+  ]
 
-  if (typeof cssSource !== 'string') {
-    throw new Error('Failed to load CSS source for token test')
+  const cssSource = cssPathCandidates
+    .filter((cssPath) => existsSync(cssPath))
+    .map((cssPath) => readFileSync(cssPath, 'utf8'))
+    .find((source) => /--code-surface:\s*[^;]+;/.test(source))
+
+  if (!cssSource) {
+    throw new Error(
+      `Failed to load theme css with --code-surface token from paths: ${cssPathCandidates.join(', ')}`
+    )
   }
 
   it('test_code_surface_when_light_theme_then_uses_light_background_token', () => {
