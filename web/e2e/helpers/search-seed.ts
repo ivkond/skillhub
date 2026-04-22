@@ -46,16 +46,12 @@ function publisherCredentials() {
 function adminCredentials() {
   return {
     username: getOptionalEnv('E2E_ADMIN_USERNAME') ?? getOptionalEnv('BOOTSTRAP_ADMIN_USERNAME') ?? 'admin',
-    password: getOptionalEnv('E2E_ADMIN_PASSWORD') ?? getOptionalEnv('BOOTSTRAP_ADMIN_PASSWORD') ?? 'ChangeMe!2026',
+    password: getOptionalEnv('E2E_ADMIN_PASSWORD') ?? getOptionalEnv('BOOTSTRAP_ADMIN_PASSWORD') ?? 'LocalDevOnly!ChangeBeforeSharing',
   }
 }
 
 function hasPublisherCredentials() {
   return Boolean(getOptionalEnv('E2E_PUBLISH_USERNAME') && getOptionalEnv('E2E_PUBLISH_PASSWORD'))
-}
-
-function hasExplicitCiAdminCredentials() {
-  return Boolean(getOptionalEnv('E2E_ADMIN_USERNAME') && getOptionalEnv('E2E_ADMIN_PASSWORD'))
 }
 
 function buildSearchKeyword(seedSuffix: string, explicitKeyword?: string): string {
@@ -213,7 +209,7 @@ export async function prepareSearchSeed(
   const keyword = buildSearchKeyword(seedSuffix, options?.keyword)
   const description = options?.description || `Searchable ${keyword} skill for Playwright E2E coverage.`
   const useProvidedPublisher = count <= 3 && hasPublisherCredentials()
-  const useAdminPublisher = Boolean((process.env.CI || process.env.GITHUB_ACTIONS) && count <= 3 && hasExplicitCiAdminCredentials())
+  const useAdminPublisher = Boolean(process.env.CI || process.env.GITHUB_ACTIONS)
   const publisherSessions: PublisherSession[] = [
     useAdminPublisher
       ? await openAdminPublisherSession(browser, testInfo)

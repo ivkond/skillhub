@@ -20,6 +20,8 @@ test.describe('Auth Entry (Real API)', () => {
   })
 
   test('renders google oauth action and sanitizes malicious returnTo', async ({ page }) => {
+    let oauthActionUrl = ''
+
     await page.route('**/api/v1/auth/methods**', async (route) => {
       await route.fulfill({
         status: 200,
@@ -40,6 +42,15 @@ test.describe('Auth Entry (Real API)', () => {
       })
     })
 
+    await page.route('**/oauth2/authorization/google**', async (route) => {
+      oauthActionUrl = route.request().url()
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/plain',
+        body: 'ok',
+      })
+    })
+
     await page.goto('/login?returnTo=https%3A%2F%2Fevil.example%2Fsteal')
 
     await expect(page.getByRole('button', { name: 'OAuth' })).toBeVisible()
@@ -48,12 +59,10 @@ test.describe('Auth Entry (Real API)', () => {
     const googleButton = page.locator('[data-provider-id="oauth-google"]')
     await expect(googleButton).toBeVisible()
 
-    const oauthRequest = page.waitForRequest((request) => request.url().includes('/oauth2/authorization/google'))
     await googleButton.click()
-    const request = await oauthRequest
+    await expect.poll(() => oauthActionUrl).toContain('/oauth2/authorization/google')
 
-    expect(request.url()).toContain('/oauth2/authorization/google')
-    expect(request.url()).toContain('returnTo=%2Fdashboard')
-    expect(request.url()).not.toContain('evil.example')
+    expect(oauthActionUrl).toContain('returnTo=%2Fdashboard')
+    expect(oauthActionUrl).not.toContain('evil.example')
   })
 })

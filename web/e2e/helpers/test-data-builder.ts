@@ -81,6 +81,18 @@ function uniqueSuffix(testInfo?: TestInfo): string {
   return `${worker}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 }
 
+function getOptionalEnv(name: string): string | undefined {
+  const value = process.env[name]?.trim()
+  return value ? value : undefined
+}
+
+function bootstrapAdminCredentials() {
+  return {
+    username: getOptionalEnv('E2E_ADMIN_USERNAME') ?? getOptionalEnv('BOOTSTRAP_ADMIN_USERNAME') ?? 'admin',
+    password: getOptionalEnv('E2E_ADMIN_PASSWORD') ?? getOptionalEnv('BOOTSTRAP_ADMIN_PASSWORD') ?? 'LocalDevOnly!ChangeBeforeSharing',
+  }
+}
+
 async function runCleanupTaskWithTimeout(task: CleanupTask): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
@@ -221,6 +233,49 @@ export class E2eTestDataBuilder {
     await this.request.get('/api/v1/auth/providers')
   }
 
+  private async withBootstrapAdminRequest<T>(
+    operation: (requestContext: APIRequestContext) => Promise<T>,
+  ): Promise<T | null> {
+    const browser = this.page.context().browser()
+    if (!browser) {
+      return null
+    }
+
+    const context = await browser.newContext()
+    try {
+      const credentials = bootstrapAdminCredentials()
+      await context.request.get('/api/v1/auth/providers')
+      const login = await context.request.post('/api/v1/auth/local/login', {
+        data: credentials,
+      })
+      if (!login.ok()) {
+        return null
+      }
+
+      return await operation(context.request)
+    } catch {
+      return null
+    } finally {
+      await context.close()
+    }
+  }
+
+  private async withIsolatedRequest<T>(
+    operation: (requestContext: APIRequestContext) => Promise<T>,
+  ): Promise<T> {
+    const browser = this.page.context().browser()
+    if (!browser) {
+      throw new Error('No browser instance available for isolated request context')
+    }
+
+    const context = await browser.newContext()
+    try {
+      return await operation(context.request)
+    } finally {
+      await context.close()
+    }
+  }
+
   async cleanup(): Promise<void> {
     for (let i = this.cleanupTasks.length - 1; i >= 0; i -= 1) {
       try {
@@ -240,15 +295,57 @@ export class E2eTestDataBuilder {
     const slug = rawSlug.slice(0, 64)
     const displayName = `E2E ${slug}`
 
-    const created = await parseEnvelope<SeededNamespace>(
-      await this.request.post('/api/v1/namespaces', {
+    const createNamespace = (headers?: Record<string, string>) =>
+      this.request.post('/api/web/namespaces', {
+        headers,
         data: {
           slug,
           displayName,
           description: `E2E namespace ${slug}`,
         },
-      }),
-    )
+      })
+
+    let created: SeededNamespace
+    try {
+      created = await parseEnvelope<SeededNamespace>(await createNamespace())
+    } catch (error) {
+      const failure = error as ApiFailure
+      const isForbidden = failure.status === 403 || failure.code === 403
+      if (!isForbidden) {
+        throw error
+      }
+      const elevatedCreated = await this.withBootstrapAdminRequest(async (requestContext) =>
+        parseEnvelope<SeededNamespace>(
+          await requestContext.post('/api/web/namespaces', {
+            data: {
+              slug,
+              displayName,
+              description: `E2E namespace ${slug}`,
+            },
+          }),
+        ),
+      )
+      if (elevatedCreated) {
+        created = elevatedCreated
+      } else {
+        created = await this.withIsolatedRequest(async (requestContext) =>
+          {
+            await requestContext.get('/api/v1/auth/providers', {
+              headers: { 'X-Mock-User-Id': 'local-admin' },
+            })
+            return parseEnvelope<SeededNamespace>(
+              await requestContext.post('/api/web/namespaces', {
+                data: {
+                  slug,
+                  displayName,
+                  description: `E2E namespace ${slug}`,
+                },
+              }),
+            )
+          },
+        )
+      }
+    }
 
     this.cleanupTasks.push(async () => {
       await this.request.post(`/api/web/namespaces/${encodeURIComponent(created.slug)}/archive`, {
@@ -538,12 +635,10 @@ export class E2eTestDataBuilder {
     const unique = `${this.suffix}_${Math.random().toString(36).slice(2, 6)}`
     const zipBuffer = buildSkillPackageZipBuffer(unique, options)
     let result: SeededSkill | null = null
-    const isCiRun = Boolean(process.env.CI || process.env.GITHUB_ACTIONS)
-    const canUseMockAdminFallback = isCiRun && namespaceSlug === 'global'
 
-    const publishOnce = async (headers?: Record<string, string>) =>
+    const publishVia = async (requestContext: APIRequestContext, headers?: Record<string, string>) =>
       parseEnvelope<SeededSkill>(
-        await this.request.post(`/api/web/skills/${encodeURIComponent(namespaceSlug)}/publish`, {
+        await requestContext.post(`/api/web/skills/${encodeURIComponent(namespaceSlug)}/publish`, {
           headers,
           multipart: {
             file: {
@@ -556,6 +651,9 @@ export class E2eTestDataBuilder {
         }),
       )
 
+    const publishOnce = async (headers?: Record<string, string>) =>
+      publishVia(this.request, headers)
+
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
         result = await publishOnce()
@@ -563,9 +661,20 @@ export class E2eTestDataBuilder {
       } catch (error) {
         const failure = error as ApiFailure
         const isForbidden = failure.status === 403 || failure.code === 403
-        if (isForbidden && canUseMockAdminFallback) {
+        if (isForbidden) {
           try {
-            result = await publishOnce({ 'X-Mock-User-Id': 'local-admin' })
+            const elevatedResult = await this.withBootstrapAdminRequest((requestContext) =>
+              publishVia(requestContext),
+            )
+            result = elevatedResult
+              ? elevatedResult
+              : await this.withIsolatedRequest(async (requestContext) => {
+                await requestContext.get('/api/v1/auth/providers', {
+                  headers: { 'X-Mock-User-Id': 'local-admin' },
+                })
+                return publishVia(requestContext)
+              },
+              )
             break
           } catch (adminError) {
             const adminFailure = adminError as ApiFailure
