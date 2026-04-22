@@ -3,7 +3,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { execSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 
 export const HARD_CODED_COLOR_PATTERN =
   /#(?:[0-9a-fA-F]{3,8})\b|rgba?\([^)]*\)|hsla?\([^)]*\d[^)]*\)/g
@@ -79,9 +79,9 @@ function parseArgs(argv) {
   return args
 }
 
-function runGit(command) {
+function runGit(args) {
   try {
-    return execSync(command, {
+    return execFileSync('git', args, {
       cwd: process.cwd(),
       stdio: ['ignore', 'pipe', 'pipe'],
       encoding: 'utf8',
@@ -254,9 +254,9 @@ function getChangedScope(scopePath, baseRef) {
   const changedLines = new Set()
 
   const diffCommands = [
-    `git diff --unified=0 ${baseRef}...HEAD -- ${normalizedScope}`,
-    `git diff --unified=0 --cached -- ${normalizedScope}`,
-    `git diff --unified=0 -- ${normalizedScope}`,
+    ['diff', '--unified=0', `${baseRef}...HEAD`, '--', normalizedScope],
+    ['diff', '--unified=0', '--cached', '--', normalizedScope],
+    ['diff', '--unified=0', '--', normalizedScope],
   ]
 
   for (const command of diffCommands) {
@@ -271,7 +271,7 @@ function getChangedScope(scopePath, baseRef) {
     }
   }
 
-  const untracked = runGit(`git ls-files --others --exclude-standard -- ${normalizedScope}`)
+  const untracked = runGit(['ls-files', '--others', '--exclude-standard', '--', normalizedScope])
   if (untracked) {
     for (const filePath of untracked.split('\n').map((value) => value.trim()).filter(Boolean)) {
       const absolute = path.resolve(process.cwd(), filePath)
