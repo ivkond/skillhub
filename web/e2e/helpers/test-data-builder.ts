@@ -362,7 +362,6 @@ export class E2eTestDataBuilder {
         created = await this.withIsolatedRequest(
           async (requestContext) => parseEnvelope<SeededNamespace>(
             await requestContext.post('/api/web/namespaces', {
-              headers: mockHeaders,
               data: {
                 slug,
                 displayName,
@@ -711,7 +710,7 @@ export class E2eTestDataBuilder {
             }
 
             result = await this.withIsolatedRequest(
-              (requestContext) => publishVia(requestContext, mockHeaders),
+              (requestContext) => publishVia(requestContext),
               mockHeaders,
             )
             break
