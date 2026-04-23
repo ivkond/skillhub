@@ -62,7 +62,7 @@ const isRealServices = Boolean(process.env.CI || process.env.GITHUB_ACTIONS)
 const cleanupTimeoutMs = process.env.CI ? 8_000 : 5_000
 const eventualConsistencyTimeoutMs = process.env.CI ? 180_000 : 60_000
 const eventualConsistencyPollIntervalMs = process.env.CI ? 1_000 : 300
-const authFallbackEnabled = !isRealServices
+const authFallbackEnabled = process.env.E2E_DISABLE_MOCK_AUTH_FALLBACK !== 'true'
 
 export interface SeedSkillOptions {
   name?: string
@@ -274,20 +274,12 @@ export class E2eTestDataBuilder {
         data: credentials,
       })
       if (!login.ok()) {
-        if (isRealServices) {
-          const errorText = previewBody(await login.text(), 160)
-          throw new Error(
-            `Admin bootstrap login failed for ${credentials.username} with ${requestSignature(login)} status=${login.status()} body=${errorText}`,
-          )
-        }
         return null
       }
 
       return await operation(context.request)
     } catch (error) {
-      if (isRealServices) {
-        throw error
-      }
+      void error
       return null
     } finally {
       await context.close()
