@@ -1,3 +1,4 @@
+import { randomIntBelow } from './crypto'
 import type { Page } from '@playwright/test'
 
 export async function setEnglishLocale(page: Page) {
@@ -7,7 +8,7 @@ export async function setEnglishLocale(page: Page) {
 }
 
 export async function setUniqueClientIp(page: Page, seed: string) {
-  const suffix = Date.now() + Math.floor(Math.random() * 1000)
+  const suffix = Date.now() + randomIntBelow(1000)
   const thirdOctet = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) % 250
   const fourthOctet = suffix % 250
   await page.context().setExtraHTTPHeaders({

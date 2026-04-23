@@ -49,6 +49,7 @@
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "@playwright/test": "^1.58.2",
     "@testing-library/react": "^16.3.2",
+    "@types/node": "^22.13.1",
     "@types/mdast": "^4.0.4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

@@ -1,6 +1,7 @@
 import type { Browser, Locator, Page, TestInfo } from '@playwright/test'
 import { createFreshSession, loginWithCredentials, registerSession } from './session'
 import { E2eTestDataBuilder, type SeededNamespace, type SeededSkill } from './test-data-builder'
+import { randomAlphanumeric } from './crypto'
 
 export const DEFAULT_SEARCH_KEYWORD = 'agent'
 
@@ -60,7 +61,7 @@ function buildSearchKeyword(seedSuffix: string, explicitKeyword?: string): strin
   }
 
   const compactSeed = seedSuffix.toLowerCase().replace(/[^a-z]/g, '')
-  const randomSuffix = compactSeed.slice(0, 12) || Math.random().toString(36).replace(/[^a-z]/g, '').slice(0, 12)
+  const randomSuffix = compactSeed.slice(0, 12) || randomAlphanumeric(12)
   return `agent${randomSuffix}`.slice(0, 32)
 }
 
@@ -155,7 +156,7 @@ export async function seedPublicSearchSkills(
 ): Promise<SearchSeedContext> {
   const count = options?.count ?? 1
   const builder = new E2eTestDataBuilder(page, testInfo)
-  const seedSuffix = `${testInfo.parallelIndex ?? 0}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+  const seedSuffix = `${testInfo.parallelIndex ?? 0}-${Date.now()}-${randomAlphanumeric(4)}`
   const keyword = buildSearchKeyword(seedSuffix, options?.keyword)
 
   await loginWithCredentials(page, publisherCredentials(), testInfo)
@@ -205,7 +206,7 @@ export async function prepareSearchSeed(
   },
 ): Promise<PreparedSearchSeed> {
   const count = options?.count ?? 1
-  const seedSuffix = `${testInfo.parallelIndex ?? 0}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+  const seedSuffix = `${testInfo.parallelIndex ?? 0}-${Date.now()}-${randomAlphanumeric(4)}`
   const keyword = buildSearchKeyword(seedSuffix, options?.keyword)
   const description = options?.description || `Searchable ${keyword} skill for Playwright E2E coverage.`
   const useProvidedPublisher = count <= 3 && hasPublisherCredentials()

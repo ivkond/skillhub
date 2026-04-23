@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 import type { APIRequestContext, Page, TestInfo } from '@playwright/test'
+import { randomAlphanumeric } from './crypto'
 
 type CleanupTask = () => Promise<void>
 
@@ -57,9 +58,11 @@ interface ApiFailure extends Error {
   code?: number
 }
 
+const isRealServices = Boolean(process.env.CI || process.env.GITHUB_ACTIONS)
 const cleanupTimeoutMs = process.env.CI ? 8_000 : 5_000
 const eventualConsistencyTimeoutMs = process.env.CI ? 180_000 : 60_000
 const eventualConsistencyPollIntervalMs = process.env.CI ? 1_000 : 300
+const authFallbackEnabled = !isRealServices
 
 export interface SeedSkillOptions {
   name?: string
@@ -78,7 +81,7 @@ function asApiErrorBody(value: unknown): string {
 
 function uniqueSuffix(testInfo?: TestInfo): string {
   const worker = testInfo?.parallelIndex ?? 0
-  return `${worker}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+  return `${worker}_${Date.now()}_${randomAlphanumeric(6)}`
 }
 
 function getOptionalEnv(name: string): string | undefined {
@@ -194,18 +197,33 @@ function createSkillPackageZipFile(suffix: string, options?: SeedSkillOptions): 
   }
 }
 
+function previewBody(body: string, maxLength = 250): string {
+  const trimmed = body.trim()
+  if (trimmed.length <= maxLength) {
+    return trimmed
+  }
+  return `${trimmed.slice(0, maxLength)}...`
+}
+
+function requestSignature(response: Awaited<ReturnType<APIRequestContext['fetch']>>): string {
+  const request = response.request()
+  const method = request?.method?.() ?? 'UNKNOWN'
+  const requestId = response.headers()['x-request-id']
+  return `${method} ${response.url()}${requestId ? ` [requestId=${requestId}]` : ''}`
+}
+
 async function parseEnvelope<T>(response: Awaited<ReturnType<APIRequestContext['fetch']>>): Promise<T> {
   const text = await response.text()
   let parsed: ApiEnvelope<T> | null = null
   try {
     parsed = JSON.parse(text) as ApiEnvelope<T>
   } catch {
-    throw new Error(`Non-JSON response: status=${response.status()} body=${text.slice(0, 200)}`)
+    throw new Error(`Non-JSON response: ${requestSignature(response)} status=${response.status()} body=${previewBody(text)}`)
   }
 
   if (!response.ok() || parsed.code !== 0) {
     const error = new Error(
-      `API failed: status=${response.status()} code=${parsed.code} msg=${asApiErrorBody(parsed) || parsed.msg}`,
+      `API request failed: ${requestSignature(response)} status=${response.status()} code=${parsed.code} msg=${asApiErrorBody(parsed) || parsed.msg || 'unknown'} body=${previewBody(text)}`,
     ) as ApiFailure
     error.status = response.status()
     error.code = parsed.code
@@ -249,11 +267,20 @@ export class E2eTestDataBuilder {
         data: credentials,
       })
       if (!login.ok()) {
+        if (isRealServices) {
+          const errorText = previewBody(await login.text(), 160)
+          throw new Error(
+            `Admin bootstrap login failed for ${credentials.username} with ${requestSignature(login)} status=${login.status()} body=${errorText}`,
+          )
+        }
         return null
       }
 
       return await operation(context.request)
-    } catch {
+    } catch (error) {
+      if (isRealServices) {
+        throw error
+      }
       return null
     } finally {
       await context.close()
@@ -262,6 +289,7 @@ export class E2eTestDataBuilder {
 
   private async withIsolatedRequest<T>(
     operation: (requestContext: APIRequestContext) => Promise<T>,
+    headers?: Record<string, string>,
   ): Promise<T> {
     const browser = this.page.context().browser()
     if (!browser) {
@@ -270,6 +298,9 @@ export class E2eTestDataBuilder {
 
     const context = await browser.newContext()
     try {
+      if (headers) {
+        await context.request.get('/api/v1/auth/providers', { headers })
+      }
       return await operation(context.request)
     } finally {
       await context.close()
@@ -314,6 +345,8 @@ export class E2eTestDataBuilder {
       if (!isForbidden) {
         throw error
       }
+
+      const mockHeaders = { 'X-Mock-User-Id': 'local-admin' }
       const elevatedCreated = await this.withBootstrapAdminRequest(async (requestContext) =>
         parseEnvelope<SeededNamespace>(
           await requestContext.post('/api/web/namespaces', {
@@ -327,22 +360,23 @@ export class E2eTestDataBuilder {
       )
       if (elevatedCreated) {
         created = elevatedCreated
+      } else if (authFallbackEnabled) {
+        created = await this.withIsolatedRequest(
+          async (requestContext) => parseEnvelope<SeededNamespace>(
+            await requestContext.post('/api/web/namespaces', {
+              headers: mockHeaders,
+              data: {
+                slug,
+                displayName,
+                description: `E2E namespace ${slug}`,
+              },
+            }),
+          ),
+          mockHeaders,
+        )
       } else {
-        created = await this.withIsolatedRequest(async (requestContext) =>
-          {
-            await requestContext.get('/api/v1/auth/providers', {
-              headers: { 'X-Mock-User-Id': 'local-admin' },
-            })
-            return parseEnvelope<SeededNamespace>(
-              await requestContext.post('/api/web/namespaces', {
-                data: {
-                  slug,
-                  displayName,
-                  description: `E2E namespace ${slug}`,
-                },
-              }),
-            )
-          },
+        throw new Error(
+          `Cannot create namespace ${slug} with active auth context. CI E2E requires valid admin credentials in E2E_ADMIN_USERNAME / E2E_ADMIN_PASSWORD.`,
         )
       }
     }
@@ -632,7 +666,7 @@ export class E2eTestDataBuilder {
   }
 
   async publishSkill(namespaceSlug: string, options?: SeedSkillOptions): Promise<SeededSkill> {
-    const unique = `${this.suffix}_${Math.random().toString(36).slice(2, 6)}`
+    const unique = `${this.suffix}_${randomAlphanumeric(4)}`
     const zipBuffer = buildSkillPackageZipBuffer(unique, options)
     let result: SeededSkill | null = null
 
@@ -662,19 +696,26 @@ export class E2eTestDataBuilder {
         const failure = error as ApiFailure
         const isForbidden = failure.status === 403 || failure.code === 403
         if (isForbidden) {
+          const mockHeaders = { 'X-Mock-User-Id': 'local-admin' }
           try {
             const elevatedResult = await this.withBootstrapAdminRequest((requestContext) =>
               publishVia(requestContext),
             )
-            result = elevatedResult
-              ? elevatedResult
-              : await this.withIsolatedRequest(async (requestContext) => {
-                await requestContext.get('/api/v1/auth/providers', {
-                  headers: { 'X-Mock-User-Id': 'local-admin' },
-                })
-                return publishVia(requestContext)
-              },
+            if (elevatedResult) {
+              result = elevatedResult
+              break
+            }
+
+            if (!authFallbackEnabled) {
+              throw new Error(
+                `Cannot publish skill into ${namespaceSlug} with active auth context. CI E2E requires valid admin credentials in E2E_ADMIN_USERNAME / E2E_ADMIN_PASSWORD.`,
               )
+            }
+
+            result = await this.withIsolatedRequest(
+              (requestContext) => publishVia(requestContext, mockHeaders),
+              mockHeaders,
+            )
             break
           } catch (adminError) {
             const adminFailure = adminError as ApiFailure
@@ -707,7 +748,7 @@ export class E2eTestDataBuilder {
   }
 
   createSkillPackageFile(options?: SeedSkillOptions): string {
-    const unique = `${this.suffix}_${Math.random().toString(36).slice(2, 6)}`
+    const unique = `${this.suffix}_${randomAlphanumeric(4)}`
     const { filePath, cleanup } = createSkillPackageZipFile(unique, options)
     this.cleanupTasks.push(async () => {
       cleanup()

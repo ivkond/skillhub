@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test'
 import { setEnglishLocale } from './helpers/auth-fixtures'
+import { randomAlphanumeric } from './helpers/crypto'
 
 function buildUniqueUser() {
-  const suffix = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`
+  const suffix = `${Date.now().toString(36)}_${randomAlphanumeric(6)}`
   return {
     username: `e2e_reg_${suffix}`,
     email: `e2e_reg_${suffix}@example.test`,
