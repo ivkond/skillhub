@@ -8,10 +8,9 @@ export function randomAlphanumeric(length: number): string {
     return ''
   }
 
-  const bytes = randomBytes(safeLength)
   let value = ''
   for (let i = 0; i < safeLength; i += 1) {
-    value += RANDOM_ALPHABET[bytes[i] % RANDOM_ALPHABET.length]
+    value += RANDOM_ALPHABET[randomInt(0, RANDOM_ALPHABET.length)]
   }
   return value
 }
