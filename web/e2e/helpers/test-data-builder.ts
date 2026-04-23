@@ -206,9 +206,16 @@ function previewBody(body: string, maxLength = 250): string {
 }
 
 function requestSignature(response: Awaited<ReturnType<APIRequestContext['fetch']>>): string {
-  const request = response.request()
-  const method = request?.method?.() ?? 'UNKNOWN'
-  const requestId = response.headers()['x-request-id']
+  const requestMethod = (response as unknown as { request?: () => { method?: () => string } }).request
+  let method = 'UNKNOWN'
+  if (typeof requestMethod === 'function') {
+    try {
+      method = requestMethod()?.method?.() ?? 'UNKNOWN'
+    } catch {
+      method = 'UNKNOWN'
+    }
+  }
+  const requestId = response.headers()?.['x-request-id']
   return `${method} ${response.url()}${requestId ? ` [requestId=${requestId}]` : ''}`
 }
 
