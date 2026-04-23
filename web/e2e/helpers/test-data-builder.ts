@@ -58,7 +58,6 @@ interface ApiFailure extends Error {
   code?: number
 }
 
-const isRealServices = Boolean(process.env.CI || process.env.GITHUB_ACTIONS)
 const cleanupTimeoutMs = process.env.CI ? 8_000 : 5_000
 const eventualConsistencyTimeoutMs = process.env.CI ? 180_000 : 60_000
 const eventualConsistencyPollIntervalMs = process.env.CI ? 1_000 : 300
