@@ -1,4 +1,4 @@
-import { randomBytes, randomInt } from 'node:crypto'
+import { randomInt } from 'node:crypto'
 
 const RANDOM_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789'
 

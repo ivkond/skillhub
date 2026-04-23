@@ -159,7 +159,7 @@ async function bootstrapMockSession(page: Page, mockUserId: string): Promise<boo
 }
 
 function defaultMockUserId(): string {
-  return process.env.CI || process.env.GITHUB_ACTIONS ? 'local-admin' : 'local-user'
+  return process.env.E2E_MOCK_USER_ID?.trim() || 'local-user'
 }
 
 async function tryBootstrapMockSession(page: Page, worker: number): Promise<{ username: string, password: string } | null> {
