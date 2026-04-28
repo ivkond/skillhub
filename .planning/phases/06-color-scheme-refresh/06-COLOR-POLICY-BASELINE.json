@@ -1,0 +1,1700 @@
+{
+  "mode": "strict",
+  "generated_at": "2026-04-17T12:40:50.783Z",
+  "entries": [
+    {
+      "key": "src/app/layout-header-style.ts:6:literal-color:rgba(15,23,42,0.32)",
+      "file": "src/app/layout-header-style.ts",
+      "line": 6,
+      "type": "literal-color",
+      "match": "rgba(15,23,42,0.32)"
+    },
+    {
+      "key": "src/features/auth/session-bootstrap-entry.tsx:85:forbidden-utility:text-red-600",
+      "file": "src/features/auth/session-bootstrap-entry.tsx",
+      "line": 85,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/features/namespace/add-namespace-member-dialog.tsx:143:forbidden-utility:'text-red-600",
+      "file": "src/features/namespace/add-namespace-member-dialog.tsx",
+      "line": 143,
+      "type": "forbidden-utility",
+      "match": "'text-red-600"
+    },
+    {
+      "key": "src/features/namespace/add-namespace-member-dialog.tsx:158:forbidden-utility:text-red-600",
+      "file": "src/features/namespace/add-namespace-member-dialog.tsx",
+      "line": 158,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/features/namespace/add-namespace-member-dialog.tsx:214:forbidden-utility:'text-red-600",
+      "file": "src/features/namespace/add-namespace-member-dialog.tsx",
+      "line": 214,
+      "type": "forbidden-utility",
+      "match": "'text-red-600"
+    },
+    {
+      "key": "src/features/namespace/add-namespace-member-dialog.tsx:237:forbidden-utility:text-red-600",
+      "file": "src/features/namespace/add-namespace-member-dialog.tsx",
+      "line": 237,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/features/namespace/create-namespace-dialog.tsx:179:forbidden-utility:\"text-red-600",
+      "file": "src/features/namespace/create-namespace-dialog.tsx",
+      "line": 179,
+      "type": "forbidden-utility",
+      "match": "\"text-red-600"
+    },
+    {
+      "key": "src/features/namespace/create-namespace-dialog.tsx:206:forbidden-utility:\"text-red-600",
+      "file": "src/features/namespace/create-namespace-dialog.tsx",
+      "line": 206,
+      "type": "forbidden-utility",
+      "match": "\"text-red-600"
+    },
+    {
+      "key": "src/features/namespace/create-namespace-dialog.tsx:227:forbidden-utility:\"text-red-600",
+      "file": "src/features/namespace/create-namespace-dialog.tsx",
+      "line": 227,
+      "type": "forbidden-utility",
+      "match": "\"text-red-600"
+    },
+    {
+      "key": "src/features/namespace/create-namespace-dialog.tsx:234:forbidden-utility:text-red-600",
+      "file": "src/features/namespace/create-namespace-dialog.tsx",
+      "line": 234,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.test.ts:53:forbidden-utility:'bg-emerald-500/10",
+      "file": "src/features/namespace/namespace-header.test.ts",
+      "line": 53,
+      "type": "forbidden-utility",
+      "match": "'bg-emerald-500/10"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.test.ts:53:forbidden-utility:border-emerald-500/20",
+      "file": "src/features/namespace/namespace-header.test.ts",
+      "line": 53,
+      "type": "forbidden-utility",
+      "match": "border-emerald-500/20"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.test.ts:53:forbidden-utility:text-emerald-500",
+      "file": "src/features/namespace/namespace-header.test.ts",
+      "line": 53,
+      "type": "forbidden-utility",
+      "match": "text-emerald-500"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.test.ts:76:forbidden-utility:'bg-amber-500/10",
+      "file": "src/features/namespace/namespace-header.test.ts",
+      "line": 76,
+      "type": "forbidden-utility",
+      "match": "'bg-amber-500/10"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.test.ts:76:forbidden-utility:border-amber-500/20",
+      "file": "src/features/namespace/namespace-header.test.ts",
+      "line": 76,
+      "type": "forbidden-utility",
+      "match": "border-amber-500/20"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.test.ts:76:forbidden-utility:text-amber-500",
+      "file": "src/features/namespace/namespace-header.test.ts",
+      "line": 76,
+      "type": "forbidden-utility",
+      "match": "text-amber-500"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.test.ts:98:forbidden-utility:'bg-slate-500/10",
+      "file": "src/features/namespace/namespace-header.test.ts",
+      "line": 98,
+      "type": "forbidden-utility",
+      "match": "'bg-slate-500/10"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.test.ts:98:forbidden-utility:border-slate-500/20",
+      "file": "src/features/namespace/namespace-header.test.ts",
+      "line": 98,
+      "type": "forbidden-utility",
+      "match": "border-slate-500/20"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.test.ts:98:forbidden-utility:text-slate-500",
+      "file": "src/features/namespace/namespace-header.test.ts",
+      "line": 98,
+      "type": "forbidden-utility",
+      "match": "text-slate-500"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.tsx:21:forbidden-utility:'bg-amber-500/10",
+      "file": "src/features/namespace/namespace-header.tsx",
+      "line": 21,
+      "type": "forbidden-utility",
+      "match": "'bg-amber-500/10"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.tsx:21:forbidden-utility:border-amber-500/20",
+      "file": "src/features/namespace/namespace-header.tsx",
+      "line": 21,
+      "type": "forbidden-utility",
+      "match": "border-amber-500/20"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.tsx:21:forbidden-utility:text-amber-500",
+      "file": "src/features/namespace/namespace-header.tsx",
+      "line": 21,
+      "type": "forbidden-utility",
+      "match": "text-amber-500"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.tsx:23:forbidden-utility:'bg-slate-500/10",
+      "file": "src/features/namespace/namespace-header.tsx",
+      "line": 23,
+      "type": "forbidden-utility",
+      "match": "'bg-slate-500/10"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.tsx:23:forbidden-utility:border-slate-500/20",
+      "file": "src/features/namespace/namespace-header.tsx",
+      "line": 23,
+      "type": "forbidden-utility",
+      "match": "border-slate-500/20"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.tsx:23:forbidden-utility:text-slate-500",
+      "file": "src/features/namespace/namespace-header.tsx",
+      "line": 23,
+      "type": "forbidden-utility",
+      "match": "text-slate-500"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.tsx:24:forbidden-utility:'bg-emerald-500/10",
+      "file": "src/features/namespace/namespace-header.tsx",
+      "line": 24,
+      "type": "forbidden-utility",
+      "match": "'bg-emerald-500/10"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.tsx:24:forbidden-utility:border-emerald-500/20",
+      "file": "src/features/namespace/namespace-header.tsx",
+      "line": 24,
+      "type": "forbidden-utility",
+      "match": "border-emerald-500/20"
+    },
+    {
+      "key": "src/features/namespace/namespace-header.tsx:24:forbidden-utility:text-emerald-500",
+      "file": "src/features/namespace/namespace-header.tsx",
+      "line": 24,
+      "type": "forbidden-utility",
+      "match": "text-emerald-500"
+    },
+    {
+      "key": "src/features/notification/notification-bell.tsx:70:forbidden-utility:bg-red-500",
+      "file": "src/features/notification/notification-bell.tsx",
+      "line": 70,
+      "type": "forbidden-utility",
+      "match": "bg-red-500"
+    },
+    {
+      "key": "src/features/notification/notification-dropdown.tsx:95:forbidden-utility:'bg-red-500",
+      "file": "src/features/notification/notification-dropdown.tsx",
+      "line": 95,
+      "type": "forbidden-utility",
+      "match": "'bg-red-500"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.test.tsx:29:forbidden-utility:'text-red-700",
+      "file": "src/features/security-audit/severity-badge.test.tsx",
+      "line": 29,
+      "type": "forbidden-utility",
+      "match": "'text-red-700"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.test.tsx:35:forbidden-utility:'text-orange-700",
+      "file": "src/features/security-audit/severity-badge.test.tsx",
+      "line": 35,
+      "type": "forbidden-utility",
+      "match": "'text-orange-700"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.test.tsx:41:forbidden-utility:'text-amber-700",
+      "file": "src/features/security-audit/severity-badge.test.tsx",
+      "line": 41,
+      "type": "forbidden-utility",
+      "match": "'text-amber-700"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.test.tsx:47:forbidden-utility:'text-blue-700",
+      "file": "src/features/security-audit/severity-badge.test.tsx",
+      "line": 47,
+      "type": "forbidden-utility",
+      "match": "'text-blue-700"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.test.tsx:53:forbidden-utility:'text-gray-700",
+      "file": "src/features/security-audit/severity-badge.test.tsx",
+      "line": 53,
+      "type": "forbidden-utility",
+      "match": "'text-gray-700"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.tsx:12:forbidden-utility:'bg-red-500/10",
+      "file": "src/features/security-audit/severity-badge.tsx",
+      "line": 12,
+      "type": "forbidden-utility",
+      "match": "'bg-red-500/10"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.tsx:12:forbidden-utility:text-red-700",
+      "file": "src/features/security-audit/severity-badge.tsx",
+      "line": 12,
+      "type": "forbidden-utility",
+      "match": "text-red-700"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.tsx:13:forbidden-utility:'bg-orange-500/10",
+      "file": "src/features/security-audit/severity-badge.tsx",
+      "line": 13,
+      "type": "forbidden-utility",
+      "match": "'bg-orange-500/10"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.tsx:13:forbidden-utility:text-orange-700",
+      "file": "src/features/security-audit/severity-badge.tsx",
+      "line": 13,
+      "type": "forbidden-utility",
+      "match": "text-orange-700"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.tsx:14:forbidden-utility:'bg-amber-500/10",
+      "file": "src/features/security-audit/severity-badge.tsx",
+      "line": 14,
+      "type": "forbidden-utility",
+      "match": "'bg-amber-500/10"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.tsx:14:forbidden-utility:text-amber-700",
+      "file": "src/features/security-audit/severity-badge.tsx",
+      "line": 14,
+      "type": "forbidden-utility",
+      "match": "text-amber-700"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.tsx:15:forbidden-utility:'bg-blue-500/10",
+      "file": "src/features/security-audit/severity-badge.tsx",
+      "line": 15,
+      "type": "forbidden-utility",
+      "match": "'bg-blue-500/10"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.tsx:15:forbidden-utility:text-blue-700",
+      "file": "src/features/security-audit/severity-badge.tsx",
+      "line": 15,
+      "type": "forbidden-utility",
+      "match": "text-blue-700"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.tsx:16:forbidden-utility:'bg-gray-500/10",
+      "file": "src/features/security-audit/severity-badge.tsx",
+      "line": 16,
+      "type": "forbidden-utility",
+      "match": "'bg-gray-500/10"
+    },
+    {
+      "key": "src/features/security-audit/severity-badge.tsx:16:forbidden-utility:text-gray-700",
+      "file": "src/features/security-audit/severity-badge.tsx",
+      "line": 16,
+      "type": "forbidden-utility",
+      "match": "text-gray-700"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.test.tsx:29:forbidden-utility:'text-emerald-700",
+      "file": "src/features/security-audit/verdict-badge.test.tsx",
+      "line": 29,
+      "type": "forbidden-utility",
+      "match": "'text-emerald-700"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.test.tsx:35:forbidden-utility:'text-amber-700",
+      "file": "src/features/security-audit/verdict-badge.test.tsx",
+      "line": 35,
+      "type": "forbidden-utility",
+      "match": "'text-amber-700"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.test.tsx:41:forbidden-utility:'text-orange-700",
+      "file": "src/features/security-audit/verdict-badge.test.tsx",
+      "line": 41,
+      "type": "forbidden-utility",
+      "match": "'text-orange-700"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.test.tsx:47:forbidden-utility:'text-red-700",
+      "file": "src/features/security-audit/verdict-badge.test.tsx",
+      "line": 47,
+      "type": "forbidden-utility",
+      "match": "'text-red-700"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:18:forbidden-utility:'bg-sky-500/10",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 18,
+      "type": "forbidden-utility",
+      "match": "'bg-sky-500/10"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:18:forbidden-utility:text-sky-700",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 18,
+      "type": "forbidden-utility",
+      "match": "text-sky-700"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:19:forbidden-utility:'bg-red-500/10",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 19,
+      "type": "forbidden-utility",
+      "match": "'bg-red-500/10"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:19:forbidden-utility:text-red-700",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 19,
+      "type": "forbidden-utility",
+      "match": "text-red-700"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:20:forbidden-utility:'bg-emerald-500/10",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 20,
+      "type": "forbidden-utility",
+      "match": "'bg-emerald-500/10"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:20:forbidden-utility:text-emerald-700",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 20,
+      "type": "forbidden-utility",
+      "match": "text-emerald-700"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:21:forbidden-utility:'bg-amber-500/10",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 21,
+      "type": "forbidden-utility",
+      "match": "'bg-amber-500/10"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:21:forbidden-utility:text-amber-700",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 21,
+      "type": "forbidden-utility",
+      "match": "text-amber-700"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:22:forbidden-utility:'bg-orange-500/10",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 22,
+      "type": "forbidden-utility",
+      "match": "'bg-orange-500/10"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:22:forbidden-utility:text-orange-700",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 22,
+      "type": "forbidden-utility",
+      "match": "text-orange-700"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:23:forbidden-utility:'bg-red-500/10",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 23,
+      "type": "forbidden-utility",
+      "match": "'bg-red-500/10"
+    },
+    {
+      "key": "src/features/security-audit/verdict-badge.tsx:23:forbidden-utility:text-red-700",
+      "file": "src/features/security-audit/verdict-badge.tsx",
+      "line": 23,
+      "type": "forbidden-utility",
+      "match": "text-red-700"
+    },
+    {
+      "key": "src/features/skill/code-renderer.tsx:83:literal-color:#039",
+      "file": "src/features/skill/code-renderer.tsx",
+      "line": 83,
+      "type": "literal-color",
+      "match": "#039"
+    },
+    {
+      "key": "src/features/skill/file-preview-dialog.tsx:98:forbidden-utility:text-emerald-500",
+      "file": "src/features/skill/file-preview-dialog.tsx",
+      "line": 98,
+      "type": "forbidden-utility",
+      "match": "text-emerald-500"
+    },
+    {
+      "key": "src/features/skill/file-tree-node.tsx:86:forbidden-utility:text-amber-500",
+      "file": "src/features/skill/file-tree-node.tsx",
+      "line": 86,
+      "type": "forbidden-utility",
+      "match": "text-amber-500"
+    },
+    {
+      "key": "src/features/skill/file-tree-node.tsx:88:forbidden-utility:text-amber-500",
+      "file": "src/features/skill/file-tree-node.tsx",
+      "line": 88,
+      "type": "forbidden-utility",
+      "match": "text-amber-500"
+    },
+    {
+      "key": "src/features/skill/skill-label-panel.tsx:150:forbidden-utility:'border-amber-500/40",
+      "file": "src/features/skill/skill-label-panel.tsx",
+      "line": 150,
+      "type": "forbidden-utility",
+      "match": "'border-amber-500/40"
+    },
+    {
+      "key": "src/features/skill/skill-label-panel.tsx:150:forbidden-utility:bg-amber-100",
+      "file": "src/features/skill/skill-label-panel.tsx",
+      "line": 150,
+      "type": "forbidden-utility",
+      "match": "bg-amber-100"
+    },
+    {
+      "key": "src/features/skill/skill-label-panel.tsx:150:forbidden-utility:text-amber-900",
+      "file": "src/features/skill/skill-label-panel.tsx",
+      "line": 150,
+      "type": "forbidden-utility",
+      "match": "text-amber-900"
+    },
+    {
+      "key": "src/features/skill/skill-label-panel.tsx:151:forbidden-utility:'border-slate-300",
+      "file": "src/features/skill/skill-label-panel.tsx",
+      "line": 151,
+      "type": "forbidden-utility",
+      "match": "'border-slate-300"
+    },
+    {
+      "key": "src/features/skill/skill-label-panel.tsx:151:forbidden-utility:bg-slate-100",
+      "file": "src/features/skill/skill-label-panel.tsx",
+      "line": 151,
+      "type": "forbidden-utility",
+      "match": "bg-slate-100"
+    },
+    {
+      "key": "src/features/skill/skill-label-panel.tsx:151:forbidden-utility:text-slate-800",
+      "file": "src/features/skill/skill-label-panel.tsx",
+      "line": 151,
+      "type": "forbidden-utility",
+      "match": "text-slate-800"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:16:forbidden-utility:'border-emerald-500/30",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 16,
+      "type": "forbidden-utility",
+      "match": "'border-emerald-500/30"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:16:forbidden-utility:bg-emerald-500/10",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 16,
+      "type": "forbidden-utility",
+      "match": "bg-emerald-500/10"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:16:forbidden-utility:text-emerald-700",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 16,
+      "type": "forbidden-utility",
+      "match": "text-emerald-700"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:18:forbidden-utility:'border-blue-500/30",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 18,
+      "type": "forbidden-utility",
+      "match": "'border-blue-500/30"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:18:forbidden-utility:bg-blue-500/10",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 18,
+      "type": "forbidden-utility",
+      "match": "bg-blue-500/10"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:18:forbidden-utility:text-blue-700",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 18,
+      "type": "forbidden-utility",
+      "match": "text-blue-700"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:20:forbidden-utility:'border-amber-500/30",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 20,
+      "type": "forbidden-utility",
+      "match": "'border-amber-500/30"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:20:forbidden-utility:bg-amber-500/10",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 20,
+      "type": "forbidden-utility",
+      "match": "bg-amber-500/10"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:20:forbidden-utility:text-amber-700",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 20,
+      "type": "forbidden-utility",
+      "match": "text-amber-700"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:22:forbidden-utility:'border-red-500/30",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 22,
+      "type": "forbidden-utility",
+      "match": "'border-red-500/30"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:22:forbidden-utility:bg-red-500/10",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 22,
+      "type": "forbidden-utility",
+      "match": "bg-red-500/10"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:22:forbidden-utility:text-red-700",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 22,
+      "type": "forbidden-utility",
+      "match": "text-red-700"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:24:forbidden-utility:'border-purple-500/30",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 24,
+      "type": "forbidden-utility",
+      "match": "'border-purple-500/30"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:24:forbidden-utility:bg-purple-500/10",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 24,
+      "type": "forbidden-utility",
+      "match": "bg-purple-500/10"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:24:forbidden-utility:text-purple-700",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 24,
+      "type": "forbidden-utility",
+      "match": "text-purple-700"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:26:forbidden-utility:'border-red-500/30",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 26,
+      "type": "forbidden-utility",
+      "match": "'border-red-500/30"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:26:forbidden-utility:bg-red-500/10",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 26,
+      "type": "forbidden-utility",
+      "match": "bg-red-500/10"
+    },
+    {
+      "key": "src/features/skill/version-status-badge.tsx:26:forbidden-utility:text-red-700",
+      "file": "src/features/skill/version-status-badge.tsx",
+      "line": 26,
+      "type": "forbidden-utility",
+      "match": "text-red-700"
+    },
+    {
+      "key": "src/features/social/rating-input.tsx:51:forbidden-utility:'fill-yellow-400",
+      "file": "src/features/social/rating-input.tsx",
+      "line": 51,
+      "type": "forbidden-utility",
+      "match": "'fill-yellow-400"
+    },
+    {
+      "key": "src/features/social/rating-input.tsx:51:forbidden-utility:text-yellow-400",
+      "file": "src/features/social/rating-input.tsx",
+      "line": 51,
+      "type": "forbidden-utility",
+      "match": "text-yellow-400"
+    },
+    {
+      "key": "src/features/social/rating-input.tsx:52:forbidden-utility:'text-gray-300",
+      "file": "src/features/social/rating-input.tsx",
+      "line": 52,
+      "type": "forbidden-utility",
+      "match": "'text-gray-300"
+    },
+    {
+      "key": "src/features/token/create-token-dialog.tsx:175:forbidden-utility:\"text-red-600",
+      "file": "src/features/token/create-token-dialog.tsx",
+      "line": 175,
+      "type": "forbidden-utility",
+      "match": "\"text-red-600"
+    },
+    {
+      "key": "src/features/token/create-token-dialog.tsx:219:forbidden-utility:text-red-600",
+      "file": "src/features/token/create-token-dialog.tsx",
+      "line": 219,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/features/token/create-token-dialog.tsx:226:forbidden-utility:text-red-600",
+      "file": "src/features/token/create-token-dialog.tsx",
+      "line": 226,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/index.css:314:literal-color:#8183FF",
+      "file": "src/index.css",
+      "line": 314,
+      "type": "literal-color",
+      "match": "#8183FF"
+    },
+    {
+      "key": "src/index.css:314:literal-color:#C77EFF",
+      "file": "src/index.css",
+      "line": 314,
+      "type": "literal-color",
+      "match": "#C77EFF"
+    },
+    {
+      "key": "src/index.css:330:literal-color:hsl(0 0% 0% / 0.2)",
+      "file": "src/index.css",
+      "line": 330,
+      "type": "literal-color",
+      "match": "hsl(0 0% 0% / 0.2)"
+    },
+    {
+      "key": "src/index.css:383:literal-color:#0369a1",
+      "file": "src/index.css",
+      "line": 383,
+      "type": "literal-color",
+      "match": "#0369a1"
+    },
+    {
+      "key": "src/index.css:384:literal-color:#e0f2fe",
+      "file": "src/index.css",
+      "line": 384,
+      "type": "literal-color",
+      "match": "#e0f2fe"
+    },
+    {
+      "key": "src/index.css:385:literal-color:#7dd3fc",
+      "file": "src/index.css",
+      "line": 385,
+      "type": "literal-color",
+      "match": "#7dd3fc"
+    },
+    {
+      "key": "src/index.css:401:literal-color:#16a34a",
+      "file": "src/index.css",
+      "line": 401,
+      "type": "literal-color",
+      "match": "#16a34a"
+    },
+    {
+      "key": "src/index.css:402:literal-color:#ea580c",
+      "file": "src/index.css",
+      "line": 402,
+      "type": "literal-color",
+      "match": "#ea580c"
+    },
+    {
+      "key": "src/index.css:403:literal-color:#6b7280",
+      "file": "src/index.css",
+      "line": 403,
+      "type": "literal-color",
+      "match": "#6b7280"
+    },
+    {
+      "key": "src/index.css:404:literal-color:#dc2626",
+      "file": "src/index.css",
+      "line": 404,
+      "type": "literal-color",
+      "match": "#dc2626"
+    },
+    {
+      "key": "src/index.css:429:literal-color:#dcfce7",
+      "file": "src/index.css",
+      "line": 429,
+      "type": "literal-color",
+      "match": "#dcfce7"
+    },
+    {
+      "key": "src/index.css:430:literal-color:#166534",
+      "file": "src/index.css",
+      "line": 430,
+      "type": "literal-color",
+      "match": "#166534"
+    },
+    {
+      "key": "src/index.css:434:literal-color:#dbeafe",
+      "file": "src/index.css",
+      "line": 434,
+      "type": "literal-color",
+      "match": "#dbeafe"
+    },
+    {
+      "key": "src/index.css:435:literal-color:#1d4ed8",
+      "file": "src/index.css",
+      "line": 435,
+      "type": "literal-color",
+      "match": "#1d4ed8"
+    },
+    {
+      "key": "src/index.css:440:literal-color:#3b82f6",
+      "file": "src/index.css",
+      "line": 440,
+      "type": "literal-color",
+      "match": "#3b82f6"
+    },
+    {
+      "key": "src/index.css:441:literal-color:#1d4ed8",
+      "file": "src/index.css",
+      "line": 441,
+      "type": "literal-color",
+      "match": "#1d4ed8"
+    },
+    {
+      "key": "src/index.css:491:literal-color:hsl(218 70% 45%)",
+      "file": "src/index.css",
+      "line": 491,
+      "type": "literal-color",
+      "match": "hsl(218 70% 45%)"
+    },
+    {
+      "key": "src/index.css:504:literal-color:hsl(24 85% 52%)",
+      "file": "src/index.css",
+      "line": 504,
+      "type": "literal-color",
+      "match": "hsl(24 85% 52%)"
+    },
+    {
+      "key": "src/index.css:520:literal-color:rgba(106, 109, 255, 0.04)",
+      "file": "src/index.css",
+      "line": 520,
+      "type": "literal-color",
+      "match": "rgba(106, 109, 255, 0.04)"
+    },
+    {
+      "key": "src/index.css:534:literal-color:rgba(106, 109, 255, 0.45)",
+      "file": "src/index.css",
+      "line": 534,
+      "type": "literal-color",
+      "match": "rgba(106, 109, 255, 0.45)"
+    },
+    {
+      "key": "src/pages/admin/users.tsx:232:forbidden-utility:'bg-emerald-500/10",
+      "file": "src/pages/admin/users.tsx",
+      "line": 232,
+      "type": "forbidden-utility",
+      "match": "'bg-emerald-500/10"
+    },
+    {
+      "key": "src/pages/admin/users.tsx:232:forbidden-utility:border-emerald-500/20",
+      "file": "src/pages/admin/users.tsx",
+      "line": 232,
+      "type": "forbidden-utility",
+      "match": "border-emerald-500/20"
+    },
+    {
+      "key": "src/pages/admin/users.tsx:232:forbidden-utility:text-emerald-400",
+      "file": "src/pages/admin/users.tsx",
+      "line": 232,
+      "type": "forbidden-utility",
+      "match": "text-emerald-400"
+    },
+    {
+      "key": "src/pages/admin/users.tsx:234:forbidden-utility:'bg-amber-500/10",
+      "file": "src/pages/admin/users.tsx",
+      "line": 234,
+      "type": "forbidden-utility",
+      "match": "'bg-amber-500/10"
+    },
+    {
+      "key": "src/pages/admin/users.tsx:234:forbidden-utility:border-amber-500/20",
+      "file": "src/pages/admin/users.tsx",
+      "line": 234,
+      "type": "forbidden-utility",
+      "match": "border-amber-500/20"
+    },
+    {
+      "key": "src/pages/admin/users.tsx:234:forbidden-utility:text-amber-400",
+      "file": "src/pages/admin/users.tsx",
+      "line": 234,
+      "type": "forbidden-utility",
+      "match": "text-amber-400"
+    },
+    {
+      "key": "src/pages/admin/users.tsx:235:forbidden-utility:'bg-red-500/10",
+      "file": "src/pages/admin/users.tsx",
+      "line": 235,
+      "type": "forbidden-utility",
+      "match": "'bg-red-500/10"
+    },
+    {
+      "key": "src/pages/admin/users.tsx:235:forbidden-utility:border-red-500/20",
+      "file": "src/pages/admin/users.tsx",
+      "line": 235,
+      "type": "forbidden-utility",
+      "match": "border-red-500/20"
+    },
+    {
+      "key": "src/pages/admin/users.tsx:235:forbidden-utility:text-red-400",
+      "file": "src/pages/admin/users.tsx",
+      "line": 235,
+      "type": "forbidden-utility",
+      "match": "text-red-400"
+    },
+    {
+      "key": "src/pages/dashboard.tsx:56:forbidden-utility:bg-emerald-500",
+      "file": "src/pages/dashboard.tsx",
+      "line": 56,
+      "type": "forbidden-utility",
+      "match": "bg-emerald-500"
+    },
+    {
+      "key": "src/pages/dashboard/collection-detail.tsx:106:forbidden-utility:'border-emerald-500/40",
+      "file": "src/pages/dashboard/collection-detail.tsx",
+      "line": 106,
+      "type": "forbidden-utility",
+      "match": "'border-emerald-500/40"
+    },
+    {
+      "key": "src/pages/dashboard/collection-detail.tsx:106:forbidden-utility:text-emerald-700",
+      "file": "src/pages/dashboard/collection-detail.tsx",
+      "line": 106,
+      "type": "forbidden-utility",
+      "match": "text-emerald-700"
+    },
+    {
+      "key": "src/pages/dashboard/collections-list.tsx:77:forbidden-utility:'border-emerald-500/40",
+      "file": "src/pages/dashboard/collections-list.tsx",
+      "line": 77,
+      "type": "forbidden-utility",
+      "match": "'border-emerald-500/40"
+    },
+    {
+      "key": "src/pages/dashboard/collections-list.tsx:77:forbidden-utility:text-emerald-700",
+      "file": "src/pages/dashboard/collections-list.tsx",
+      "line": 77,
+      "type": "forbidden-utility",
+      "match": "text-emerald-700"
+    },
+    {
+      "key": "src/pages/dashboard/governance.tsx:155:forbidden-utility:bg-amber-500/5",
+      "file": "src/pages/dashboard/governance.tsx",
+      "line": 155,
+      "type": "forbidden-utility",
+      "match": "bg-amber-500/5"
+    },
+    {
+      "key": "src/pages/dashboard/governance.tsx:155:forbidden-utility:border-amber-500/20",
+      "file": "src/pages/dashboard/governance.tsx",
+      "line": 155,
+      "type": "forbidden-utility",
+      "match": "border-amber-500/20"
+    },
+    {
+      "key": "src/pages/dashboard/my-namespaces.tsx:64:forbidden-utility:'bg-amber-500/10",
+      "file": "src/pages/dashboard/my-namespaces.tsx",
+      "line": 64,
+      "type": "forbidden-utility",
+      "match": "'bg-amber-500/10"
+    },
+    {
+      "key": "src/pages/dashboard/my-namespaces.tsx:64:forbidden-utility:border-amber-500/20",
+      "file": "src/pages/dashboard/my-namespaces.tsx",
+      "line": 64,
+      "type": "forbidden-utility",
+      "match": "border-amber-500/20"
+    },
+    {
+      "key": "src/pages/dashboard/my-namespaces.tsx:64:forbidden-utility:text-amber-500",
+      "file": "src/pages/dashboard/my-namespaces.tsx",
+      "line": 64,
+      "type": "forbidden-utility",
+      "match": "text-amber-500"
+    },
+    {
+      "key": "src/pages/dashboard/my-namespaces.tsx:67:forbidden-utility:'bg-slate-500/10",
+      "file": "src/pages/dashboard/my-namespaces.tsx",
+      "line": 67,
+      "type": "forbidden-utility",
+      "match": "'bg-slate-500/10"
+    },
+    {
+      "key": "src/pages/dashboard/my-namespaces.tsx:67:forbidden-utility:border-slate-500/20",
+      "file": "src/pages/dashboard/my-namespaces.tsx",
+      "line": 67,
+      "type": "forbidden-utility",
+      "match": "border-slate-500/20"
+    },
+    {
+      "key": "src/pages/dashboard/my-namespaces.tsx:67:forbidden-utility:text-slate-500",
+      "file": "src/pages/dashboard/my-namespaces.tsx",
+      "line": 67,
+      "type": "forbidden-utility",
+      "match": "text-slate-500"
+    },
+    {
+      "key": "src/pages/dashboard/my-namespaces.tsx:69:forbidden-utility:'bg-emerald-500/10",
+      "file": "src/pages/dashboard/my-namespaces.tsx",
+      "line": 69,
+      "type": "forbidden-utility",
+      "match": "'bg-emerald-500/10"
+    },
+    {
+      "key": "src/pages/dashboard/my-namespaces.tsx:69:forbidden-utility:border-emerald-500/20",
+      "file": "src/pages/dashboard/my-namespaces.tsx",
+      "line": 69,
+      "type": "forbidden-utility",
+      "match": "border-emerald-500/20"
+    },
+    {
+      "key": "src/pages/dashboard/my-namespaces.tsx:69:forbidden-utility:text-emerald-500",
+      "file": "src/pages/dashboard/my-namespaces.tsx",
+      "line": 69,
+      "type": "forbidden-utility",
+      "match": "text-emerald-500"
+    },
+    {
+      "key": "src/pages/dashboard/namespace-members.tsx:166:forbidden-utility:text-red-600",
+      "file": "src/pages/dashboard/namespace-members.tsx",
+      "line": 166,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/dashboard/profile-review-table.tsx:141:forbidden-utility:bg-emerald-500/12",
+      "file": "src/pages/dashboard/profile-review-table.tsx",
+      "line": 141,
+      "type": "forbidden-utility",
+      "match": "bg-emerald-500/12"
+    },
+    {
+      "key": "src/pages/dashboard/profile-review-table.tsx:141:forbidden-utility:text-emerald-700",
+      "file": "src/pages/dashboard/profile-review-table.tsx",
+      "line": 141,
+      "type": "forbidden-utility",
+      "match": "text-emerald-700"
+    },
+    {
+      "key": "src/pages/dashboard/profile-review-table.tsx:148:forbidden-utility:bg-rose-500/12",
+      "file": "src/pages/dashboard/profile-review-table.tsx",
+      "line": 148,
+      "type": "forbidden-utility",
+      "match": "bg-rose-500/12"
+    },
+    {
+      "key": "src/pages/dashboard/profile-review-table.tsx:148:forbidden-utility:text-rose-700",
+      "file": "src/pages/dashboard/profile-review-table.tsx",
+      "line": 148,
+      "type": "forbidden-utility",
+      "match": "text-rose-700"
+    },
+    {
+      "key": "src/pages/dashboard/profile-review-table.tsx:166:forbidden-utility:bg-amber-100",
+      "file": "src/pages/dashboard/profile-review-table.tsx",
+      "line": 166,
+      "type": "forbidden-utility",
+      "match": "bg-amber-100"
+    },
+    {
+      "key": "src/pages/dashboard/profile-review-table.tsx:166:forbidden-utility:text-amber-700",
+      "file": "src/pages/dashboard/profile-review-table.tsx",
+      "line": 166,
+      "type": "forbidden-utility",
+      "match": "text-amber-700"
+    },
+    {
+      "key": "src/pages/dashboard/publish.tsx:136:forbidden-utility:bg-blue-500/5",
+      "file": "src/pages/dashboard/publish.tsx",
+      "line": 136,
+      "type": "forbidden-utility",
+      "match": "bg-blue-500/5"
+    },
+    {
+      "key": "src/pages/dashboard/publish.tsx:136:forbidden-utility:border-blue-500/20",
+      "file": "src/pages/dashboard/publish.tsx",
+      "line": 136,
+      "type": "forbidden-utility",
+      "match": "border-blue-500/20"
+    },
+    {
+      "key": "src/pages/dashboard/publish.tsx:138:forbidden-utility:text-blue-500",
+      "file": "src/pages/dashboard/publish.tsx",
+      "line": 138,
+      "type": "forbidden-utility",
+      "match": "text-blue-500"
+    },
+    {
+      "key": "src/pages/dashboard/publish.tsx:199:forbidden-utility:text-emerald-500",
+      "file": "src/pages/dashboard/publish.tsx",
+      "line": 199,
+      "type": "forbidden-utility",
+      "match": "text-emerald-500"
+    },
+    {
+      "key": "src/pages/dashboard/review-detail.tsx:214:forbidden-utility:bg-amber-500/10",
+      "file": "src/pages/dashboard/review-detail.tsx",
+      "line": 214,
+      "type": "forbidden-utility",
+      "match": "bg-amber-500/10"
+    },
+    {
+      "key": "src/pages/dashboard/review-detail.tsx:214:forbidden-utility:text-amber-400",
+      "file": "src/pages/dashboard/review-detail.tsx",
+      "line": 214,
+      "type": "forbidden-utility",
+      "match": "text-amber-400"
+    },
+    {
+      "key": "src/pages/dashboard/review-detail.tsx:217:forbidden-utility:bg-emerald-500/10",
+      "file": "src/pages/dashboard/review-detail.tsx",
+      "line": 217,
+      "type": "forbidden-utility",
+      "match": "bg-emerald-500/10"
+    },
+    {
+      "key": "src/pages/dashboard/review-detail.tsx:217:forbidden-utility:text-emerald-400",
+      "file": "src/pages/dashboard/review-detail.tsx",
+      "line": 217,
+      "type": "forbidden-utility",
+      "match": "text-emerald-400"
+    },
+    {
+      "key": "src/pages/dashboard/review-detail.tsx:220:forbidden-utility:bg-red-500/10",
+      "file": "src/pages/dashboard/review-detail.tsx",
+      "line": 220,
+      "type": "forbidden-utility",
+      "match": "bg-red-500/10"
+    },
+    {
+      "key": "src/pages/dashboard/review-detail.tsx:220:forbidden-utility:text-red-400",
+      "file": "src/pages/dashboard/review-detail.tsx",
+      "line": 220,
+      "type": "forbidden-utility",
+      "match": "text-red-400"
+    },
+    {
+      "key": "src/pages/device.tsx:141:forbidden-utility:'bg-emerald-500/10",
+      "file": "src/pages/device.tsx",
+      "line": 141,
+      "type": "forbidden-utility",
+      "match": "'bg-emerald-500/10"
+    },
+    {
+      "key": "src/pages/device.tsx:141:forbidden-utility:border-emerald-500/20",
+      "file": "src/pages/device.tsx",
+      "line": 141,
+      "type": "forbidden-utility",
+      "match": "border-emerald-500/20"
+    },
+    {
+      "key": "src/pages/device.tsx:141:forbidden-utility:text-emerald-400",
+      "file": "src/pages/device.tsx",
+      "line": 141,
+      "type": "forbidden-utility",
+      "match": "text-emerald-400"
+    },
+    {
+      "key": "src/pages/device.tsx:142:forbidden-utility:'bg-red-500/10",
+      "file": "src/pages/device.tsx",
+      "line": 142,
+      "type": "forbidden-utility",
+      "match": "'bg-red-500/10"
+    },
+    {
+      "key": "src/pages/device.tsx:142:forbidden-utility:border-red-500/20",
+      "file": "src/pages/device.tsx",
+      "line": 142,
+      "type": "forbidden-utility",
+      "match": "border-red-500/20"
+    },
+    {
+      "key": "src/pages/device.tsx:142:forbidden-utility:text-red-400",
+      "file": "src/pages/device.tsx",
+      "line": 142,
+      "type": "forbidden-utility",
+      "match": "text-red-400"
+    },
+    {
+      "key": "src/pages/home.tsx:62:literal-color:#F7FAFC",
+      "file": "src/pages/home.tsx",
+      "line": 62,
+      "type": "literal-color",
+      "match": "#F7FAFC"
+    },
+    {
+      "key": "src/pages/login.tsx:122:forbidden-utility:text-red-600",
+      "file": "src/pages/login.tsx",
+      "line": 122,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/login.tsx:154:forbidden-utility:text-red-600",
+      "file": "src/pages/login.tsx",
+      "line": 154,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/login.tsx:158:forbidden-utility:text-red-600",
+      "file": "src/pages/login.tsx",
+      "line": 158,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/login.tsx:82:forbidden-utility:bg-red-50",
+      "file": "src/pages/login.tsx",
+      "line": 82,
+      "type": "forbidden-utility",
+      "match": "bg-red-50"
+    },
+    {
+      "key": "src/pages/login.tsx:82:forbidden-utility:border-red-200",
+      "file": "src/pages/login.tsx",
+      "line": 82,
+      "type": "forbidden-utility",
+      "match": "border-red-200"
+    },
+    {
+      "key": "src/pages/login.tsx:82:forbidden-utility:text-red-700",
+      "file": "src/pages/login.tsx",
+      "line": 82,
+      "type": "forbidden-utility",
+      "match": "text-red-700"
+    },
+    {
+      "key": "src/pages/notifications.tsx:152:forbidden-utility:'bg-red-500",
+      "file": "src/pages/notifications.tsx",
+      "line": 152,
+      "type": "forbidden-utility",
+      "match": "'bg-red-500"
+    },
+    {
+      "key": "src/pages/notifications.tsx:48:forbidden-utility:'bg-blue-100",
+      "file": "src/pages/notifications.tsx",
+      "line": 48,
+      "type": "forbidden-utility",
+      "match": "'bg-blue-100"
+    },
+    {
+      "key": "src/pages/notifications.tsx:48:forbidden-utility:text-blue-700",
+      "file": "src/pages/notifications.tsx",
+      "line": 48,
+      "type": "forbidden-utility",
+      "match": "text-blue-700"
+    },
+    {
+      "key": "src/pages/notifications.tsx:49:forbidden-utility:'bg-yellow-100",
+      "file": "src/pages/notifications.tsx",
+      "line": 49,
+      "type": "forbidden-utility",
+      "match": "'bg-yellow-100"
+    },
+    {
+      "key": "src/pages/notifications.tsx:49:forbidden-utility:text-yellow-700",
+      "file": "src/pages/notifications.tsx",
+      "line": 49,
+      "type": "forbidden-utility",
+      "match": "text-yellow-700"
+    },
+    {
+      "key": "src/pages/notifications.tsx:50:forbidden-utility:'bg-green-100",
+      "file": "src/pages/notifications.tsx",
+      "line": 50,
+      "type": "forbidden-utility",
+      "match": "'bg-green-100"
+    },
+    {
+      "key": "src/pages/notifications.tsx:50:forbidden-utility:text-green-700",
+      "file": "src/pages/notifications.tsx",
+      "line": 50,
+      "type": "forbidden-utility",
+      "match": "text-green-700"
+    },
+    {
+      "key": "src/pages/notifications.tsx:51:forbidden-utility:'bg-red-100",
+      "file": "src/pages/notifications.tsx",
+      "line": 51,
+      "type": "forbidden-utility",
+      "match": "'bg-red-100"
+    },
+    {
+      "key": "src/pages/notifications.tsx:51:forbidden-utility:text-red-700",
+      "file": "src/pages/notifications.tsx",
+      "line": 51,
+      "type": "forbidden-utility",
+      "match": "text-red-700"
+    },
+    {
+      "key": "src/pages/register.tsx:171:forbidden-utility:border-slate-200",
+      "file": "src/pages/register.tsx",
+      "line": 171,
+      "type": "forbidden-utility",
+      "match": "border-slate-200"
+    },
+    {
+      "key": "src/pages/register.tsx:205:forbidden-utility:text-red-600",
+      "file": "src/pages/register.tsx",
+      "line": 205,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/register.tsx:229:forbidden-utility:text-red-600",
+      "file": "src/pages/register.tsx",
+      "line": 229,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/register.tsx:252:forbidden-utility:text-red-600",
+      "file": "src/pages/register.tsx",
+      "line": 252,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/register.tsx:254:forbidden-utility:text-red-600",
+      "file": "src/pages/register.tsx",
+      "line": 254,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/reset-password.tsx:100:forbidden-utility:bg-emerald-50",
+      "file": "src/pages/reset-password.tsx",
+      "line": 100,
+      "type": "forbidden-utility",
+      "match": "bg-emerald-50"
+    },
+    {
+      "key": "src/pages/reset-password.tsx:100:forbidden-utility:border-emerald-200",
+      "file": "src/pages/reset-password.tsx",
+      "line": 100,
+      "type": "forbidden-utility",
+      "match": "border-emerald-200"
+    },
+    {
+      "key": "src/pages/reset-password.tsx:100:forbidden-utility:text-emerald-700",
+      "file": "src/pages/reset-password.tsx",
+      "line": 100,
+      "type": "forbidden-utility",
+      "match": "text-emerald-700"
+    },
+    {
+      "key": "src/pages/reset-password.tsx:173:forbidden-utility:text-red-600",
+      "file": "src/pages/reset-password.tsx",
+      "line": 173,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/reset-password.tsx:176:forbidden-utility:text-emerald-700",
+      "file": "src/pages/reset-password.tsx",
+      "line": 176,
+      "type": "forbidden-utility",
+      "match": "text-emerald-700"
+    },
+    {
+      "key": "src/pages/reset-password.tsx:92:forbidden-utility:border-slate-200",
+      "file": "src/pages/reset-password.tsx",
+      "line": 92,
+      "type": "forbidden-utility",
+      "match": "border-slate-200"
+    },
+    {
+      "key": "src/pages/settings/profile.tsx:238:forbidden-utility:text-red-600",
+      "file": "src/pages/settings/profile.tsx",
+      "line": 238,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/settings/profile.tsx:244:forbidden-utility:text-red-600",
+      "file": "src/pages/settings/profile.tsx",
+      "line": 244,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/settings/profile.tsx:265:forbidden-utility:bg-yellow-500/10",
+      "file": "src/pages/settings/profile.tsx",
+      "line": 265,
+      "type": "forbidden-utility",
+      "match": "bg-yellow-500/10"
+    },
+    {
+      "key": "src/pages/settings/profile.tsx:265:forbidden-utility:border-yellow-500/30",
+      "file": "src/pages/settings/profile.tsx",
+      "line": 265,
+      "type": "forbidden-utility",
+      "match": "border-yellow-500/30"
+    },
+    {
+      "key": "src/pages/settings/profile.tsx:265:forbidden-utility:text-yellow-700",
+      "file": "src/pages/settings/profile.tsx",
+      "line": 265,
+      "type": "forbidden-utility",
+      "match": "text-yellow-700"
+    },
+    {
+      "key": "src/pages/settings/profile.tsx:270:forbidden-utility:bg-red-500/10",
+      "file": "src/pages/settings/profile.tsx",
+      "line": 270,
+      "type": "forbidden-utility",
+      "match": "bg-red-500/10"
+    },
+    {
+      "key": "src/pages/settings/profile.tsx:270:forbidden-utility:border-red-500/30",
+      "file": "src/pages/settings/profile.tsx",
+      "line": 270,
+      "type": "forbidden-utility",
+      "match": "border-red-500/30"
+    },
+    {
+      "key": "src/pages/settings/profile.tsx:270:forbidden-utility:text-red-700",
+      "file": "src/pages/settings/profile.tsx",
+      "line": 270,
+      "type": "forbidden-utility",
+      "match": "text-red-700"
+    },
+    {
+      "key": "src/pages/settings/security.tsx:102:forbidden-utility:text-red-600",
+      "file": "src/pages/settings/security.tsx",
+      "line": 102,
+      "type": "forbidden-utility",
+      "match": "text-red-600"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:1112:forbidden-utility:\"border-amber-500/30",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 1112,
+      "type": "forbidden-utility",
+      "match": "\"border-amber-500/30"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:1112:forbidden-utility:bg-amber-500/5",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 1112,
+      "type": "forbidden-utility",
+      "match": "bg-amber-500/5"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:1115:forbidden-utility:text-amber-600",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 1115,
+      "type": "forbidden-utility",
+      "match": "text-amber-600"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:1126:forbidden-utility:border-amber-500/20",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 1126,
+      "type": "forbidden-utility",
+      "match": "border-amber-500/20"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:1134:forbidden-utility:border-amber-500/20",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 1134,
+      "type": "forbidden-utility",
+      "match": "border-amber-500/20"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:1138:forbidden-utility:text-amber-700",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 1138,
+      "type": "forbidden-utility",
+      "match": "text-amber-700"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:729:forbidden-utility:'bg-amber-100",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 729,
+      "type": "forbidden-utility",
+      "match": "'bg-amber-100"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:729:forbidden-utility:text-amber-800",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 729,
+      "type": "forbidden-utility",
+      "match": "text-amber-800"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:739:forbidden-utility:'bg-slate-100",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 739,
+      "type": "forbidden-utility",
+      "match": "'bg-slate-100"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:739:forbidden-utility:text-slate-700",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 739,
+      "type": "forbidden-utility",
+      "match": "text-slate-700"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:783:forbidden-utility:'border-amber-500/40",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 783,
+      "type": "forbidden-utility",
+      "match": "'border-amber-500/40"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:783:forbidden-utility:bg-amber-100",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 783,
+      "type": "forbidden-utility",
+      "match": "bg-amber-100"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:783:forbidden-utility:text-amber-900",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 783,
+      "type": "forbidden-utility",
+      "match": "text-amber-900"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:784:forbidden-utility:'border-slate-300",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 784,
+      "type": "forbidden-utility",
+      "match": "'border-slate-300"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:784:forbidden-utility:bg-slate-100",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 784,
+      "type": "forbidden-utility",
+      "match": "bg-slate-100"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:784:forbidden-utility:text-slate-800",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 784,
+      "type": "forbidden-utility",
+      "match": "text-slate-800"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:793:forbidden-utility:\"border-amber-500/30",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 793,
+      "type": "forbidden-utility",
+      "match": "\"border-amber-500/30"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:793:forbidden-utility:bg-amber-500/5",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 793,
+      "type": "forbidden-utility",
+      "match": "bg-amber-500/5"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:799:forbidden-utility:\"border-red-500/30",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 799,
+      "type": "forbidden-utility",
+      "match": "\"border-red-500/30"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:799:forbidden-utility:bg-red-500/5",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 799,
+      "type": "forbidden-utility",
+      "match": "bg-red-500/5"
+    },
+    {
+      "key": "src/pages/skill-detail.tsx:802:forbidden-utility:border-red-500/20",
+      "file": "src/pages/skill-detail.tsx",
+      "line": 802,
+      "type": "forbidden-utility",
+      "match": "border-red-500/20"
+    },
+    {
+      "key": "src/shared/components/landing-quick-start.tsx:103:literal-color:rgba(15,23,42,0.25)",
+      "file": "src/shared/components/landing-quick-start.tsx",
+      "line": 103,
+      "type": "literal-color",
+      "match": "rgba(15,23,42,0.25)"
+    },
+    {
+      "key": "src/shared/components/landing-quick-start.tsx:108:inline-style-literal:background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.92) 100%)'",
+      "file": "src/shared/components/landing-quick-start.tsx",
+      "line": 108,
+      "type": "inline-style-literal",
+      "match": "background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.92) 100%)'"
+    },
+    {
+      "key": "src/shared/components/landing-quick-start.tsx:108:literal-color:rgba(241,245,249,0.92)",
+      "file": "src/shared/components/landing-quick-start.tsx",
+      "line": 108,
+      "type": "literal-color",
+      "match": "rgba(241,245,249,0.92)"
+    },
+    {
+      "key": "src/shared/components/landing-quick-start.tsx:108:literal-color:rgba(248,250,252,0.98)",
+      "file": "src/shared/components/landing-quick-start.tsx",
+      "line": 108,
+      "type": "literal-color",
+      "match": "rgba(248,250,252,0.98)"
+    },
+    {
+      "key": "src/shared/components/landing-quick-start.tsx:122:literal-color:rgba(255,255,255,0.96)",
+      "file": "src/shared/components/landing-quick-start.tsx",
+      "line": 122,
+      "type": "literal-color",
+      "match": "rgba(255,255,255,0.96)"
+    },
+    {
+      "key": "src/shared/components/landing-quick-start.tsx:124:literal-color:rgba(15, 23, 42, 0.08)",
+      "file": "src/shared/components/landing-quick-start.tsx",
+      "line": 124,
+      "type": "literal-color",
+      "match": "rgba(15, 23, 42, 0.08)"
+    },
+    {
+      "key": "src/shared/components/landing-quick-start.tsx:143:forbidden-utility:bg-slate-50/90",
+      "file": "src/shared/components/landing-quick-start.tsx",
+      "line": 143,
+      "type": "forbidden-utility",
+      "match": "bg-slate-50/90"
+    },
+    {
+      "key": "src/shared/components/landing-quick-start.tsx:143:literal-color:rgba(255,255,255,0.7)",
+      "file": "src/shared/components/landing-quick-start.tsx",
+      "line": 143,
+      "type": "literal-color",
+      "match": "rgba(255,255,255,0.7)"
+    },
+    {
+      "key": "src/shared/components/landing-quick-start.tsx:149:literal-color:#0F172A",
+      "file": "src/shared/components/landing-quick-start.tsx",
+      "line": 149,
+      "type": "literal-color",
+      "match": "#0F172A"
+    },
+    {
+      "key": "src/shared/components/landing-quick-start.tsx:149:literal-color:#16A34A",
+      "file": "src/shared/components/landing-quick-start.tsx",
+      "line": 149,
+      "type": "literal-color",
+      "match": "#16A34A"
+    },
+    {
+      "key": "src/shared/components/namespace-badge.tsx:15:forbidden-utility:'bg-emerald-500/10",
+      "file": "src/shared/components/namespace-badge.tsx",
+      "line": 15,
+      "type": "forbidden-utility",
+      "match": "'bg-emerald-500/10"
+    },
+    {
+      "key": "src/shared/components/namespace-badge.tsx:15:forbidden-utility:border-emerald-500/20",
+      "file": "src/shared/components/namespace-badge.tsx",
+      "line": 15,
+      "type": "forbidden-utility",
+      "match": "border-emerald-500/20"
+    },
+    {
+      "key": "src/shared/components/namespace-badge.tsx:15:forbidden-utility:text-emerald-400",
+      "file": "src/shared/components/namespace-badge.tsx",
+      "line": 15,
+      "type": "forbidden-utility",
+      "match": "text-emerald-400"
+    },
+    {
+      "key": "src/shared/components/quick-start.tsx:101:forbidden-utility:bg-red-500/80",
+      "file": "src/shared/components/quick-start.tsx",
+      "line": 101,
+      "type": "forbidden-utility",
+      "match": "bg-red-500/80"
+    },
+    {
+      "key": "src/shared/components/quick-start.tsx:102:forbidden-utility:bg-amber-500/80",
+      "file": "src/shared/components/quick-start.tsx",
+      "line": 102,
+      "type": "forbidden-utility",
+      "match": "bg-amber-500/80"
+    },
+    {
+      "key": "src/shared/components/quick-start.tsx:103:forbidden-utility:bg-emerald-500/80",
+      "file": "src/shared/components/quick-start.tsx",
+      "line": 103,
+      "type": "forbidden-utility",
+      "match": "bg-emerald-500/80"
+    },
+    {
+      "key": "src/shared/components/toaster.tsx:22:forbidden-utility:'border-emerald-500/40",
+      "file": "src/shared/components/toaster.tsx",
+      "line": 22,
+      "type": "forbidden-utility",
+      "match": "'border-emerald-500/40"
+    },
+    {
+      "key": "src/shared/components/toaster.tsx:23:forbidden-utility:'border-amber-500/40",
+      "file": "src/shared/components/toaster.tsx",
+      "line": 23,
+      "type": "forbidden-utility",
+      "match": "'border-amber-500/40"
+    },
+    {
+      "key": "src/shared/components/toaster.tsx:24:forbidden-utility:'border-blue-500/40",
+      "file": "src/shared/components/toaster.tsx",
+      "line": 24,
+      "type": "forbidden-utility",
+      "match": "'border-blue-500/40"
+    },
+    {
+      "key": "src/shared/lib/utils.test.ts:30:forbidden-utility:'text-blue-500",
+      "file": "src/shared/lib/utils.test.ts",
+      "line": 30,
+      "type": "forbidden-utility",
+      "match": "'text-blue-500"
+    },
+    {
+      "key": "src/shared/lib/utils.test.ts:30:forbidden-utility:'text-blue-500",
+      "file": "src/shared/lib/utils.test.ts",
+      "line": 30,
+      "type": "forbidden-utility",
+      "match": "'text-blue-500"
+    },
+    {
+      "key": "src/shared/lib/utils.test.ts:30:forbidden-utility:'text-red-500",
+      "file": "src/shared/lib/utils.test.ts",
+      "line": 30,
+      "type": "forbidden-utility",
+      "match": "'text-red-500"
+    }
+  ]
+}

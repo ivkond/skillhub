@@ -189,4 +189,16 @@ class VisibilityCheckerTest {
         boolean canAccess = checker.canAccess(privateSkill, OTHER_USER_ID, Map.of(), Set.of());
         assertFalse(canAccess);
     }
+
+    @Test
+    void testNullNamespaceRolesMapIsTreatedAsEmptyForAnonymousPublicAccess() {
+        boolean canAccess = checker.canAccess(publicSkill, null, null);
+        assertTrue(canAccess);
+    }
+
+    @Test
+    void testNullNamespaceRolesAndPlatformRolesDoNotThrowAndDenyPrivateForAnonymous() {
+        boolean canAccess = checker.canAccess(privateSkill, null, null, null);
+        assertFalse(canAccess);
+    }
 }

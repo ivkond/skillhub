@@ -74,8 +74,60 @@ class RouteSecurityPolicyRegistryTest {
     }
 
     @Test
-    void shouldIgnoreCsrf_forBearerAndApiPaths() {
-        assertTrue(registry.shouldIgnoreCsrf("/api/v1/admin/users", null));
+    void authorizationPolicies_shouldExposePublicCollectionRouteToAnonymousUsers() {
+        boolean matchedV1 = registry.authorizationPolicies().stream()
+                .anyMatch(policy -> policy.method() == HttpMethod.GET
+                        && "/api/v1/public/collections/*/*".equals(policy.pattern())
+                        && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.PERMIT_ALL);
+        boolean matchedWeb = registry.authorizationPolicies().stream()
+                .anyMatch(policy -> policy.method() == HttpMethod.GET
+                        && "/api/web/public/collections/*/*".equals(policy.pattern())
+                        && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.PERMIT_ALL);
+
+        assertTrue(matchedV1);
+        assertTrue(matchedWeb);
+    }
+
+    @Test
+    void authorizationPolicies_shouldRequireAuthenticationForMyCollectionsRoute() {
+        boolean matchedV1 = registry.authorizationPolicies().stream()
+                .anyMatch(policy -> policy.method() == HttpMethod.GET
+                        && "/api/v1/me/collections".equals(policy.pattern())
+                        && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.AUTHENTICATED);
+        boolean matchedWeb = registry.authorizationPolicies().stream()
+                .anyMatch(policy -> policy.method() == HttpMethod.GET
+                        && "/api/web/me/collections".equals(policy.pattern())
+                        && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.AUTHENTICATED);
+
+        assertTrue(matchedV1);
+        assertTrue(matchedWeb);
+    }
+
+    @Test
+    void authorizationPolicies_shouldRequireAuthenticationForCollectionCreateRoute() {
+        boolean matchedV1 = registry.authorizationPolicies().stream()
+                .anyMatch(policy -> policy.method() == HttpMethod.POST
+                        && "/api/v1/collections".equals(policy.pattern())
+                        && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.AUTHENTICATED);
+        boolean matchedWeb = registry.authorizationPolicies().stream()
+                .anyMatch(policy -> policy.method() == HttpMethod.POST
+                        && "/api/web/collections".equals(policy.pattern())
+                        && policy.accessLevel() == RouteSecurityPolicyRegistry.AccessLevel.AUTHENTICATED);
+
+        assertTrue(matchedV1);
+        assertTrue(matchedWeb);
+    }
+
+    @Test
+    void authorizeApiToken_shouldAllowV1PublicCollectionReadWithoutScope() {
+        var decision = registry.authorizeApiToken("GET", "/api/v1/public/collections/owner/slug", Set.of());
+        assertTrue(decision.allowed());
+    }
+
+    @Test
+    void shouldIgnoreCsrf_onlyForBearerTokens() {
+        assertFalse(registry.shouldIgnoreCsrf("/api/v1/admin/users", null));
+        assertFalse(registry.shouldIgnoreCsrf("/api/v1/admin/users", "Basic dXNlcjpwYXNz"));
         assertTrue(registry.shouldIgnoreCsrf("/not-api", "Bearer token"));
         assertFalse(registry.shouldIgnoreCsrf("/ui/settings", null));
     }

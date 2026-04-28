@@ -35,6 +35,21 @@ const config: Config = {
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        surface: {
+          0: 'hsl(var(--surface-0))',
+          1: 'hsl(var(--surface-1))',
+          2: 'hsl(var(--surface-2))',
+        },
+        content: {
+          primary: 'hsl(var(--content-primary))',
+          secondary: 'hsl(var(--content-secondary))',
+          muted: 'hsl(var(--content-muted))',
+        },
+        action: {
+          primary: 'hsl(var(--action-primary))',
+          'primary-hover': 'hsl(var(--action-primary-hover))',
+          'ghost-hover': 'hsl(var(--action-ghost-hover))',
+        },
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -63,6 +78,17 @@ const config: Config = {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
         },
+        state: {
+          success: 'hsl(var(--state-success))',
+          warning: 'hsl(var(--state-warning))',
+          danger: 'hsl(var(--state-danger))',
+          info: 'hsl(var(--state-info))',
+        },
+        stroke: {
+          subtle: 'hsl(var(--stroke-subtle))',
+          DEFAULT: 'hsl(var(--stroke-default))',
+          strong: 'hsl(var(--stroke-strong))',
+        },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -78,7 +104,6 @@ const config: Config = {
         'fade-in': 'fade-in 0.5s ease both',
         'slide-in-right': 'slide-in-right 0.5s cubic-bezier(0.16, 1, 0.3, 1) both',
         'shimmer': 'shimmer 1.8s ease-in-out infinite',
-        'float': 'float 6s ease-in-out infinite',
       },
       keyframes: {
         'fade-up': {
@@ -96,10 +121,6 @@ const config: Config = {
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
-        },
-        float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-8px)' },
         },
       },
     },

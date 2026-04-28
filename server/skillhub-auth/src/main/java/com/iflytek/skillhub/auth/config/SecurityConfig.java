@@ -1,11 +1,13 @@
 package com.iflytek.skillhub.auth.config;
 
 import com.iflytek.skillhub.auth.oauth.CustomOAuth2UserService;
+import com.iflytek.skillhub.auth.oauth.CustomOidcUserService;
 import com.iflytek.skillhub.auth.oauth.OAuth2LoginFailureHandler;
 import com.iflytek.skillhub.auth.oauth.OAuth2LoginSuccessHandler;
 import com.iflytek.skillhub.auth.oauth.SkillHubOAuth2AuthorizationRequestResolver;
 import com.iflytek.skillhub.auth.mock.MockAuthFilter;
 import com.iflytek.skillhub.auth.policy.RouteSecurityPolicyRegistry;
+import com.iflytek.skillhub.auth.session.SessionPrincipalAuthenticationFilter;
 import com.iflytek.skillhub.auth.token.ApiTokenAuthenticationFilter;
 import com.iflytek.skillhub.auth.token.ApiTokenScopeFilter;
 import org.springframework.beans.factory.ObjectProvider;
@@ -51,32 +53,38 @@ public class SecurityConfig {
             "form-action 'self'");
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOidcUserService customOidcUserService;
     private final SkillHubOAuth2AuthorizationRequestResolver authorizationRequestResolver;
     private final OAuth2LoginSuccessHandler successHandler;
     private final OAuth2LoginFailureHandler failureHandler;
     private final ApiTokenAuthenticationFilter apiTokenAuthenticationFilter;
     private final ApiTokenScopeFilter apiTokenScopeFilter;
+    private final SessionPrincipalAuthenticationFilter sessionPrincipalAuthenticationFilter;
     private final AuthenticationEntryPoint apiAuthenticationEntryPoint;
     private final AccessDeniedHandler apiAccessDeniedHandler;
     private final ObjectProvider<MockAuthFilter> mockAuthFilterProvider;
     private final RouteSecurityPolicyRegistry routeSecurityPolicyRegistry;
 
     public SecurityConfig(CustomOAuth2UserService customOAuth2UserService,
+                          CustomOidcUserService customOidcUserService,
                           SkillHubOAuth2AuthorizationRequestResolver authorizationRequestResolver,
                           OAuth2LoginSuccessHandler successHandler,
                           OAuth2LoginFailureHandler failureHandler,
                           ApiTokenAuthenticationFilter apiTokenAuthenticationFilter,
                           ApiTokenScopeFilter apiTokenScopeFilter,
+                          SessionPrincipalAuthenticationFilter sessionPrincipalAuthenticationFilter,
                           AuthenticationEntryPoint apiAuthenticationEntryPoint,
                           AccessDeniedHandler apiAccessDeniedHandler,
                           ObjectProvider<MockAuthFilter> mockAuthFilterProvider,
                           RouteSecurityPolicyRegistry routeSecurityPolicyRegistry) {
         this.customOAuth2UserService = customOAuth2UserService;
+        this.customOidcUserService = customOidcUserService;
         this.authorizationRequestResolver = authorizationRequestResolver;
         this.successHandler = successHandler;
         this.failureHandler = failureHandler;
         this.apiTokenAuthenticationFilter = apiTokenAuthenticationFilter;
         this.apiTokenScopeFilter = apiTokenScopeFilter;
+        this.sessionPrincipalAuthenticationFilter = sessionPrincipalAuthenticationFilter;
         this.apiAuthenticationEntryPoint = apiAuthenticationEntryPoint;
         this.apiAccessDeniedHandler = apiAccessDeniedHandler;
         this.mockAuthFilterProvider = mockAuthFilterProvider;
@@ -112,7 +120,9 @@ public class SecurityConfig {
             })
             .oauth2Login(oauth2 -> oauth2
                 .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(authorizationRequestResolver))
-                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                .userInfoEndpoint(userInfo -> userInfo
+                        .userService(customOAuth2UserService)
+                        .oidcUserService(customOidcUserService))
                 .successHandler(successHandler)
                 .failureHandler(failureHandler)
             )
@@ -142,7 +152,8 @@ public class SecurityConfig {
                 .deleteCookies("SESSION")
             )
             .addFilterBefore(apiTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(apiTokenScopeFilter, ApiTokenAuthenticationFilter.class);
+            .addFilterAfter(apiTokenScopeFilter, ApiTokenAuthenticationFilter.class)
+            .addFilterBefore(sessionPrincipalAuthenticationFilter, AnonymousAuthenticationFilter.class);
 
         MockAuthFilter mockAuthFilter = mockAuthFilterProvider.getIfAvailable();
         if (mockAuthFilter != null) {

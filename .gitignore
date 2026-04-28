@@ -5,6 +5,7 @@ Thumbs.db
 # Editors / IDEs / local tooling
 .claude/
 .codex/
+.corepack/
 .idea/
 .omc
 .vscode/
@@ -14,6 +15,7 @@ Thumbs.db
 *.iml
 *.swp
 *.swo
+.m2
 
 # Logs
 *.log
@@ -34,6 +36,7 @@ yarn-error.log*
 
 # Java / Spring Boot
 .gradle/
+.m2repo/
 build/
 out/
 target/
@@ -46,6 +49,7 @@ target/
 !gradle/wrapper/gradle-wrapper.jar
 !mvnw
 !mvnw.cmd
+server/.mvn/local-settings.xml
 
 # Frontend / Node.js
 .cache/
@@ -83,6 +87,7 @@ docs/superpowers/
 # Local workspace metadata
 AGENTS.md
 CLAUDE.md
+.gitnexus
 
 # Local config file
 .mcp.json

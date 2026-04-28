@@ -13,11 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +33,7 @@ import org.springframework.stereotype.Service;
 public class OAuthLoginFlowService {
 
     private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+    private final OidcUserService oidcDelegate = new OidcUserService();
     private final Map<String, OAuthClaimsExtractor> extractors;
     private final AccessPolicy accessPolicy;
     private final IdentityBindingService identityBindingService;
@@ -45,6 +49,15 @@ public class OAuthLoginFlowService {
 
     public AuthenticatedLoginContext loadLoginContext(OAuth2UserRequest request) {
         OAuth2User upstreamUser = delegate.loadUser(request);
+        return buildAuthenticatedContext(request, upstreamUser);
+    }
+
+    public AuthenticatedLoginContext loadOidcLoginContext(OidcUserRequest request) {
+        OidcUser upstreamUser = oidcDelegate.loadUser(request);
+        return buildAuthenticatedContext(request, upstreamUser);
+    }
+
+    private AuthenticatedLoginContext buildAuthenticatedContext(OAuth2UserRequest request, OAuth2User upstreamUser) {
         String registrationId = request.getClientRegistration().getRegistrationId();
 
         OAuthClaimsExtractor extractor = extractors.get(registrationId);

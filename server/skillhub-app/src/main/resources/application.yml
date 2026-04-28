@@ -59,6 +59,13 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             client-name: GitHub
             authorization-grant-type: authorization_code
+          google:
+            client-id: ${OAUTH2_GOOGLE_CLIENT_ID:placeholder}
+            client-secret: ${OAUTH2_GOOGLE_CLIENT_SECRET:placeholder}
+            scope: openid,email,profile
+            client-name: Google
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
           gitlab:
             client-id: ${OAUTH2_GITLAB_CLIENT_ID:placeholder}
             client-secret: ${OAUTH2_GITLAB_CLIENT_SECRET:placeholder}
@@ -93,6 +100,9 @@ spring:
             enable: ${SPRING_MAIL_SMTP_STARTTLS_ENABLE:false}
 
 skillhub:
+  collections:
+    reconcile-cron: ${SKILLHUB_COLLECTIONS_RECONCILE_CRON:0 0 * * * *}
+    reconcile-stale-after: ${SKILLHUB_COLLECTIONS_RECONCILE_STALE_AFTER:PT24H}
   auth:
     mock:
       enabled: ${SKILLHUB_AUTH_MOCK_ENABLED:false}
@@ -141,7 +151,7 @@ skillhub:
     download:
       anonymous-cookie-name: ${SKILLHUB_DOWNLOAD_ANON_COOKIE_NAME:skillhub_anon_dl}
       anonymous-cookie-max-age: ${SKILLHUB_DOWNLOAD_ANON_COOKIE_MAX_AGE:P30D}
-      anonymous-cookie-secret: ${SKILLHUB_DOWNLOAD_ANON_COOKIE_SECRET:change-me-in-production}
+      anonymous-cookie-secret: ${SKILLHUB_DOWNLOAD_ANON_COOKIE_SECRET:}
   publish:
     max-file-count: 100
     max-single-file-size: 10485760 # 10MB
@@ -197,7 +207,7 @@ skillhub:
       enabled: ${BOOTSTRAP_ADMIN_ENABLED:false}
       user-id: ${BOOTSTRAP_ADMIN_USER_ID:docker-admin}
       username: ${BOOTSTRAP_ADMIN_USERNAME:admin}
-      password: ${BOOTSTRAP_ADMIN_PASSWORD:ChangeMe!2026}
+      password: ${BOOTSTRAP_ADMIN_PASSWORD:}
       display-name: ${BOOTSTRAP_ADMIN_DISPLAY_NAME:Admin}
       email: ${BOOTSTRAP_ADMIN_EMAIL:admin@skillhub.local}
 

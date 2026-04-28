@@ -10,7 +10,7 @@ function getOptionalEnv(name: string): string | undefined {
 function adminCredentials() {
   return {
     username: getOptionalEnv('E2E_ADMIN_USERNAME') ?? getOptionalEnv('BOOTSTRAP_ADMIN_USERNAME') ?? 'admin',
-    password: getOptionalEnv('E2E_ADMIN_PASSWORD') ?? getOptionalEnv('BOOTSTRAP_ADMIN_PASSWORD') ?? 'ChangeMe!2026',
+    password: getOptionalEnv('E2E_ADMIN_PASSWORD') ?? getOptionalEnv('BOOTSTRAP_ADMIN_PASSWORD') ?? 'LocalDevOnly!ChangeBeforeSharing',
   }
 }
 
@@ -28,7 +28,7 @@ export async function createNamespaceReviewData(
   page: Page,
   testInfo: TestInfo,
 ): Promise<SeededReviewData & { reviewTaskId: number; cleanup: () => Promise<void> }> {
-  const credentials = await registerSession(page, testInfo, { allowMockSession: false })
+  const credentials = await registerSession(page, testInfo)
   const builder = new E2eTestDataBuilder(page, testInfo)
   await builder.init()
 

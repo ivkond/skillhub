@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { setEnglishLocale, setUniqueClientIp } from './helpers/auth-fixtures'
 import { createFreshSession } from './helpers/session'
+import { randomAlphanumeric } from './helpers/crypto'
 
 // TC_UN_* 用户名输入框 / TC_EM_* 邮箱输入框 / TC_PW_* 密码输入框
 // TC_REG_* 注册/登录流程 / TC_UI_* UI/UX
@@ -193,7 +194,7 @@ test.describe('Register Flow (Real API)', () => {
   // TC_REG_002 P0 - registration without email
   test('TC_REG_002: shows required validation when email is missing', async ({ page }) => {
     await page.goto('/register')
-    const suffix = Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
+    const suffix = `${Date.now().toString(36)}${randomAlphanumeric(4)}`
     await page.getByLabel(/username/i).fill(`emailrequired_${suffix}`)
     await page.getByLabel(/^password/i).fill('Test123!@')
     await page.getByLabel(/email/i).click()

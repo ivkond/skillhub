@@ -24,16 +24,12 @@
 
 ## 2. 目录结构
 
+所有业务流 spec 位于 `web/e2e/*.spec.ts`（当前 32 个文件）；共享辅助代码在 `web/e2e/helpers/`。
+
 ```text
 web/
 ├── e2e/
-│   ├── auth-entry.spec.ts
-│   ├── dashboard-shell.spec.ts
-│   ├── landing-navigation.spec.ts
-│   ├── public-pages.spec.ts
-│   ├── route-guard.spec.ts
-│   ├── settings-pages.spec.ts
-│   ├── tokens.spec.ts
+│   ├── *.spec.ts
 │   └── helpers/
 │       ├── auth-fixtures.ts
 │       ├── session.ts
@@ -51,7 +47,7 @@ web/
 
 ## 3. 当前覆盖范围
 
-当前真实请求 E2E 覆盖 23 个 spec：
+当前真实请求 E2E 覆盖 32 个 spec 文件。以下为部分代表 spec（完整列表见 `web/e2e/*.spec.ts`）：
 
 - `auth-entry.spec.ts`：登录入口、注册入口、`returnTo` 保留
 - `landing-navigation.spec.ts`：首页导航与匿名受限跳转
@@ -76,6 +72,8 @@ web/
 - `protected-routes.spec.ts`：匿名访问 dashboard/admin 受保护路由跳转登录
 - `cli-auth.spec.ts`：CLI Auth 缺失参数错误路径
 - `role-access-control.spec.ts`：登录普通用户访问治理/管理台受限路由会被回退
+- `collections-flow.spec.ts`：集合创建、加技能、公开页访问、贡献者增删主流程
+- `collections-visibility-guard.spec.ts`：私有集合公开链接防泄露（未授权用户 not-found）
 
 ## 4. 执行命令
 
@@ -94,6 +92,18 @@ cd web && pnpm test:e2e:smoke
 cd web && pnpm exec playwright test e2e/<feature>.spec.ts
 cd web && pnpm test:e2e:ui
 ```
+
+Phase 4 集合验证专用命令：
+
+```bash
+cd web && pnpm exec playwright test e2e/collections-flow.spec.ts --config=playwright.config.ts
+cd web && pnpm exec playwright test e2e/collections-visibility-guard.spec.ts --config=playwright.config.ts
+cd web && pnpm exec playwright test e2e/collections-flow.spec.ts e2e/collections-visibility-guard.spec.ts --config=playwright.config.ts
+```
+
+CI 说明：
+
+- `.github/workflows/pr-e2e.yml` 通过既有 `make test-e2e-frontend` 执行全量 `web/e2e`，上述两个集合 spec 会自动纳入 PR 校验，无需新增独立 job。
 
 说明：
 

@@ -74,35 +74,21 @@ public class SkillController extends BaseApiController {
 
         SkillQueryService.SkillDetailDTO detail = skillQueryService.getSkillDetail(
                 namespace, slug, userId, userNsRoles != null ? userNsRoles : Map.of());
+        return ok("response.success.read", toSkillDetailResponse(detail, namespace));
+    }
 
-        SkillDetailResponse response = new SkillDetailResponse(
-                detail.id(),
-                detail.slug(),
-                detail.displayName(),
-                detail.ownerId(),
-                detail.ownerDisplayName(),
-                detail.summary(),
-                detail.visibility(),
-                detail.status(),
-                detail.downloadCount(),
-                detail.starCount(),
-                detail.ratingAvg(),
-                detail.ratingCount(),
-                detail.hidden(),
-                namespace,
-                skillLabelAppService.listSkillLabelsBySkillId(detail.id()),
-                detail.canManageLifecycle(),
-                detail.canSubmitPromotion(),
-                detail.canInteract(),
-                detail.canReport(),
-                toLifecycleVersion(detail.headlineVersion()),
-                toLifecycleVersion(detail.publishedVersion()),
-                toLifecycleVersion(detail.ownerPreviewVersion()),
-                detail.ownerPreviewReviewComment(),
-                detail.resolutionMode()
+    @GetMapping("/id/{skillId}")
+    public ApiResponse<SkillDetailResponse> getSkillDetailById(
+            @PathVariable Long skillId,
+            @RequestAttribute(value = "userId", required = false) String userId,
+            @RequestAttribute(value = "userNsRoles", required = false) Map<Long, NamespaceRole> userNsRoles
+    ) {
+        SkillQueryService.SkillDetailWithNamespaceDTO detailWithNamespace = skillQueryService.getSkillDetailById(
+                skillId,
+                userId,
+                userNsRoles != null ? userNsRoles : Map.of()
         );
-
-        return ok("response.success.read", response);
+        return ok("response.success.read", toSkillDetailResponse(detailWithNamespace.detail(), detailWithNamespace.namespace()));
     }
 
     /**
@@ -419,5 +405,34 @@ public class SkillController extends BaseApiController {
             return null;
         }
         return new SkillLifecycleVersionResponse(projection.id(), projection.version(), projection.status());
+    }
+
+    private SkillDetailResponse toSkillDetailResponse(SkillQueryService.SkillDetailDTO detail, String namespace) {
+        return new SkillDetailResponse(
+                detail.id(),
+                detail.slug(),
+                detail.displayName(),
+                detail.ownerId(),
+                detail.ownerDisplayName(),
+                detail.summary(),
+                detail.visibility(),
+                detail.status(),
+                detail.downloadCount(),
+                detail.starCount(),
+                detail.ratingAvg(),
+                detail.ratingCount(),
+                detail.hidden(),
+                namespace,
+                skillLabelAppService.listSkillLabelsBySkillId(detail.id()),
+                detail.canManageLifecycle(),
+                detail.canSubmitPromotion(),
+                detail.canInteract(),
+                detail.canReport(),
+                toLifecycleVersion(detail.headlineVersion()),
+                toLifecycleVersion(detail.publishedVersion()),
+                toLifecycleVersion(detail.ownerPreviewVersion()),
+                detail.ownerPreviewReviewComment(),
+                detail.resolutionMode()
+        );
     }
 }

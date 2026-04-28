@@ -15,12 +15,12 @@ export function VerdictBadge({ verdict, displayState }: VerdictBadgeProps) {
   }
 
   const styles = {
-    SCANNING: 'bg-sky-500/10 text-sky-700 dark:text-sky-400',
-    SCAN_FAILED: 'bg-red-500/10 text-red-700 dark:text-red-400',
-    SAFE: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
-    SUSPICIOUS: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
-    DANGEROUS: 'bg-orange-500/10 text-orange-700 dark:text-orange-400',
-    BLOCKED: 'bg-red-500/10 text-red-700 dark:text-red-400',
+    SCANNING: 'state-info',
+    SCAN_FAILED: 'state-danger',
+    SAFE: 'state-success',
+    SUSPICIOUS: 'state-warning',
+    DANGEROUS: 'state-danger',
+    BLOCKED: 'state-danger',
   }
 
   const label = state === 'SCANNING'

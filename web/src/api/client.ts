@@ -1,5 +1,5 @@
 import createClient from 'openapi-fetch'
-import type { paths } from './generated/schema'
+import type { components, paths } from './generated/schema'
 import type {
   ChangePasswordRequest,
   PasswordResetConfirmRequest,
@@ -40,6 +40,7 @@ import type {
   AdminLabelInput,
   LabelDefinition,
   LabelItem,
+  SkillDetail,
 } from './types'
 import { ApiError } from '@/shared/lib/api-error'
 import i18n from '@/i18n/config'
@@ -720,6 +721,141 @@ export const namespaceApi = {
       method: 'DELETE',
       headers: await ensureCsrfHeaders(),
     })
+  },
+}
+
+type SkillCollectionResponse = components['schemas']['SkillCollectionResponse']
+type SkillCollectionCreateRequestBody = components['schemas']['SkillCollectionCreateRequest']
+type SkillCollectionUpdateRequestBody = components['schemas']['SkillCollectionUpdateRequest']
+type PageSkillCollectionResponse = components['schemas']['PageSkillCollectionResponse']
+type SkillCollectionMemberResponse = components['schemas']['SkillCollectionMemberResponse']
+type SkillCollectionContributorResponse = components['schemas']['SkillCollectionContributorResponse']
+
+export const collectionApi = {
+  async listMine(params?: { page?: number; size?: number }): Promise<{
+    items: SkillCollectionResponse[]
+    total: number
+    page: number
+    size: number
+  }> {
+    const page = params?.page ?? 0
+    const size = params?.size ?? 20
+    const query = new URLSearchParams({
+      page: String(page),
+      size: String(size),
+    })
+    const pageData = await fetchJson<PageSkillCollectionResponse>(`${WEB_API_PREFIX}/me/collections?${query.toString()}`)
+    return {
+      items: pageData.content ?? [],
+      total: Number(pageData.totalElements ?? 0),
+      page: pageData.number ?? page,
+      size: pageData.size ?? size,
+    }
+  },
+
+  async create(body: SkillCollectionCreateRequestBody): Promise<SkillCollectionResponse> {
+    return fetchJson<SkillCollectionResponse>(`${WEB_API_PREFIX}/collections`, {
+      method: 'POST',
+      headers: await ensureCsrfHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(body),
+    })
+  },
+
+  async getById(id: string | number): Promise<SkillCollectionResponse> {
+    return fetchJson<SkillCollectionResponse>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}`)
+  },
+
+  async updateMetadata(id: string | number, body: SkillCollectionUpdateRequestBody): Promise<SkillCollectionResponse> {
+    return fetchJson<SkillCollectionResponse>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}`, {
+      method: 'PATCH',
+      headers: await ensureCsrfHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(body),
+    })
+  },
+
+  async setVisibility(id: string | number, visibility: 'PUBLIC' | 'PRIVATE'): Promise<SkillCollectionResponse> {
+    return fetchJson<SkillCollectionResponse>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/visibility`, {
+      method: 'PATCH',
+      headers: await ensureCsrfHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({ visibility }),
+    })
+  },
+
+  async deleteCollection(id: string | number): Promise<void> {
+    await fetchJson<components['schemas']['MessageResponse']>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}`, {
+      method: 'DELETE',
+      headers: await ensureCsrfHeaders(),
+    })
+  },
+
+  async addSkill(id: string | number, skillId: number): Promise<SkillCollectionMemberResponse> {
+    return fetchJson<SkillCollectionMemberResponse>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/skills`, {
+      method: 'POST',
+      headers: await ensureCsrfHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({ skillId }),
+    })
+  },
+
+  async removeSkill(id: string | number, skillId: number): Promise<void> {
+    await fetchJson<components['schemas']['MessageResponse']>(
+      `${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/skills/${encodeURIComponent(String(skillId))}`,
+      {
+        method: 'DELETE',
+        headers: await ensureCsrfHeaders(),
+      },
+    )
+  },
+
+  async reorderSkills(id: string | number, skillIdsInOrder: number[]): Promise<SkillCollectionMemberResponse[]> {
+    return fetchJson<SkillCollectionMemberResponse[]>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/skills/order`, {
+      method: 'PUT',
+      headers: await ensureCsrfHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({ skillIdsInOrder }),
+    })
+  },
+
+  async listContributors(id: string | number): Promise<SkillCollectionContributorResponse[]> {
+    return fetchJson<SkillCollectionContributorResponse[]>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/contributors`)
+  },
+
+  async addContributor(id: string | number, userId: string): Promise<SkillCollectionContributorResponse> {
+    return fetchJson<SkillCollectionContributorResponse>(`${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/contributors`, {
+      method: 'POST',
+      headers: await ensureCsrfHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({ userId }),
+    })
+  },
+
+  async removeContributor(id: string | number, userId: string): Promise<void> {
+    await fetchJson<components['schemas']['MessageResponse']>(
+      `${WEB_API_PREFIX}/collections/${encodeURIComponent(String(id))}/contributors/${encodeURIComponent(userId)}`,
+      {
+        method: 'DELETE',
+        headers: await ensureCsrfHeaders(),
+      },
+    )
+  },
+
+  async getPublicByOwnerAndSlug(ownerKey: string, slug: string): Promise<SkillCollectionResponse> {
+    return fetchJson<SkillCollectionResponse>(
+      `${WEB_API_PREFIX}/public/collections/${encodeURIComponent(ownerKey)}/${encodeURIComponent(slug)}`,
+    )
+  },
+
+  async getSkillById(skillId: number): Promise<SkillDetail> {
+    return fetchJson<SkillDetail>(`${WEB_API_PREFIX}/skills/id/${encodeURIComponent(String(skillId))}`)
   },
 }
 

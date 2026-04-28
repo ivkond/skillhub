@@ -18,10 +18,10 @@ export function NamespaceHeader({ namespace }: NamespaceHeaderProps) {
       ? t('namespaceStatus.archived')
       : t('namespaceStatus.active')
   const statusClassName = namespace.status === 'FROZEN'
-    ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+    ? 'state-warning'
     : namespace.status === 'ARCHIVED'
-      ? 'bg-slate-500/10 text-slate-500 border-slate-500/20'
-      : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+      ? 'border-border/60 bg-secondary/40 text-muted-foreground'
+      : 'state-success'
   const hint = namespace.type === 'GLOBAL'
     ? t('namespaceStatus.immutableHint')
     : namespace.status === 'FROZEN'

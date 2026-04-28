@@ -111,6 +111,11 @@ public class SkillQueryService {
             String resolutionMode
     ) {}
 
+    public record SkillDetailWithNamespaceDTO(
+            String namespace,
+            SkillDetailDTO detail
+    ) {}
+
     public record SkillVersionDetailDTO(
             Long id,
             String version,
@@ -209,6 +214,19 @@ public class SkillQueryService {
             Map<Long, NamespaceRole> userNsRoles,
             Set<String> platformRoles) {
         return getSkillDetail(namespaceSlug, skillSlug, currentUserId, userNsRoles);
+    }
+
+    public SkillDetailWithNamespaceDTO getSkillDetailById(
+            Long skillId,
+            String currentUserId,
+            Map<Long, NamespaceRole> userNsRoles
+    ) {
+        Skill skill = skillRepository.findById(skillId)
+                .orElseThrow(() -> new DomainBadRequestException("error.skill.notFound", skillId));
+        Namespace namespace = namespaceRepository.findById(skill.getNamespaceId())
+                .orElseThrow(() -> new DomainBadRequestException("error.namespace.notFound", skill.getNamespaceId()));
+        SkillDetailDTO detail = getSkillDetail(namespace.getSlug(), skill.getSlug(), currentUserId, userNsRoles);
+        return new SkillDetailWithNamespaceDTO(namespace.getSlug(), detail);
     }
 
     /**

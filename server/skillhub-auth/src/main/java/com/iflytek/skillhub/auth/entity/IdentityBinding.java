@@ -2,7 +2,6 @@ package com.iflytek.skillhub.auth.entity;
 
 import java.time.Clock;
 import java.time.Instant;
-
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 

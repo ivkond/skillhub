@@ -138,14 +138,14 @@ export function ProfileReviewTable() {
     if (!result || result === 'SKIPPED') return <span className="text-xs text-muted-foreground">-</span>
     if (result === 'PASS') {
       return (
-        <span className="inline-flex items-center rounded-full bg-emerald-500/12 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+        <span className="inline-flex items-center rounded-full border border-state-success/30 bg-state-success/10 px-2.5 py-1 text-xs font-semibold text-state-success">
           PASS
         </span>
       )
     }
     if (result === 'FAIL') {
       return (
-        <span className="inline-flex items-center rounded-full bg-rose-500/12 px-2.5 py-1 text-xs font-semibold text-rose-700">
+        <span className="inline-flex items-center rounded-full border border-state-danger/30 bg-state-danger/10 px-2.5 py-1 text-xs font-semibold text-state-danger">
           FAIL
         </span>
       )
@@ -163,7 +163,7 @@ export function ProfileReviewTable() {
             </p>
             <p className="mt-2 text-3xl font-semibold text-foreground">{count}</p>
           </div>
-          <div className="rounded-xl bg-amber-100 p-3 text-amber-700">
+          <div className="rounded-xl border border-state-warning/30 bg-state-warning/10 p-3 text-state-warning">
             <Clock3 className="h-5 w-5" />
           </div>
         </div>

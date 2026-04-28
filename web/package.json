@@ -12,6 +12,9 @@
     "test:e2e": "playwright test",
     "test:e2e:smoke": "playwright test -c playwright.smoke.config.ts",
     "test:e2e:ui": "playwright test --ui",
+    "check:colors": "node scripts/check-no-hardcoded-colors.mjs",
+    "check:motion": "node scripts/check-motion-effects.mjs",
+    "check:parity-matrix": "node scripts/check-parity-matrix.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "generate-api": "openapi-typescript http://localhost:8080/v3/api-docs -o src/api/generated/schema.d.ts"
@@ -45,6 +48,8 @@
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "@playwright/test": "^1.58.2",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^22.13.1",
     "@types/mdast": "^4.0.4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
@@ -55,6 +60,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "jsdom": "^26.1.0",
     "openapi-typescript": "^7.6.1",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",

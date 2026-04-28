@@ -29,8 +29,8 @@ export function DashboardPage() {
   return (
     <div className={APP_SHELL_PAGE_CLASS_NAME}>
       <div>
-        <h1 className="text-4xl font-bold" style={{ color: 'hsl(var(--foreground))' }}>{t('dashboard.title')}</h1>
-        <p className="mt-2 text-lg" style={{ color: 'hsl(var(--text-secondary))' }}>
+        <h1 className="text-4xl font-bold text-foreground">{t('dashboard.title')}</h1>
+        <p className="mt-2 text-lg text-content-secondary">
           {t('dashboard.subtitle')}
         </p>
       </div>
@@ -53,7 +53,7 @@ export function DashboardPage() {
               <div className="text-xl font-semibold font-heading">{user?.displayName}</div>
               <div className="text-sm text-muted-foreground">{user?.email}</div>
               <div className="text-xs text-muted-foreground flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="w-2 h-2 rounded-full bg-state-success" />
                 {t('dashboard.loginVia', { provider: user?.oauthProvider })}
               </div>
             </div>
@@ -76,7 +76,11 @@ export function DashboardPage() {
         </CardContent>
       </Card>
 
-      <div className={`grid grid-cols-1 gap-4 ${governanceVisible ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}>
+      <div
+        className={`grid grid-cols-1 gap-4 ${
+          governanceVisible ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4'
+        }`}
+      >
         <Card className="p-5">
           <div className="text-sm text-muted-foreground">{t('dashboard.starsAndRatings')}</div>
           <Link to="/dashboard/stars" className="mt-2 inline-block font-semibold text-primary hover:underline">
@@ -93,6 +97,12 @@ export function DashboardPage() {
           <div className="text-sm text-muted-foreground">{t('dashboard.credentials')}</div>
           <Link to="/dashboard/tokens" className="mt-2 inline-block font-semibold text-primary hover:underline">
             {t('dashboard.openTokens')}
+          </Link>
+        </Card>
+        <Card className="p-5">
+          <div className="text-sm text-muted-foreground">{t('dashboard.collectionsTitle')}</div>
+          <Link to="/dashboard/collections" className="mt-2 inline-block font-semibold text-primary hover:underline">
+            {t('dashboard.openCollections')}
           </Link>
         </Card>
         {governanceVisible ? (

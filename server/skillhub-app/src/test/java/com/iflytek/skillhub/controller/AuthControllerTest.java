@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
@@ -35,6 +36,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
     "spring.security.oauth2.client.registration.github.client-name=GitHub",
+    "spring.security.oauth2.client.registration.google.client-id=placeholder",
+    "spring.security.oauth2.client.registration.google.client-secret=placeholder",
+    "spring.security.oauth2.client.registration.google.scope=openid,email,profile",
+    "spring.security.oauth2.client.registration.google.client-name=Google",
     "spring.security.oauth2.client.registration.gitee.client-id=placeholder",
     "spring.security.oauth2.client.registration.gitee.client-secret=placeholder",
     "spring.security.oauth2.client.registration.gitee.provider=gitee",
@@ -107,6 +112,32 @@ class AuthControllerTest {
             .andExpect(jsonPath("$.requestId").isNotEmpty());
     }
 
+    @Test
+    void meShouldRestoreAuthenticationFromSessionPrincipal() throws Exception {
+        given(namespaceMemberRepository.findByUserId("user-42")).willReturn(List.of());
+        given(userAccountRepository.findById("user-42"))
+                .willReturn(java.util.Optional.of(new UserAccount("user-42", "tester", "tester@example.com", "https://example.com/avatar.png")));
+        given(userRoleBindingRepository.findByUserId("user-42")).willReturn(List.of());
+
+        PlatformPrincipal principal = new PlatformPrincipal(
+                "user-42",
+                "tester",
+                "tester@example.com",
+                "https://example.com/avatar.png",
+                "google",
+                Set.of("USER")
+        );
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("platformPrincipal", principal);
+
+        mockMvc.perform(get("/api/v1/auth/me").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.userId").value("user-42"))
+                .andExpect(jsonPath("$.data.oauthProvider").value("google"));
+    }
+
     // ===== AC-P-002: Session refresh when displayName changes =====
 
     @Test
@@ -142,10 +173,11 @@ class AuthControllerTest {
         mockMvc.perform(get("/api/v1/auth/providers"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value(0))
-            .andExpect(jsonPath("$.data.length()").value(3))
-            .andExpect(jsonPath("$.data[*].id", hasItems("github", "gitee", "gitlab")))
+            .andExpect(jsonPath("$.data.length()").value(4))
+            .andExpect(jsonPath("$.data[*].id", hasItems("github", "google", "gitee", "gitlab")))
             .andExpect(jsonPath("$.data[*].authorizationUrl", hasItems(
                 "/oauth2/authorization/github",
+                "/oauth2/authorization/google",
                 "/oauth2/authorization/gitee",
                 "/oauth2/authorization/gitlab"
             )))
@@ -160,7 +192,22 @@ class AuthControllerTest {
             .andExpect(jsonPath("$.code").value(0))
             .andExpect(jsonPath("$.data[*].authorizationUrl", hasItems(
                 "/oauth2/authorization/github?returnTo=%2Fdashboard%2Fpublish",
-                "/oauth2/authorization/gitee?returnTo=%2Fdashboard%2Fpublish"
+                "/oauth2/authorization/google?returnTo=%2Fdashboard%2Fpublish",
+                "/oauth2/authorization/gitee?returnTo=%2Fdashboard%2Fpublish",
+                "/oauth2/authorization/gitlab?returnTo=%2Fdashboard%2Fpublish"
+            )));
+    }
+
+    @Test
+    void providersShouldIgnoreUnsafeReturnToWhenRequested() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/providers").param("returnTo", "https://evil.example/steal"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(0))
+            .andExpect(jsonPath("$.data[*].authorizationUrl", hasItems(
+                "/oauth2/authorization/github",
+                "/oauth2/authorization/google",
+                "/oauth2/authorization/gitee",
+                "/oauth2/authorization/gitlab"
             )));
     }
 
@@ -169,10 +216,14 @@ class AuthControllerTest {
         mockMvc.perform(get("/api/v1/auth/methods").param("returnTo", "/dashboard/publish"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value(0))
-            .andExpect(jsonPath("$.data[*].id", hasItems("local-password", "oauth-github", "oauth-gitee")))
+            .andExpect(jsonPath("$.data[*].id", hasItems("local-password", "oauth-github", "oauth-google", "oauth-gitee", "oauth-gitlab")))
             .andExpect(jsonPath("$.data[?(@.id=='local-password')].methodType").value(hasItems("PASSWORD")))
+            .andExpect(jsonPath("$.data[?(@.id=='oauth-google')].actionUrl")
+                .value(hasItems("/oauth2/authorization/google?returnTo=%2Fdashboard%2Fpublish")))
             .andExpect(jsonPath("$.data[?(@.id=='oauth-github')].actionUrl")
-                .value(hasItems("/oauth2/authorization/github?returnTo=%2Fdashboard%2Fpublish")));
+                .value(hasItems("/oauth2/authorization/github?returnTo=%2Fdashboard%2Fpublish")))
+            .andExpect(jsonPath("$.data[?(@.id=='oauth-gitlab')].actionUrl")
+                .value(hasItems("/oauth2/authorization/gitlab?returnTo=%2Fdashboard%2Fpublish")));
     }
 
     @Test

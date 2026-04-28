@@ -72,6 +72,26 @@ const TermsOfServicePage = createLazyRouteComponent(() => import('@/pages/terms'
 const NamespacePage = createLazyRouteComponent(() => import('@/pages/namespace'), 'NamespacePage')
 const SkillDetailPage = createLazyRouteComponent(() => import('@/pages/skill-detail'), 'SkillDetailPage')
 const DashboardPage = createLazyRouteComponent(() => import('@/pages/dashboard'), 'DashboardPage')
+const CollectionsListPage = createLazyRouteComponent(
+  () => import('@/pages/dashboard/collections-list'),
+  'CollectionsListPage',
+)
+const CollectionNewPage = createLazyRouteComponent(
+  () => import('@/pages/dashboard/collection-new'),
+  'CollectionNewPage',
+)
+const CollectionEditPage = createLazyRouteComponent(
+  () => import('@/pages/dashboard/collection-edit'),
+  'CollectionEditPage',
+)
+const CollectionDetailPage = createLazyRouteComponent(
+  () => import('@/pages/dashboard/collection-detail'),
+  'CollectionDetailPage',
+)
+const PublicCollectionPage = createLazyRouteComponent(
+  () => import('@/pages/public/public-collection-page'),
+  'PublicCollectionPage',
+)
 const MySkillsPage = createLazyRouteComponent(() => import('@/pages/dashboard/my-skills'), 'MySkillsPage')
 const PublishPage = createLazyRouteComponent(() => import('@/pages/dashboard/publish'), 'PublishPage')
 const MyNamespacesPage = createLazyRouteComponent(
@@ -335,6 +355,40 @@ const dashboardTokensRoute = createRoute({
   component: TokensPage,
 })
 
+const dashboardCollectionNewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'dashboard/collections/new',
+  beforeLoad: requireAuth,
+  component: CollectionNewPage,
+})
+
+const dashboardCollectionEditRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'dashboard/collections/$collectionId/edit',
+  beforeLoad: requireAuth,
+  component: CollectionEditPage,
+})
+
+const dashboardCollectionDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'dashboard/collections/$collectionId',
+  beforeLoad: requireAuth,
+  component: CollectionDetailPage,
+})
+
+const dashboardCollectionsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'dashboard/collections',
+  beforeLoad: requireAuth,
+  component: CollectionsListPage,
+})
+
+const publicCollectionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'u/$ownerKey/c/$collectionSlug',
+  component: PublicCollectionPage,
+})
+
 const cliAuthRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'cli/auth',
@@ -427,6 +481,11 @@ const routeTree = rootRoute.addChildren([
   dashboardStarsRoute,
   dashboardNotificationsRoute,
   dashboardTokensRoute,
+  dashboardCollectionNewRoute,
+  dashboardCollectionDetailRoute,
+  dashboardCollectionEditRoute,
+  dashboardCollectionsRoute,
+  publicCollectionRoute,
   cliAuthRoute,
   settingsSecurityRoute,
   settingsProfileRoute,
