@@ -9,6 +9,18 @@ import {
   validateRows,
 } from './batch-import-members-dialog'
 
+const expectedParsedRows = [
+  { userId: 'user-1', role: 'MEMBER' },
+  { userId: 'user-2', role: 'ADMIN' },
+]
+
+const renderDialog = () =>
+  render(
+    <BatchImportMembersDialog slug="team-ai">
+      <button type="button">members.batchImport</button>
+    </BatchImportMembersDialog>,
+  )
+
 const batchMutation = {
   mutateAsync: vi.fn(),
   reset: vi.fn(),
@@ -42,25 +54,24 @@ vi.mock('@/shared/ui/button', () => ({
   ),
 }))
 
-vi.mock('@/shared/ui/dialog', () => ({
-  Dialog: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  DialogContent: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <div className={className}>{children}</div>
-  ),
-  DialogDescription: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <p className={className}>{children}</p>
-  ),
-  DialogFooter: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <div className={className}>{children}</div>
-  ),
-  DialogHeader: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <div className={className}>{children}</div>
-  ),
-  DialogTitle: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <h2 className={className}>{children}</h2>
-  ),
-  DialogTrigger: ({ children }: { children: ReactNode; asChild?: boolean }) => <>{children}</>,
-}))
+vi.mock('@/shared/ui/dialog', () => {
+  const renderTag = (tag: 'div' | 'p' | 'h2') => (
+    { children, className }: { children: ReactNode; className?: string },
+  ) => {
+    const Tag = tag
+    return <Tag className={className}>{children}</Tag>
+  }
+
+  return {
+    Dialog: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+    DialogContent: renderTag('div'),
+    DialogDescription: renderTag('p'),
+    DialogFooter: renderTag('div'),
+    DialogHeader: renderTag('div'),
+    DialogTitle: renderTag('h2'),
+    DialogTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
+  }
+})
 
 afterEach(() => {
   cleanup()
@@ -68,44 +79,14 @@ afterEach(() => {
 })
 
 describe('parseCsv', () => {
-  it('parses basic CSV with header', () => {
-    const result = parseCsv('userId,role\nuser-1,MEMBER\nuser-2,ADMIN')
-    expect(result).toEqual([
-      { userId: 'user-1', role: 'MEMBER' },
-      { userId: 'user-2', role: 'ADMIN' },
-    ])
-  })
-
-  it('parses CSV without header', () => {
-    const result = parseCsv('user-1,MEMBER\nuser-2,ADMIN')
-    expect(result).toEqual([
-      { userId: 'user-1', role: 'MEMBER' },
-      { userId: 'user-2', role: 'ADMIN' },
-    ])
-  })
-
-  it('handles Windows line endings', () => {
-    const result = parseCsv('userId,role\r\nuser-1,MEMBER\r\nuser-2,ADMIN\r\n')
-    expect(result).toEqual([
-      { userId: 'user-1', role: 'MEMBER' },
-      { userId: 'user-2', role: 'ADMIN' },
-    ])
-  })
-
-  it('normalizes role to uppercase', () => {
-    const result = parseCsv('user-1,member\nuser-2,admin')
-    expect(result).toEqual([
-      { userId: 'user-1', role: 'MEMBER' },
-      { userId: 'user-2', role: 'ADMIN' },
-    ])
-  })
-
-  it('skips empty lines', () => {
-    const result = parseCsv('userId,role\nuser-1,MEMBER\n\n\nuser-2,ADMIN\n')
-    expect(result).toEqual([
-      { userId: 'user-1', role: 'MEMBER' },
-      { userId: 'user-2', role: 'ADMIN' },
-    ])
+  it.each([
+    ['parses basic CSV with header', 'userId,role\nuser-1,MEMBER\nuser-2,ADMIN'],
+    ['parses CSV without header', 'user-1,MEMBER\nuser-2,ADMIN'],
+    ['handles Windows line endings', 'userId,role\r\nuser-1,MEMBER\r\nuser-2,ADMIN\r\n'],
+    ['normalizes role to uppercase', 'user-1,member\nuser-2,admin'],
+    ['skips empty lines', 'userId,role\nuser-1,MEMBER\n\n\nuser-2,ADMIN\n'],
+  ])('%s', (_, csvText) => {
+    expect(parseCsv(csvText)).toEqual(expectedParsedRows)
   })
 
   it('returns empty array for empty input', () => {
@@ -127,8 +108,7 @@ describe('parseCsv', () => {
 describe('validateRows', () => {
   it('marks valid rows', () => {
     const result = validateRows([
-      { userId: 'user-1', role: 'MEMBER' },
-      { userId: 'user-2', role: 'ADMIN' },
+      ...expectedParsedRows,
     ])
     expect(result).toEqual([
       { userId: 'user-1', role: 'MEMBER', validation: 'valid' },
@@ -168,11 +148,7 @@ describe('validateRows', () => {
 
 describe('BatchImportMembersDialog', () => {
   it('renders the upload drop zone as a real button and keeps the hidden file input unfocusable', () => {
-    const { container } = render(
-      <BatchImportMembersDialog slug="team-ai">
-        <button type="button">members.batchImport</button>
-      </BatchImportMembersDialog>,
-    )
+    const { container } = renderDialog()
 
     const uploadButton = screen.getByRole('button', { name: 'members.batchDropHint' })
     expect(uploadButton.tagName).toBe('BUTTON')

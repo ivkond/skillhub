@@ -147,21 +147,22 @@ export function BatchImportMembersDialog({ slug, children }: BatchImportMembersD
     }
   }, [t])
 
-  const handleDrop = useCallback((event: React.DragEvent) => {
+  const handleDrop = useCallback(async (event: React.DragEvent) => {
     event.preventDefault()
     setDragOver(false)
     const file = event.dataTransfer.files[0]
     if (file) {
-      void processFile(file)
+      await processFile(file)
     }
   }, [processFile])
 
-  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+  const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.target
+    const file = input.files?.[0]
     if (file) {
-      void processFile(file)
+      await processFile(file)
     }
-    event.target.value = ''
+    input.value = ''
   }, [processFile])
 
   const validRows = parsedRows.filter((row) => row.validation === 'valid')
