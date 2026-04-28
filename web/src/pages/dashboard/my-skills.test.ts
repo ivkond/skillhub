@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const navigateMock = vi.fn()
-const buttonRecords: Array<{ label: string; onClick?: ((event?: { stopPropagation: () => void }) => void) | undefined }> = []
+const buttonRecords: Array<{ label: string; onClick?: (event?: { stopPropagation: () => void }) => void }> = []
 const useMySkillsMock = vi.fn()
 
 vi.mock('@tanstack/react-router', () => ({

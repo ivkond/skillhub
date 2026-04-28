@@ -187,9 +187,9 @@ class NamespaceBatchMemberControllerTest {
 
     @Test
     void batchAddMembers_emptyArray_returnsError() throws Exception {
-        // @NotEmpty on BatchMemberRequest.members triggers validation error
-        // Spring Boot 3.2+ raises HandlerMethodValidationException (500) rather than
-        // MethodArgumentNotValidException (400) for record-based @RequestBody validation
+        Namespace namespace = namespace(1L, "team-a", NamespaceStatus.ACTIVE, NamespaceType.TEAM);
+        given(namespaceService.getNamespaceBySlug("team-a")).willReturn(namespace);
+
         mockMvc.perform(post("/api/v1/namespaces/team-a/members/batch")
                         .with(csrf())
                         .with(auth("owner-1"))
@@ -198,7 +198,27 @@ class NamespaceBatchMemberControllerTest {
                         .content("""
                                 {"members":[]}
                                 """))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.msg").value("Members list cannot be empty"));
+    }
+
+    @Test
+    void batchAddMembers_missingRole_returnsError() throws Exception {
+        Namespace namespace = namespace(1L, "team-a", NamespaceStatus.ACTIVE, NamespaceType.TEAM);
+        given(namespaceService.getNamespaceBySlug("team-a")).willReturn(namespace);
+
+        mockMvc.perform(post("/api/v1/namespaces/team-a/members/batch")
+                        .with(csrf())
+                        .with(auth("owner-1"))
+                        .requestAttr("userId", "owner-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"members":[{"userId":"user-2","role":null}]}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.msg").value("Role is required"));
     }
 
     @Test

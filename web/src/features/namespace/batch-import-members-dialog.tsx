@@ -15,8 +15,8 @@ import {
 } from '@/shared/ui/dialog'
 
 interface BatchImportMembersDialogProps {
-  slug: string
-  children: React.ReactNode
+  readonly slug: string
+  readonly children: React.ReactNode
 }
 
 interface ParsedRow {
@@ -27,7 +27,9 @@ interface ParsedRow {
 
 type Step = 'upload' | 'preview' | 'results'
 
-const VALID_ROLES = ['MEMBER', 'ADMIN']
+type BatchResultRow = BatchMemberResponse['results'][number]
+
+const VALID_ROLES = new Set(['MEMBER', 'ADMIN'])
 
 function generateCsvTemplate(): string {
   return 'userId,role\nuser-example-1,MEMBER\nuser-example-2,ADMIN\n'
@@ -62,7 +64,7 @@ export function validateRows(rows: Array<{ userId: string; role: string }>): Par
     if (!row.userId) {
       return { ...row, validation: 'missing_user_id' as const }
     }
-    if (!VALID_ROLES.includes(row.role)) {
+    if (!VALID_ROLES.has(row.role)) {
       return { ...row, validation: 'invalid_role' as const }
     }
     if (seen.has(row.userId)) {
@@ -81,6 +83,24 @@ function mapResultError(error: string | undefined, t: (key: string) => string): 
     case 'INVALID_ROLE': return t('members.batchResultInvalidRole')
     default: return t('members.batchResultUnknownError')
   }
+}
+
+function withStableKeys<T>(items: readonly T[], getBaseKey: (item: T) => string): Array<{ item: T; key: string }> {
+  const seen = new Map<string, number>()
+  return items.map((item) => {
+    const baseKey = getBaseKey(item)
+    const occurrence = seen.get(baseKey) ?? 0
+    seen.set(baseKey, occurrence + 1)
+    return { item, key: `${baseKey}:${occurrence}` }
+  })
+}
+
+function buildParsedRowKey(row: ParsedRow): string {
+  return `${row.userId || '__missing__'}|${row.role || '__missing__'}|${row.validation}`
+}
+
+function buildBatchResultKey(result: BatchResultRow): string {
+  return `${result.userId}|${result.role}|${result.success ? 'success' : result.error ?? 'unknown'}`
 }
 
 export function BatchImportMembersDialog({ slug, children }: BatchImportMembersDialogProps) {
@@ -106,14 +126,14 @@ export function BatchImportMembersDialog({ slug, children }: BatchImportMembersD
     if (!nextOpen) resetDialog()
   }
 
-  const processFile = useCallback((file: File) => {
+  const processFile = useCallback(async (file: File) => {
     if (!file.name.endsWith('.csv')) {
       toast.error(t('members.batchParseError'), t('members.batchFormatHint'))
       return
     }
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      const text = event.target?.result as string
+
+    try {
+      const text = await file.text()
       const raw = parseCsv(text)
       if (raw.length === 0) {
         toast.error(t('members.batchEmptyFile'))
@@ -122,25 +142,32 @@ export function BatchImportMembersDialog({ slug, children }: BatchImportMembersD
       const validated = validateRows(raw)
       setParsedRows(validated)
       setStep('preview')
+    } catch {
+      toast.error(t('members.batchParseError'), t('members.batchFormatHint'))
     }
-    reader.readAsText(file)
   }, [t])
 
   const handleDrop = useCallback((event: React.DragEvent) => {
     event.preventDefault()
     setDragOver(false)
     const file = event.dataTransfer.files[0]
-    if (file) processFile(file)
+    if (file) {
+      void processFile(file)
+    }
   }, [processFile])
 
   const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (file) processFile(file)
+    if (file) {
+      void processFile(file)
+    }
     event.target.value = ''
   }, [processFile])
 
   const validRows = parsedRows.filter((row) => row.validation === 'valid')
   const invalidRows = parsedRows.filter((row) => row.validation !== 'valid')
+  const previewRows = withStableKeys(parsedRows, buildParsedRowKey)
+  const resultRows = results ? withStableKeys(results.results, buildBatchResultKey) : []
 
   const handleSubmit = async () => {
     const members = validRows.map((row) => ({ userId: row.userId, role: row.role }))
@@ -178,29 +205,27 @@ export function BatchImportMembersDialog({ slug, children }: BatchImportMembersD
             <Button type="button" variant="outline" size="sm" onClick={downloadCsvTemplate}>
               {t('members.batchDownloadTemplate')}
             </Button>
-            <div
-              role="button"
-              tabIndex={0}
+            <button
+              type="button"
               aria-label={t('members.batchDropHint')}
               className={`flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors ${
                 dragOver ? 'border-primary bg-primary/5' : 'border-border/50 hover:border-primary/50'
               }`}
               onClick={() => fileInputRef.current?.click()}
-              onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') fileInputRef.current?.click() }}
               onDragOver={(event) => { event.preventDefault(); setDragOver(true) }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
             >
               <p className="text-sm text-muted-foreground">{t('members.batchDropHint')}</p>
               <p className="text-xs text-muted-foreground mt-1">{t('members.batchFormatHint')}</p>
-            </div>
+            </button>
             <input
               ref={fileInputRef}
               type="file"
               accept=".csv"
               className="hidden"
               onChange={handleFileSelect}
-              aria-hidden="true"
+              tabIndex={-1}
             />
           </div>
         )}
@@ -225,8 +250,8 @@ export function BatchImportMembersDialog({ slug, children }: BatchImportMembersD
                   </tr>
                 </thead>
                 <tbody>
-                  {parsedRows.map((row, index) => (
-                    <tr key={index} className="border-b border-border/40 last:border-b-0">
+                  {previewRows.map(({ item: row, key }) => (
+                    <tr key={key} className="border-b border-border/40 last:border-b-0">
                       <td className="p-2 font-mono text-xs">{row.userId || '-'}</td>
                       <td className="p-2">{row.role || '-'}</td>
                       <td className={`p-2 text-xs ${row.validation === 'valid' ? 'text-green-600' : 'text-red-600'}`}>
@@ -260,8 +285,8 @@ export function BatchImportMembersDialog({ slug, children }: BatchImportMembersD
                   </tr>
                 </thead>
                 <tbody>
-                  {results.results.map((result, index) => (
-                    <tr key={index} className="border-b border-border/40 last:border-b-0">
+                  {resultRows.map(({ item: result, key }) => (
+                    <tr key={key} className="border-b border-border/40 last:border-b-0">
                       <td className="p-2 font-mono text-xs">{result.userId}</td>
                       <td className="p-2">{result.role}</td>
                       <td className={`p-2 text-xs ${result.success ? 'text-green-600' : 'text-red-600'}`}>
