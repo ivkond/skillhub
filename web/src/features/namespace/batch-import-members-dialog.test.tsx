@@ -103,6 +103,19 @@ describe('parseCsv', () => {
     const result = parseCsv('  user-1  ,  MEMBER  ')
     expect(result).toEqual([{ userId: 'user-1', role: 'MEMBER' }])
   })
+
+  it('parses quoted user IDs with commas and escaped quotes', () => {
+    const result = parseCsv('userId,role\n"user,1",member\n"user ""quoted""",ADMIN')
+
+    expect(result).toEqual([
+      { userId: 'user,1', role: 'MEMBER' },
+      { userId: 'user "quoted"', role: 'ADMIN' },
+    ])
+  })
+
+  it('throws for malformed quoted CSV rows', () => {
+    expect(() => parseCsv('userId,role\n"user-1,MEMBER')).toThrow('Malformed CSV')
+  })
 })
 
 describe('validateRows', () => {

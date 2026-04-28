@@ -1,8 +1,14 @@
 package com.iflytek.skillhub.controller;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.iflytek.skillhub.domain.namespace.NamespaceMemberRepository;
 import com.iflytek.skillhub.service.SkillSearchAppService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,11 +25,17 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class SkillSearchControllerTest {
+
+    private final Logger logger = (Logger) LoggerFactory.getLogger(
+            com.iflytek.skillhub.controller.portal.SkillSearchController.class
+    );
+    private ListAppender<ILoggingEvent> appender;
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,6 +45,14 @@ class SkillSearchControllerTest {
 
     @MockBean
     private SkillSearchAppService skillSearchAppService;
+
+    @AfterEach
+    void tearDown() {
+        if (appender != null) {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
 
     @Test
     void searchShouldUseUnifiedEnvelopeAndItemsField() throws Exception {
@@ -125,6 +145,7 @@ class SkillSearchControllerTest {
 
     @Test
     void searchShouldFallbackToDefaultsForInvalidPagination() throws Exception {
+        attachAppender();
         when(skillSearchAppService.search(
                 eq(null),
                 eq(null),
@@ -142,5 +163,29 @@ class SkillSearchControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.page").value(0))
                 .andExpect(jsonPath("$.data.size").value(20));
+
+        assertThat(loggedMessages()).anySatisfy(message -> {
+            assertThat(message).contains("Invalid pagination query parameter");
+            assertThat(message).contains("page");
+            assertThat(message).contains("NaN");
+        });
+        assertThat(loggedMessages()).anySatisfy(message -> {
+            assertThat(message).contains("Invalid pagination query parameter");
+            assertThat(message).contains("size");
+            assertThat(message).contains("-12");
+        });
+    }
+
+    private void attachAppender() {
+        logger.setLevel(Level.WARN);
+        appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+    }
+
+    private java.util.List<String> loggedMessages() {
+        return appender.list.stream()
+                .map(ILoggingEvent::getFormattedMessage)
+                .toList();
     }
 }

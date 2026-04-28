@@ -49,13 +49,48 @@ export function parseCsv(text: string): Array<{ userId: string; role: string }> 
   const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0)
   if (lines.length === 0) return []
 
-  const firstLine = lines[0].toLowerCase().trim()
+  const firstLine = parseCsvRow(lines[0]).map((part) => part.toLowerCase()).join(',')
   const startIndex = firstLine.includes('userid') || firstLine.includes('user_id') ? 1 : 0
 
   return lines.slice(startIndex).map((line) => {
-    const parts = line.split(',').map((part) => part.trim())
+    const parts = parseCsvRow(line)
     return { userId: parts[0] || '', role: (parts[1] || '').toUpperCase() }
   })
+}
+
+function parseCsvRow(line: string): string[] {
+  const parts: string[] = []
+  let current = ''
+  let inQuotes = false
+
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index]
+
+    if (character === '"') {
+      if (inQuotes && line[index + 1] === '"') {
+        current += '"'
+        index += 1
+        continue
+      }
+      inQuotes = !inQuotes
+      continue
+    }
+
+    if (character === ',' && !inQuotes) {
+      parts.push(current.trim())
+      current = ''
+      continue
+    }
+
+    current += character
+  }
+
+  if (inQuotes) {
+    throw new Error('Malformed CSV')
+  }
+
+  parts.push(current.trim())
+  return parts
 }
 
 export function validateRows(rows: Array<{ userId: string; role: string }>): ParsedRow[] {

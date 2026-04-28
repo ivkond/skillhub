@@ -8,6 +8,8 @@ import com.iflytek.skillhub.ratelimit.RateLimit;
 import com.iflytek.skillhub.service.SkillSearchAppService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +23,7 @@ import java.util.regex.Pattern;
 @RestController
 @RequestMapping({"/api/web/skills"})
 public class SkillSearchController extends BaseApiController {
+    private static final Logger logger = LoggerFactory.getLogger(SkillSearchController.class);
     private static final Pattern NON_NEGATIVE_INTEGER = Pattern.compile("\\d+");
     private static final String DEFAULT_SORT = "newest";
     private static final int DEFAULT_PAGE = 0;
@@ -53,8 +56,8 @@ public class SkillSearchController extends BaseApiController {
                 q,
                 namespace,
                 normalizeSort(sort),
-                parseNonNegativeInt(page, DEFAULT_PAGE),
-                parsePositiveInt(size, DEFAULT_SIZE),
+                parseNonNegativeInt(page, DEFAULT_PAGE, "page"),
+                parsePositiveInt(size, DEFAULT_SIZE, "size"),
                 labels,
                 userId,
                 userNsRoles
@@ -70,23 +73,37 @@ public class SkillSearchController extends BaseApiController {
         return sort.trim();
     }
 
-    private int parseNonNegativeInt(String rawValue, int defaultValue) {
+    private int parseNonNegativeInt(String rawValue, int defaultValue, String parameterName) {
         if (rawValue == null || rawValue.isBlank()) {
             return defaultValue;
         }
         String normalized = rawValue.trim();
         if (!NON_NEGATIVE_INTEGER.matcher(normalized).matches()) {
+            logInvalidPaginationValue(parameterName, rawValue, defaultValue);
             return defaultValue;
         }
         try {
             return Integer.parseInt(normalized);
         } catch (NumberFormatException ex) {
+            logInvalidPaginationValue(parameterName, rawValue, defaultValue);
             return defaultValue;
         }
     }
 
-    private int parsePositiveInt(String rawValue, int defaultValue) {
-        int parsed = parseNonNegativeInt(rawValue, defaultValue);
+    private int parsePositiveInt(String rawValue, int defaultValue, String parameterName) {
+        int parsed = parseNonNegativeInt(rawValue, defaultValue, parameterName);
+        if (rawValue != null && !rawValue.isBlank() && parsed <= 0) {
+            logInvalidPaginationValue(parameterName, rawValue, defaultValue);
+        }
         return parsed > 0 ? parsed : defaultValue;
+    }
+
+    private void logInvalidPaginationValue(String parameterName, String rawValue, int defaultValue) {
+        logger.warn(
+                "Invalid pagination query parameter [{}='{}']; falling back to default {}",
+                parameterName,
+                rawValue,
+                defaultValue
+        );
     }
 }

@@ -15,6 +15,7 @@ import com.iflytek.skillhub.domain.shared.exception.DomainBadRequestException;
 import com.iflytek.skillhub.domain.shared.exception.DomainForbiddenException;
 import com.iflytek.skillhub.domain.user.UserAccount;
 import com.iflytek.skillhub.domain.user.UserAccountRepository;
+import com.iflytek.skillhub.dto.BatchMemberRequest;
 import com.iflytek.skillhub.service.NamespaceMemberCandidateService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,7 +123,7 @@ class NamespaceBatchMemberControllerTest {
         given(namespaceMemberService.addMember(eq(1L), eq("ghost-1"), any(), eq("owner-1")))
                 .willThrow(new DomainBadRequestException("error.user.notFound"));
         given(namespaceMemberService.addMember(eq(1L), eq("ghost-2"), any(), eq("owner-1")))
-                .willThrow(new DomainBadRequestException("error.user.not found"));
+                .willThrow(new DomainBadRequestException("error.user.notFound"));
 
         mockMvc.perform(post("/api/v1/namespaces/team-a/members/batch")
                         .with(csrf())
@@ -204,6 +205,24 @@ class NamespaceBatchMemberControllerTest {
     }
 
     @Test
+    void batchAddMembers_tooManyMembers_returnsError() throws Exception {
+        Namespace namespace = namespace(1L, "team-a", NamespaceStatus.ACTIVE, NamespaceType.TEAM);
+        given(namespaceService.getNamespaceBySlug("team-a")).willReturn(namespace);
+
+        String payload = buildBatchPayload(BatchMemberRequest.MAX_MEMBERS + 1);
+
+        mockMvc.perform(post("/api/v1/namespaces/team-a/members/batch")
+                        .with(csrf())
+                        .with(auth("owner-1"))
+                        .requestAttr("userId", "owner-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.msg").value("Members list cannot exceed 100 entries"));
+    }
+
+    @Test
     void batchAddMembers_missingRole_returnsError() throws Exception {
         Namespace namespace = namespace(1L, "team-a", NamespaceStatus.ACTIVE, NamespaceType.TEAM);
         given(namespaceService.getNamespaceBySlug("team-a")).willReturn(namespace);
@@ -275,6 +294,13 @@ class NamespaceBatchMemberControllerTest {
         namespace.setStatus(status);
         namespace.setType(type);
         return namespace;
+    }
+
+    private String buildBatchPayload(int memberCount) {
+        String members = java.util.stream.IntStream.range(0, memberCount)
+                .mapToObj(index -> "{\"userId\":\"user-" + index + "\",\"role\":\"MEMBER\"}")
+                .collect(java.util.stream.Collectors.joining(","));
+        return "{\"members\":[" + members + "]}";
     }
 
     private void setField(Object target, String fieldName, Object value) {

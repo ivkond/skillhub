@@ -184,6 +184,9 @@ public class NamespaceController extends BaseApiController {
         if (request.members() == null || request.members().isEmpty()) {
             throw new BadRequestException("validation.batch.members.notEmpty");
         }
+        if (request.members().size() > BatchMemberRequest.MAX_MEMBERS) {
+            throw new BadRequestException("validation.batch.members.size");
+        }
 
         for (MemberRequest member : request.members()) {
             if (member == null || member.userId() == null) {

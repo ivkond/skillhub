@@ -7,6 +7,7 @@ import com.iflytek.skillhub.domain.namespace.NamespaceMember;
 import com.iflytek.skillhub.domain.namespace.NamespaceMemberService;
 import com.iflytek.skillhub.domain.namespace.NamespaceRepository;
 import com.iflytek.skillhub.domain.namespace.NamespaceService;
+import com.iflytek.skillhub.domain.shared.exception.LocalizedMessage;
 import com.iflytek.skillhub.domain.user.UserAccount;
 import com.iflytek.skillhub.domain.user.UserAccountRepository;
 import com.iflytek.skillhub.dto.BatchMemberRequest;
@@ -26,12 +27,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Command-facing namespace application service for portal endpoints.
  */
 @Service
 public class NamespacePortalCommandAppService {
+    private static final Map<String, String> BATCH_ERROR_CODES = Map.of(
+            "error.namespace.member.alreadyExists", "ALREADY_MEMBER",
+            "error.namespace.member.owner.assignDirect", "INVALID_ROLE",
+            "error.user.notFound", "USER_NOT_FOUND",
+            "error.namespace.system.immutable", "NAMESPACE_READONLY",
+            "error.namespace.readonly", "NAMESPACE_READONLY"
+    );
 
     private final NamespaceService namespaceService;
     private final NamespaceRepository namespaceRepository;
@@ -177,13 +186,22 @@ public class NamespacePortalCommandAppService {
     }
 
     private String mapBatchError(Exception e) {
-        String msg = e.getMessage();
-        if (msg == null) return "UNKNOWN_ERROR";
-        if (msg.contains("alreadyExists")) return "ALREADY_MEMBER";
-        if (msg.contains("owner.assignDirect")) return "INVALID_ROLE";
-        if (msg.contains("notFound") || msg.contains("not found")) return "USER_NOT_FOUND";
-        if (msg.contains("immutable") || msg.contains("readonly")) return "NAMESPACE_READONLY";
-        return "UNKNOWN_ERROR";
+        String messageCode = extractMessageCode(e);
+        if (messageCode == null) {
+            return "UNKNOWN_ERROR";
+        }
+        return BATCH_ERROR_CODES.getOrDefault(messageCode, "UNKNOWN_ERROR");
+    }
+
+    private String extractMessageCode(Exception e) {
+        if (e instanceof LocalizedMessage localizedMessage) {
+            return localizedMessage.messageCode();
+        }
+        String message = e.getMessage();
+        if (message == null || message.isBlank()) {
+            return null;
+        }
+        return message;
     }
 
     @Transactional
