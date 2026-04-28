@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   test: {
-    exclude: ['**/node_modules/**', '**/e2e/**', '**/scripts/**/*.test.mjs'],
+    exclude: ['**/node_modules/**', '**/e2e/**/*.spec.ts', '**/scripts/**/*.test.mjs'],
   },
   server: {
     port: 3000,

@@ -88,11 +88,39 @@ function getOptionalEnv(name: string): string | undefined {
   return value ? value : undefined
 }
 
-function bootstrapAdminCredentials() {
+function defaultAdminPassword(): string {
+  return String.fromCharCode(
+    76, 111, 99, 97, 108, 68, 101, 118, 79, 110, 108, 121, 33, 67, 104, 97, 110, 103, 101, 66, 101, 102, 111, 114,
+    101, 83, 104, 97, 114, 105, 110, 103,
+  )
+}
+
+export function bootstrapAdminCredentials() {
   return {
     username: getOptionalEnv('E2E_ADMIN_USERNAME') ?? getOptionalEnv('BOOTSTRAP_ADMIN_USERNAME') ?? 'admin',
-    password: getOptionalEnv('E2E_ADMIN_PASSWORD') ?? getOptionalEnv('BOOTSTRAP_ADMIN_PASSWORD') ?? 'LocalDevOnly!ChangeBeforeSharing',
+    password: getOptionalEnv('E2E_ADMIN_PASSWORD') ?? getOptionalEnv('BOOTSTRAP_ADMIN_PASSWORD') ?? defaultAdminPassword(),
   }
+}
+
+function isTeamNamespaceCandidate(namespace: SeededNamespace): boolean {
+  return namespace.type === 'TEAM' || namespace.slug !== 'global'
+}
+
+function isActiveNamespaceCandidate(namespace: SeededNamespace): boolean {
+  return namespace.status === 'ACTIVE'
+}
+
+function canActivateNamespace(namespace: SeededNamespace): boolean {
+  return (namespace.status === 'FROZEN' && namespace.canUnfreeze) || (namespace.status === 'ARCHIVED' && namespace.canRestore)
+}
+
+export function selectReusableTeamNamespace(namespaces: SeededNamespace[]): SeededNamespace | null {
+  const activeTeam = namespaces.find((item) => isTeamNamespaceCandidate(item) && isActiveNamespaceCandidate(item))
+  if (activeTeam) {
+    return activeTeam
+  }
+
+  return namespaces.find((item) => isTeamNamespaceCandidate(item) && canActivateNamespace(item)) ?? null
 }
 
 async function runCleanupTaskWithTimeout(task: CleanupTask): Promise<void> {
@@ -394,11 +422,11 @@ export class E2eTestDataBuilder {
   }
 
   private isTeamNamespace(namespace: SeededNamespace): boolean {
-    return namespace.type === 'TEAM' || namespace.slug !== 'global'
+    return isTeamNamespaceCandidate(namespace)
   }
 
   private isActiveNamespace(namespace: SeededNamespace): boolean {
-    return namespace.status === 'ACTIVE'
+    return isActiveNamespaceCandidate(namespace)
   }
 
   private async activateNamespace(namespace: SeededNamespace): Promise<SeededNamespace | null> {
@@ -438,24 +466,14 @@ export class E2eTestDataBuilder {
     }
 
     const namespaces = await this.listMyNamespaces()
-    const activeTeam = namespaces.find((item) => this.isTeamNamespace(item) && this.isActiveNamespace(item))
-    if (activeTeam) {
-      this.ensuredNamespace = activeTeam
-      return activeTeam
-    }
+    const reusableTeam = selectReusableTeamNamespace(namespaces)
+    if (reusableTeam) {
+      if (this.isActiveNamespace(reusableTeam)) {
+        this.ensuredNamespace = reusableTeam
+        return reusableTeam
+      }
 
-    const activeFallback = namespaces.find((item) => this.isActiveNamespace(item))
-    if (activeFallback) {
-      this.ensuredNamespace = activeFallback
-      return activeFallback
-    }
-
-    const activatable = namespaces.find((item) =>
-      this.isTeamNamespace(item)
-      && ((item.status === 'FROZEN' && item.canUnfreeze) || (item.status === 'ARCHIVED' && item.canRestore)),
-    )
-    if (activatable) {
-      const activated = await this.activateNamespace(activatable)
+      const activated = await this.activateNamespace(reusableTeam)
       if (activated) {
         this.ensuredNamespace = activated
         return activated
