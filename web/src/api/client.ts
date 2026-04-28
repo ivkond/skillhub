@@ -41,6 +41,7 @@ import type {
   LabelDefinition,
   LabelItem,
   SkillDetail,
+  BatchMemberResponse,
 } from './types'
 import { ApiError } from '@/shared/lib/api-error'
 import i18n from '@/i18n/config'
@@ -700,6 +701,16 @@ export const namespaceApi = {
         userId: request.userId.trim(),
         role: request.role,
       }),
+    })
+  },
+
+  async batchAddMembers(slug: string, members: Array<{ userId: string; role: string }>): Promise<BatchMemberResponse> {
+    return fetchJson<BatchMemberResponse>(`${WEB_API_PREFIX}/namespaces/${normalizeNamespaceSlug(slug)}/members/batch`, {
+      method: 'POST',
+      headers: await ensureCsrfHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({ members }),
     })
   },
 
