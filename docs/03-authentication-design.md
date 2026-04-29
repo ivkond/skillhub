@@ -14,8 +14,8 @@
   │
   ▼
 ┌─────────────────────────────┐
-│  Layer 1: OAuth2 Login      │  Spring Security OAuth2 Client
-│  (一期 GitHub，可扩展)        │  授权码模式 (Authorization Code)
+│  Layer 1: OAuth2/OIDC Login │  Spring Security OAuth2 Client
+│  (GitHub/GitLab/OIDC 可扩展) │  授权码模式 (Authorization Code)
 │  Layer 1b: Session Bootstrap│  显式被动会话引导（默认关闭）
 └─────────────┬───────────────┘
               │ OAuth2User
@@ -100,7 +100,7 @@ astron:
 
 后续新增 OAuth Provider（Google、GitLab、微信）时，准入策略与 Provider 无关，统一在 AccessPolicy 层判定，不需要重做入驻逻辑。
 
-## 3. Web 认证流程（OAuth2 Authorization Code）
+## 3. Web 认证流程（OAuth2 / OIDC Authorization Code）
 
 ```
 浏览器点击"登录"
@@ -124,7 +124,7 @@ Spring Security 自动完成:
   ③ 触发自定义 OAuth2UserService
     │
     ▼
-CustomOAuth2UserService:
+CustomOAuth2UserService / CustomOidcUserService:
   ① 从 OAuth2User 提取 provider + externalId → 构建 OAuthClaims
   ② AccessPolicy.evaluate(claims) → 准入判定
   │
@@ -141,6 +141,21 @@ AuthenticationSuccessHandler:
   ① 创建 Spring Session (Redis)
   ② 重定向到前端页面 (可配置的 redirect_uri)
 ```
+
+OIDC 登录沿用同一条业务链路，但由 Spring Security 的 `oidcUserService`
+分支处理。`CustomOidcUserService` 会把标准 OIDC claims 映射为
+`OAuthClaims`：
+
+- `provider`：Spring OAuth2 client registration id，例如 `okta`、`keycloak`
+  或 `oidc`
+- `subject`：OIDC `sub`
+- `email` / `emailVerified`：`email` 与 `email_verified`
+- `providerLogin`：优先 `preferred_username`，其次 `name`、`email`、`sub`
+- `picture` 会同步为 `avatar_url`，供现有头像同步逻辑复用
+
+因此 OIDC 不需要新增数据库表；现有 `identity_binding(provider_code,
+subject)` 可以保存任意 OIDC issuer 下的稳定用户标识。不同 IdP 应使用不同
+registration id，避免多个 issuer 的 `sub` 值空间混用。
 
 ### 3.1 统一 Session 建立约束
 
@@ -642,21 +657,3 @@ window.location.href = '/oauth2/authorization/github'
 | `GET /api/v1/resolve` | 可选（匿名仅限全局 namespace 下的 PUBLIC） | visibility + namespace type + version status |
 | `GET /api/v1/download/{slug}/{version}` | 可选（匿名仅限全局 namespace 下的 PUBLIC） | visibility + namespace type + version status |
 | `POST /api/v1/publish` | Bearer Token + `skill:publish` | 普通用户要求目标 namespace 成员；`SUPER_ADMIN` 可绕过（namespace 由 canonical slug 解析） |
-
-## Google OAuth Configuration (Phase 07)
-
-### Spring Security registration keys
-
-`properties
-spring.security.oauth2.client.registration.google.client-id=
-spring.security.oauth2.client.registration.google.client-secret=
-spring.security.oauth2.client.registration.google.scope=openid,profile,email
-spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/login/oauth2/code/google
-`
-
-### Runtime contract
-
-- egistrationId=google is resolved through GoogleClaimsExtractor.
-- sub is mandatory and mapped to providerSubject; missing value raises invalid_user_info.
-- mail_verified controls verified-email semantics and must not be inferred from presence of mail alone.
-- Provider onboarding must reuse OAuthLoginFlowService policy and identity-binding flow without provider-specific bypasses.
