@@ -13,15 +13,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Translates application, domain, auth, and infrastructure exceptions into the platform's JSON API
@@ -67,11 +73,20 @@ public class GlobalExceptionHandler {
                         .findFirst()
                         .map(error -> error.getDefaultMessage())
                         .orElse(null));
-        logHandledException(HttpStatus.BAD_REQUEST, "validation.request.invalid", request);
-        if (msg == null || msg.isBlank()) {
-            return ResponseEntity.badRequest().body(apiResponseFactory.error(400, "error.badRequest"));
-        }
-        return ResponseEntity.badRequest().body(apiResponseFactory.errorMessage(400, msg));
+        return renderValidationError(msg, request);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHandlerMethodValidation(HandlerMethodValidationException ex,
+                                                                           HttpServletRequest request) {
+        String msg = ex.getAllValidationResults().stream()
+                .map(ParameterValidationResult::getResolvableErrors)
+                .flatMap(errors -> errors.stream())
+                .map(this::resolveValidationMessage)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+        return renderValidationError(msg, request);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -157,6 +172,26 @@ public class GlobalExceptionHandler {
         logHandledException(status, error.messageCode(), request);
         return ResponseEntity.status(status).body(
                 apiResponseFactory.error(status.value(), error.messageCode(), error.messageArgs()));
+    }
+
+    private ResponseEntity<ApiResponse<Void>> renderValidationError(String msg, HttpServletRequest request) {
+        logHandledException(HttpStatus.BAD_REQUEST, "validation.request.invalid", request);
+        if (msg == null || msg.isBlank()) {
+            return ResponseEntity.badRequest().body(apiResponseFactory.error(400, "error.badRequest"));
+        }
+        return ResponseEntity.badRequest().body(apiResponseFactory.errorMessage(400, msg));
+    }
+
+    private String resolveValidationMessage(MessageSourceResolvable resolvable) {
+        if (resolvable.getDefaultMessage() != null && !resolvable.getDefaultMessage().isBlank()) {
+            return resolvable.getDefaultMessage();
+        }
+
+        return Arrays.stream(resolvable.getCodes() == null ? new String[0] : resolvable.getCodes())
+                .filter(Objects::nonNull)
+                .filter(code -> !code.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 
     private String resolveUserId(HttpServletRequest request) {

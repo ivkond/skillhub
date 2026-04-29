@@ -397,31 +397,27 @@ class PostgresFullTextQueryServiceTest {
     }
 
     @Test
-    void authenticatedQueriesShouldNotBindUnusedAdminNamespaceParameter() {
+    void authenticatedQueriesShouldNotBindUnusedAdminNamespaceIdsParameter() {
         EntityManager entityManager = mock(EntityManager.class);
         Query nativeQuery = mock(Query.class);
         Query countQuery = mock(Query.class);
         when(entityManager.createNativeQuery(anyString()))
                 .thenReturn(nativeQuery)
                 .thenReturn(countQuery);
-        when(nativeQuery.setParameter(anyString(), any())).thenReturn(nativeQuery);
-        when(countQuery.setParameter(anyString(), any())).thenReturn(countQuery);
-        doThrow(new IllegalArgumentException("Could not locate named parameter [adminNamespaceIds]"))
-                .when(nativeQuery).setParameter(eq("adminNamespaceIds"), any());
-        doThrow(new IllegalArgumentException("Could not locate named parameter [adminNamespaceIds]"))
-                .when(countQuery).setParameter(eq("adminNamespaceIds"), any());
+        when(nativeQuery.setParameter(anyString(), org.mockito.ArgumentMatchers.any())).thenReturn(nativeQuery);
+        when(countQuery.setParameter(anyString(), org.mockito.ArgumentMatchers.any())).thenReturn(countQuery);
         when(nativeQuery.getResultList()).thenReturn(List.of());
         when(countQuery.getSingleResult()).thenReturn(0L);
 
         PostgresFullTextQueryService service = new PostgresFullTextQueryService(entityManager);
 
         assertThatCode(() -> service.search(new SearchQuery(
-                "agentr",
+                "issue331",
                 null,
                 new SearchVisibilityScope("user-1", Set.of(7L), Set.of(9L)),
                 "relevance",
                 0,
-                50
+                20
         ))).doesNotThrowAnyException();
 
         verify(nativeQuery).setParameter("memberNamespaceIds", Set.of(7L));

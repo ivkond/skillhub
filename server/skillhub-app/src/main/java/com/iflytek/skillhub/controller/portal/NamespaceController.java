@@ -5,6 +5,8 @@ import com.iflytek.skillhub.auth.rbac.PlatformPrincipal;
 import com.iflytek.skillhub.domain.namespace.NamespaceRole;
 import com.iflytek.skillhub.dto.ApiResponse;
 import com.iflytek.skillhub.dto.ApiResponseFactory;
+import com.iflytek.skillhub.dto.BatchMemberRequest;
+import com.iflytek.skillhub.dto.BatchMemberResponse;
 import com.iflytek.skillhub.dto.MemberRequest;
 import com.iflytek.skillhub.dto.MemberResponse;
 import com.iflytek.skillhub.dto.MessageResponse;
@@ -15,11 +17,12 @@ import com.iflytek.skillhub.dto.NamespaceRequest;
 import com.iflytek.skillhub.dto.NamespaceResponse;
 import com.iflytek.skillhub.dto.PageResponse;
 import com.iflytek.skillhub.dto.UpdateMemberRoleRequest;
+import com.iflytek.skillhub.exception.BadRequestException;
 import com.iflytek.skillhub.service.AuditRequestContext;
 import com.iflytek.skillhub.service.GovernanceWorkflowAppService;
+import com.iflytek.skillhub.service.NamespaceMemberCandidateService;
 import com.iflytek.skillhub.service.NamespacePortalCommandAppService;
 import com.iflytek.skillhub.service.NamespacePortalQueryAppService;
-import com.iflytek.skillhub.service.NamespaceMemberCandidateService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
@@ -165,6 +168,34 @@ public class NamespaceController extends BaseApiController {
             @RequestAttribute("userId") String userId) {
         return ok("response.success.created",
                 namespacePortalCommandAppService.addMember(slug, request.userId(), request.role(), userId));
+    }
+
+    @PostMapping("/namespaces/{slug}/members/batch")
+    public ApiResponse<BatchMemberResponse> batchAddMembers(
+            @PathVariable String slug,
+            @Valid @RequestBody BatchMemberRequest request,
+            @RequestAttribute("userId") String userId) {
+        validateBatchMemberRequest(request);
+        return ok("response.success.created",
+                namespacePortalCommandAppService.batchAddMembers(slug, request.members(), userId));
+    }
+
+    private void validateBatchMemberRequest(BatchMemberRequest request) {
+        if (request.members() == null || request.members().isEmpty()) {
+            throw new BadRequestException("validation.batch.members.notEmpty");
+        }
+        if (request.members().size() > BatchMemberRequest.MAX_MEMBERS) {
+            throw new BadRequestException("validation.batch.members.size");
+        }
+
+        for (MemberRequest member : request.members()) {
+            if (member == null || member.userId() == null) {
+                throw new BadRequestException("validation.member.userId.notNull");
+            }
+            if (member.role() == null) {
+                throw new BadRequestException("validation.member.role.notNull");
+            }
+        }
     }
 
     @DeleteMapping("/namespaces/{slug}/members/{userId}")

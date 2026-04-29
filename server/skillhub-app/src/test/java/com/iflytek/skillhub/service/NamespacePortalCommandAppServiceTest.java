@@ -16,8 +16,10 @@ import com.iflytek.skillhub.domain.namespace.NamespaceRole;
 import com.iflytek.skillhub.domain.namespace.NamespaceService;
 import com.iflytek.skillhub.domain.namespace.NamespaceStatus;
 import com.iflytek.skillhub.domain.namespace.NamespaceType;
+import com.iflytek.skillhub.domain.shared.exception.DomainBadRequestException;
 import com.iflytek.skillhub.domain.user.UserAccount;
 import com.iflytek.skillhub.domain.user.UserAccountRepository;
+import com.iflytek.skillhub.dto.MemberRequest;
 import com.iflytek.skillhub.dto.MemberResponse;
 import com.iflytek.skillhub.dto.NamespaceLifecycleRequest;
 import com.iflytek.skillhub.dto.NamespaceRequest;
@@ -26,6 +28,7 @@ import com.iflytek.skillhub.exception.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -72,6 +75,53 @@ class NamespacePortalCommandAppServiceTest {
         assertThat(response.slug()).isEqualTo("team-alpha");
         assertThat(response.status()).isEqualTo(NamespaceStatus.FROZEN);
         verify(namespaceGovernanceService).freezeNamespace("team-alpha", "owner-1", "cleanup", null, "127.0.0.1", "JUnit");
+    }
+
+    @Test
+    void batchAddMembers_mapsKnownLocalizedErrorCodes() {
+        Namespace namespace = namespace(1L, "team-alpha");
+        when(namespaceService.getNamespaceBySlug("team-alpha")).thenReturn(namespace);
+        when(namespaceMemberService.addMember(1L, "duplicate-user", NamespaceRole.MEMBER, "owner-1"))
+                .thenThrow(new DomainBadRequestException("error.namespace.member.alreadyExists"));
+        when(namespaceMemberService.addMember(1L, "readonly-user", NamespaceRole.ADMIN, "owner-1"))
+                .thenThrow(new DomainBadRequestException("error.namespace.readonly", "team-alpha"));
+        when(namespaceMemberService.addMember(1L, "missing-user", NamespaceRole.MEMBER, "owner-1"))
+                .thenThrow(new DomainBadRequestException("error.user.notFound"));
+
+        var response = service.batchAddMembers(
+                "team-alpha",
+                List.of(
+                        new MemberRequest("duplicate-user", NamespaceRole.MEMBER),
+                        new MemberRequest("readonly-user", NamespaceRole.ADMIN),
+                        new MemberRequest("missing-user", NamespaceRole.MEMBER)
+                ),
+                "owner-1"
+        );
+
+        assertThat(response.failureCount()).isEqualTo(3);
+        assertThat(response.results()).extracting(result -> result.error()).containsExactly(
+                "ALREADY_MEMBER",
+                "NAMESPACE_READONLY",
+                "USER_NOT_FOUND"
+        );
+    }
+
+    @Test
+    void batchAddMembers_doesNotInferErrorFromArbitraryExceptionText() {
+        Namespace namespace = namespace(1L, "team-alpha");
+        when(namespaceService.getNamespaceBySlug("team-alpha")).thenReturn(namespace);
+        when(namespaceMemberService.addMember(1L, "ghost-user", NamespaceRole.MEMBER, "owner-1"))
+                .thenThrow(new RuntimeException("user not found in downstream directory"));
+
+        var response = service.batchAddMembers(
+                "team-alpha",
+                List.of(new MemberRequest("ghost-user", NamespaceRole.MEMBER)),
+                "owner-1"
+        );
+
+        assertThat(response.failureCount()).isEqualTo(1);
+        assertThat(response.results()).singleElement().satisfies(result ->
+                assertThat(result.error()).isEqualTo("UNKNOWN_ERROR"));
     }
 
     private Namespace namespace(Long id, String slug) {

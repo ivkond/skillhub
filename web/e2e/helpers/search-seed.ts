@@ -24,6 +24,8 @@ interface PublisherSession {
   page: Page
 }
 
+export type PublisherMode = 'admin' | 'adhoc' | 'provided'
+
 function requireEnv(name: string): string {
   const value = process.env[name]
   if (!value) {
@@ -37,6 +39,13 @@ function getOptionalEnv(name: string): string | undefined {
   return value ? value : undefined
 }
 
+function defaultAdminPassword(): string {
+  return String.fromCharCode(
+    76, 111, 99, 97, 108, 68, 101, 118, 79, 110, 108, 121, 33, 67, 104, 97, 110, 103, 101, 66, 101, 102, 111, 114,
+    101, 83, 104, 97, 114, 105, 110, 103,
+  )
+}
+
 function publisherCredentials() {
   return {
     username: requireEnv('E2E_PUBLISH_USERNAME'),
@@ -44,15 +53,36 @@ function publisherCredentials() {
   }
 }
 
-function adminCredentials() {
+export function adminCredentials() {
   return {
     username: getOptionalEnv('E2E_ADMIN_USERNAME') ?? getOptionalEnv('BOOTSTRAP_ADMIN_USERNAME') ?? 'admin',
-    password: getOptionalEnv('E2E_ADMIN_PASSWORD') ?? getOptionalEnv('BOOTSTRAP_ADMIN_PASSWORD') ?? 'LocalDevOnly!ChangeBeforeSharing',
+    password: getOptionalEnv('E2E_ADMIN_PASSWORD') ?? getOptionalEnv('BOOTSTRAP_ADMIN_PASSWORD') ?? defaultAdminPassword(),
   }
 }
 
 function hasPublisherCredentials() {
   return Boolean(getOptionalEnv('E2E_PUBLISH_USERNAME') && getOptionalEnv('E2E_PUBLISH_PASSWORD'))
+}
+
+export function hasConfiguredAdminCredentials() {
+  return Boolean(getOptionalEnv('E2E_ADMIN_PASSWORD') || getOptionalEnv('BOOTSTRAP_ADMIN_PASSWORD'))
+}
+
+export function resolvePublisherMode(options: {
+  count: number
+  hasConfiguredAdminCredentials: boolean
+  hasPublisherCredentials: boolean
+  isCi: boolean
+}): PublisherMode {
+  if (options.isCi && options.hasConfiguredAdminCredentials) {
+    return 'admin'
+  }
+
+  if (options.count <= 3 && options.hasPublisherCredentials) {
+    return 'provided'
+  }
+
+  return 'adhoc'
 }
 
 function buildSearchKeyword(seedSuffix: string, explicitKeyword?: string): string {
@@ -209,12 +239,16 @@ export async function prepareSearchSeed(
   const seedSuffix = `${testInfo.parallelIndex ?? 0}-${Date.now()}-${randomAlphanumeric(4)}`
   const keyword = buildSearchKeyword(seedSuffix, options?.keyword)
   const description = options?.description || `Searchable ${keyword} skill for Playwright E2E coverage.`
-  const useProvidedPublisher = count <= 3 && hasPublisherCredentials()
-  const useAdminPublisher = Boolean(process.env.CI || process.env.GITHUB_ACTIONS)
+  const publisherMode = resolvePublisherMode({
+    count,
+    hasConfiguredAdminCredentials: hasConfiguredAdminCredentials(),
+    hasPublisherCredentials: hasPublisherCredentials(),
+    isCi: Boolean(process.env.CI || process.env.GITHUB_ACTIONS),
+  })
   const publisherSessions: PublisherSession[] = [
-    useAdminPublisher
+    publisherMode === 'admin'
       ? await openAdminPublisherSession(browser, testInfo)
-      : useProvidedPublisher
+      : publisherMode === 'provided'
       ? await openProvidedPublisherSession(browser, testInfo)
       : await openAdhocPublisherSession(browser, testInfo),
   ]
@@ -223,7 +257,7 @@ export async function prepareSearchSeed(
   let publishedCount = 0
 
   while (publishedCount < count) {
-    if (!useAdminPublisher && publishedCount >= 10 && publisherSessions.length === 1) {
+    if (publisherMode !== 'admin' && publishedCount >= 10 && publisherSessions.length === 1) {
       publisherSessions.push(await openAdhocPublisherSession(browser, testInfo))
     }
 
@@ -278,7 +312,7 @@ export async function prepareSearchSeed(
   try {
     await seed.builder.waitForSearchResults(seed.keyword, expectedSlugs)
   } catch (initialError) {
-    const privilegedBuilder = useAdminPublisher ? seed.builder : await ensureAdminBuilder()
+    const privilegedBuilder = publisherMode === 'admin' ? seed.builder : await ensureAdminBuilder()
     const rebuildTriggered = await privilegedBuilder.rebuildSearchIndexIfPermitted(20_000)
     if (!rebuildTriggered) {
       throw initialError

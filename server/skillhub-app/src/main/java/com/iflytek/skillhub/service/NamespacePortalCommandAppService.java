@@ -7,24 +7,40 @@ import com.iflytek.skillhub.domain.namespace.NamespaceMember;
 import com.iflytek.skillhub.domain.namespace.NamespaceMemberService;
 import com.iflytek.skillhub.domain.namespace.NamespaceRepository;
 import com.iflytek.skillhub.domain.namespace.NamespaceService;
+import com.iflytek.skillhub.domain.shared.exception.LocalizedMessage;
 import com.iflytek.skillhub.domain.user.UserAccount;
 import com.iflytek.skillhub.domain.user.UserAccountRepository;
+import com.iflytek.skillhub.dto.BatchMemberRequest;
+import com.iflytek.skillhub.dto.BatchMemberResponse;
+import com.iflytek.skillhub.dto.BatchMemberResult;
 import com.iflytek.skillhub.dto.MemberResponse;
 import com.iflytek.skillhub.dto.MessageResponse;
 import com.iflytek.skillhub.dto.NamespaceLifecycleRequest;
 import com.iflytek.skillhub.dto.NamespaceRequest;
 import com.iflytek.skillhub.dto.NamespaceResponse;
+import com.iflytek.skillhub.dto.MemberRequest;
 import com.iflytek.skillhub.dto.UpdateMemberRoleRequest;
 import com.iflytek.skillhub.exception.ForbiddenException;
 import com.iflytek.skillhub.exception.UnauthorizedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Command-facing namespace application service for portal endpoints.
  */
 @Service
 public class NamespacePortalCommandAppService {
+    private static final Map<String, String> BATCH_ERROR_CODES = Map.of(
+            "error.namespace.member.alreadyExists", "ALREADY_MEMBER",
+            "error.namespace.member.owner.assignDirect", "INVALID_ROLE",
+            "error.user.notFound", "USER_NOT_FOUND",
+            "error.namespace.system.immutable", "NAMESPACE_READONLY",
+            "error.namespace.readonly", "NAMESPACE_READONLY"
+    );
 
     private final NamespaceService namespaceService;
     private final NamespaceRepository namespaceRepository;
@@ -142,6 +158,50 @@ public class NamespacePortalCommandAppService {
         );
         UserAccount user = userAccountRepository.findById(memberUserId).orElse(null);
         return MemberResponse.from(member, user);
+    }
+
+    // Intentionally not @Transactional: each addMember runs in its own transaction
+    // so partial success is possible (some members added even if others fail).
+    public BatchMemberResponse batchAddMembers(String slug, List<MemberRequest> members, String operatorUserId) {
+        Namespace namespace = namespaceService.getNamespaceBySlug(slug);
+        Long namespaceId = namespace.getId();
+
+        List<BatchMemberResult> results = new ArrayList<>();
+        int successCount = 0;
+        int failureCount = 0;
+
+        for (MemberRequest req : members) {
+            try {
+                namespaceMemberService.addMember(namespaceId, req.userId(), req.role(), operatorUserId);
+                results.add(BatchMemberResult.success(req.userId(), req.role().name()));
+                successCount++;
+            } catch (Exception e) {
+                String errorCode = mapBatchError(e);
+                results.add(BatchMemberResult.failure(req.userId(), req.role().name(), errorCode));
+                failureCount++;
+            }
+        }
+
+        return new BatchMemberResponse(members.size(), successCount, failureCount, results);
+    }
+
+    private String mapBatchError(Exception e) {
+        String messageCode = extractMessageCode(e);
+        if (messageCode == null) {
+            return "UNKNOWN_ERROR";
+        }
+        return BATCH_ERROR_CODES.getOrDefault(messageCode, "UNKNOWN_ERROR");
+    }
+
+    private String extractMessageCode(Exception e) {
+        if (e instanceof LocalizedMessage localizedMessage) {
+            return localizedMessage.messageCode();
+        }
+        String message = e.getMessage();
+        if (message == null || message.isBlank()) {
+            return null;
+        }
+        return message;
     }
 
     @Transactional
