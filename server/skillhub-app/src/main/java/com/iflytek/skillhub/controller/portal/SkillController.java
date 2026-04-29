@@ -419,6 +419,7 @@ public class SkillController extends BaseApiController {
                 detail.status(),
                 detail.downloadCount(),
                 detail.starCount(),
+                detail.subscriptionCount(),
                 detail.ratingAvg(),
                 detail.ratingCount(),
                 detail.hidden(),

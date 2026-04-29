@@ -68,6 +68,11 @@ public class OAuthLoginFlowService {
         }
 
         OAuthClaims claims = extractor.extract(request, upstreamUser);
+        PlatformPrincipal principal = authenticate(claims);
+        return new AuthenticatedLoginContext(upstreamUser, principal);
+    }
+
+    public PlatformPrincipal authenticate(OAuthClaims claims) {
         AccessDecision decision = accessPolicy.evaluate(claims);
 
         if (decision == AccessDecision.PENDING_APPROVAL) {
@@ -80,8 +85,7 @@ public class OAuthLoginFlowService {
             );
         }
 
-        PlatformPrincipal principal = identityBindingService.bindOrCreate(claims, UserStatus.ACTIVE);
-        return new AuthenticatedLoginContext(upstreamUser, principal);
+        return identityBindingService.bindOrCreate(claims, UserStatus.ACTIVE);
     }
 
     public void rememberReturnTo(HttpServletRequest request) {

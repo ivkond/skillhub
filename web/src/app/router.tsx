@@ -124,6 +124,7 @@ const PromotionsPage = createRoleProtectedRouteComponent(
   ['SKILL_ADMIN', 'SUPER_ADMIN'],
 )
 const MyStarsPage = createLazyRouteComponent(() => import('@/pages/dashboard/stars'), 'MyStarsPage')
+const MySubscriptionsPage = createLazyRouteComponent(() => import('@/pages/dashboard/subscriptions'), 'MySubscriptionsPage')
 const NotificationsPage = createLazyRouteComponent(() => import('@/pages/notifications'), 'NotificationsPage')
 const TokensPage = createLazyRouteComponent(() => import('@/pages/dashboard/tokens'), 'TokensPage')
 const CliAuthPage = createLazyRouteComponent(() => import('@/pages/cli-auth'), 'CliAuthPage')
@@ -345,6 +346,13 @@ const dashboardStarsRoute = createRoute({
   component: MyStarsPage,
 })
 
+const dashboardSubscriptionsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'dashboard/subscriptions',
+  beforeLoad: requireAuth,
+  component: MySubscriptionsPage,
+})
+
 const dashboardNotificationsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'dashboard/notifications',
@@ -483,6 +491,7 @@ const routeTree = rootRoute.addChildren([
   dashboardReviewDetailRoute,
   dashboardPromotionsRoute,
   dashboardStarsRoute,
+  dashboardSubscriptionsRoute,
   dashboardNotificationsRoute,
   dashboardTokensRoute,
   dashboardCollectionNewRoute,

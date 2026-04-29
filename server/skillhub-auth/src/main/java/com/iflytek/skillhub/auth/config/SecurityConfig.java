@@ -121,8 +121,8 @@ public class SecurityConfig {
             .oauth2Login(oauth2 -> oauth2
                 .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(authorizationRequestResolver))
                 .userInfoEndpoint(userInfo -> userInfo
-                        .userService(customOAuth2UserService)
-                        .oidcUserService(customOidcUserService))
+                    .userService(customOAuth2UserService)
+                    .oidcUserService(customOidcUserService))
                 .successHandler(successHandler)
                 .failureHandler(failureHandler)
             )

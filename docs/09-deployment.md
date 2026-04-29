@@ -2,25 +2,18 @@
 
 ## 1 运行模型
 
-当前仓库保留三种常见运行方式：
+当前仓库只保留两种运行方式：
 
-- 本地开发全栈：`docker compose -f compose.dev.yml up -d --build`
-  - 依赖 + scanner + 后端 + 前端均在容器内运行
-  - 使用 `build.context` 从本仓库源码构建镜像
-- 预发布/私有化（预构建镜像）：`docker compose --env-file .env -f compose.prod.yml up -d`
-  - 前端与后端使用 `.env` 中指定的镜像名
-  - 仍然由 Compose 拉起 PostgreSQL、Redis、MinIO（默认配置偏“单机一体”）
+- 开发环境：`make dev-all`
+  - 前端和后端运行在宿主机
+  - `docker-compose.yml` 只负责 PostgreSQL、Redis、MinIO
 - 单机交付环境：`docker compose --env-file .env.release -f compose.release.yml up -d`
   - 前端和后端都运行在容器内
-
-镜像发布：
-
-- 使用 GitHub Actions 发布到 GHCR
+- 使用 GitHub Actions 发布到 GHCR 的镜像
 - 默认发布 `linux/amd64` 与 `linux/arm64` 多架构镜像
+  - PostgreSQL、Redis 与应用容器一起通过 Compose 启动
 
-另外保留 `docker-compose.yml` 作为“仅依赖服务”模式（scanner + postgres + redis + minio），便于你只跑应用进程时使用。
-
-不再保留历史 `docker-compose.prod.yml` 命名（已由 `compose.prod.yml` 取代）。
+不再维护本地构建整套 demo 容器的中间模式，也不再保留 `docker-compose.prod.yml`。
 
 ## 2 单机交付拓扑
 
@@ -77,26 +70,26 @@
 
 ## 4 开发环境
 
-开发入口：
+开发入口保持不变：
 
 ```bash
-docker compose -f compose.dev.yml up -d --build
+make dev-all
 ```
 
 行为：
 
-- Compose 启动 PostgreSQL、Redis、MinIO、scanner、server、web
-- `server` 使用 `SPRING_PROFILES_ACTIVE=local`（启用 mock 登录等本地开发能力）
-- `web` 使用 Vite 开发服务器（并通过 `VITE_DEV_PROXY_TARGET` 反代到后端容器）
+- `docker-compose.yml` 启动 PostgreSQL、Redis、MinIO
+- `server` 在宿主机通过 Maven Wrapper 启动
+- `web` 在宿主机通过 Vite 启动
 
 常用命令：
 
 ```bash
-docker compose -f compose.dev.yml logs -f server
-docker compose -f compose.dev.yml logs -f web
-
-docker compose -f compose.dev.yml down
-docker compose -f compose.dev.yml down -v
+make dev
+make dev-all
+make dev-down
+make dev-all-down
+make dev-all-reset
 ```
 
 ## 5 单机交付环境
@@ -204,7 +197,47 @@ docker compose --env-file .env.release -f compose.release.yml up -d
 - 如果要开放真实登录，再补充 `OAUTH2_GITHUB_CLIENT_ID` / `OAUTH2_GITHUB_CLIENT_SECRET`
 - 如果要启用密码重置验证码邮件，参见：`docs/19-smtp-password-reset-email-setup.md`
 
-## 8 裸金属上线清单
+## 8 OIDC 登录配置
+
+SkillHub 复用 Spring Security OAuth2 Client 的 OIDC 支持。前端不需要单独
+配置回调页；登录页会从 `/api/v1/auth/methods` 读取后端暴露的
+`OAUTH_REDIRECT` 方法并跳转到 `/oauth2/authorization/{registrationId}`。
+
+生产环境接入 OIDC 时，为后端增加一组 OAuth2 client registration 配置即可。
+下面以 `oidc` 作为 registration id：
+
+```bash
+SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_CLIENT_ID=replace-me
+SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_CLIENT_SECRET=replace-me
+SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_PROVIDER=oidc
+SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_AUTHORIZATION_GRANT_TYPE=authorization_code
+SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_REDIRECT_URI={baseUrl}/login/oauth2/code/{registrationId}
+SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_SCOPE=openid,profile,email
+SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_CLIENT_NAME=OIDC
+SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_OIDC_ISSUER_URI=https://idp.example.com/realms/skillhub
+```
+
+要接入多个 OIDC IdP，使用不同 registration id，例如 `okta`、`keycloak`，
+并把上面的环境变量中的 `OIDC` 替换为对应大写 id。registration id 会作为
+`identity_binding.provider_code`，请保持稳定。
+
+> **警告：Registration ID 冲突**
+>
+> 每个 OIDC 提供商必须使用唯一的 registration ID。Registration ID 作为
+> `identity_binding.provider_code` 存储在数据库中，用于将外部身份映射到平台
+> 用户。如果两个不同的 IdP 使用了相同的 registration ID（例如都使用 `oidc`），
+> 会导致不同 IdP 的用户 `sub` 值空间混用，可能出现身份绑定错误或账户冲突。
+>
+> 建议使用有意义的 registration ID，例如 `okta`、`keycloak`、`azure-ad`，
+> 而不是通用的 `oidc`。一旦投入使用，不要更改 registration ID，否则现有用户
+> 将无法登录。
+
+Docker Compose 发布模板默认只透传常用变量。若使用 OIDC，请通过 compose
+override 或部署平台环境变量把上述 `SPRING_SECURITY_*` 变量注入 `server`
+容器。Kubernetes 部署同理，将这些变量放入 `backend-deployment.yaml` 的
+`server` 容器环境变量或统一的配置管理系统中。
+
+## 9 裸金属上线清单
 
 推荐顺序：
 
@@ -230,7 +263,7 @@ docker compose --env-file .env.release -f compose.release.yml up -d
    - 立即修改管理员密码
    - 如果后续完全走 OAuth，可将 `BOOTSTRAP_ADMIN_ENABLED=false`
 
-## 9 可观测性
+## 10 可观测性
 
 | 维度 | 方案 |
 |------|------|
@@ -238,7 +271,7 @@ docker compose --env-file .env.release -f compose.release.yml up -d
 | 日志 | 容器 stdout / stderr |
 | 指标 | Spring Boot Actuator，后续可接 Prometheus |
 
-## 10 安全扫描服务
+## 11 安全扫描服务
 
 如果要启用 `skill-scanner` 后端链路，当前仓库建议按下面的方式部署：
 
@@ -259,48 +292,10 @@ docker compose --env-file .env.release -f compose.release.yml up -d
 - `scripts/verify-scanner.sh`
 - `docs/security-scanning.md`
 
-## 11 数据迁移
+## 12 数据迁移
 
 Flyway 仍是唯一 schema 变更入口：
 
 - 路径：`server/skillhub-app/src/main/resources/db/migration/`
 - 命名：`V{version}__{description}.sql`
 - 启动策略：应用容器启动时自动执行迁移
-
-## Google OAuth rollout keys (Phase 07)
-
-### Required env values
-
-- oauth2-google-client-id
-- oauth2-google-client-secret
-
-### Compose mapping example
-
-`yaml
-environment:
-  OAUTH2_GOOGLE_CLIENT_ID: 
-  OAUTH2_GOOGLE_CLIENT_SECRET: 
-`
-
-### Kubernetes mapping example
-
-`yaml
-env:
-  - name: OAUTH2_GOOGLE_CLIENT_ID
-    valueFrom:
-      secretKeyRef:
-        name: skillhub-auth
-        key: oauth2-google-client-id
-  - name: OAUTH2_GOOGLE_CLIENT_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: skillhub-auth
-        key: oauth2-google-client-secret
-`
-
-### Minimal rollout checklist
-
-1. Configure Google OAuth redirect URI: {baseUrl}/login/oauth2/code/google.
-2. Inject both Google secrets into backend runtime.
-3. Verify /api/v1/auth/providers and /api/v1/auth/methods expose Google entries.
-4. Verify malicious eturnTo is sanitized and does not leak external redirects.
